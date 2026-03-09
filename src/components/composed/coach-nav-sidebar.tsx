@@ -1,0 +1,100 @@
+"use client";
+
+import { useState } from "react";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { OrganizationSwitcher } from "@clerk/nextjs";
+import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "@/components/ui/sheet";
+import { LayoutDashboard, Users, Settings, Menu } from "lucide-react";
+
+const navItems = [
+  { href: "/coach/dashboard", label: "Overview", icon: LayoutDashboard },
+  { href: "/coach/roster", label: "Roster", icon: Users },
+  { href: "/coach/settings", label: "Settings", icon: Settings },
+];
+
+function NavContent({ onNavigate }: { onNavigate?: () => void }) {
+  const pathname = usePathname();
+
+  return (
+    <>
+      {/* Organization switcher — for coaches at multiple schools */}
+      <div className="mb-6 px-2">
+        <OrganizationSwitcher
+          hidePersonal
+          appearance={{
+            elements: {
+              rootBox: "w-full",
+              organizationSwitcherTrigger: "w-full justify-between",
+            },
+          }}
+        />
+      </div>
+
+      <nav className="flex flex-col gap-1">
+        {navItems.map((item) => {
+          const isActive = pathname === item.href;
+          const Icon = item.icon;
+
+          return (
+            <Button
+              key={item.href}
+              variant={isActive ? "secondary" : "ghost"}
+              className={cn(
+                "justify-start gap-3",
+                !isActive && "text-muted-foreground"
+              )}
+              asChild
+              onClick={onNavigate}
+            >
+              <Link href={item.href}>
+                <Icon className="h-4 w-4" />
+                {item.label}
+              </Link>
+            </Button>
+          );
+        })}
+      </nav>
+    </>
+  );
+}
+
+export function CoachNavSidebar() {
+  const [open, setOpen] = useState(false);
+
+  return (
+    <>
+      {/* Mobile nav trigger */}
+      <div className="md:hidden fixed bottom-4 right-4 z-50">
+        <Sheet open={open} onOpenChange={setOpen}>
+          <SheetTrigger asChild>
+            <Button size="icon" className="h-12 w-12 rounded-full shadow-lg">
+              <Menu className="h-5 w-5" />
+            </Button>
+          </SheetTrigger>
+          <SheetContent side="left" className="w-64">
+            <SheetHeader>
+              <SheetTitle>Coach Navigation</SheetTitle>
+            </SheetHeader>
+            <div className="mt-4">
+              <NavContent onNavigate={() => setOpen(false)} />
+            </div>
+          </SheetContent>
+        </Sheet>
+      </div>
+
+      {/* Desktop sidebar */}
+      <aside className="w-64 border-r border-border bg-card p-4 hidden md:block">
+        <NavContent />
+      </aside>
+    </>
+  );
+}

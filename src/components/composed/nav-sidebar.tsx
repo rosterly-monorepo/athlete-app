@@ -1,0 +1,82 @@
+"use client";
+
+import { useState } from "react";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "@/components/ui/sheet";
+import { LayoutDashboard, User, Zap, Settings, Menu } from "lucide-react";
+
+const navItems = [
+  { href: "/dashboard", label: "Overview", icon: LayoutDashboard },
+  { href: "/profile", label: "My Profile", icon: User },
+  { href: "/performance", label: "Performance", icon: Zap },
+  { href: "/settings", label: "Settings", icon: Settings },
+];
+
+function NavContent({ onNavigate }: { onNavigate?: () => void }) {
+  const pathname = usePathname();
+
+  return (
+    <nav className="flex flex-col gap-1">
+      {navItems.map((item) => {
+        const isActive = pathname === item.href;
+        const Icon = item.icon;
+
+        return (
+          <Button
+            key={item.href}
+            variant={isActive ? "secondary" : "ghost"}
+            className={cn("justify-start gap-3", !isActive && "text-muted-foreground")}
+            asChild
+            onClick={onNavigate}
+          >
+            <Link href={item.href}>
+              <Icon className="h-4 w-4" />
+              {item.label}
+            </Link>
+          </Button>
+        );
+      })}
+    </nav>
+  );
+}
+
+export function NavSidebar() {
+  const [open, setOpen] = useState(false);
+
+  return (
+    <>
+      {/* Mobile nav trigger */}
+      <div className="md:hidden fixed bottom-4 right-4 z-50">
+        <Sheet open={open} onOpenChange={setOpen}>
+          <SheetTrigger asChild>
+            <Button size="icon" className="h-12 w-12 rounded-full shadow-lg">
+              <Menu className="h-5 w-5" />
+            </Button>
+          </SheetTrigger>
+          <SheetContent side="left" className="w-64">
+            <SheetHeader>
+              <SheetTitle>Navigation</SheetTitle>
+            </SheetHeader>
+            <div className="mt-4">
+              <NavContent onNavigate={() => setOpen(false)} />
+            </div>
+          </SheetContent>
+        </Sheet>
+      </div>
+
+      {/* Desktop sidebar */}
+      <aside className="w-64 border-r border-border bg-card p-4 hidden md:block">
+        <NavContent />
+      </aside>
+    </>
+  );
+}
