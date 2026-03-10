@@ -1,5 +1,8 @@
 import type { NextConfig } from "next";
 
+// Backend API URL for proxying requests (avoids CORS issues in development)
+const BACKEND_URL = process.env.EXTERNAL_API_URL || "http://localhost:8765";
+
 const nextConfig: NextConfig = {
   // ── Performance ──
   // Enable React strict mode for catching bugs early
@@ -42,6 +45,17 @@ const nextConfig: NextConfig = {
     fetches: {
       fullUrl: true,
     },
+  },
+
+  // ── API Proxy ──
+  // Proxy /api/v1/* requests to the backend to avoid CORS issues
+  async rewrites() {
+    return [
+      {
+        source: "/api/v1/:path*",
+        destination: `${BACKEND_URL}/api/v1/:path*`,
+      },
+    ];
   },
 };
 
