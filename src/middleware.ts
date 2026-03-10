@@ -2,7 +2,7 @@ import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
 
 /**
- * AthleteHub middleware — permission-based authorization.
+ * Rosterly middleware — permission-based authorization.
  *
  * Clerk Dashboard setup required:
  *

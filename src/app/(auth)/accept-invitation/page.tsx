@@ -23,7 +23,7 @@ export default function AcceptInvitationPage() {
   return (
     <div className="flex flex-col items-center justify-center min-h-[calc(100vh-10rem)] gap-6">
       <div className="text-center space-y-2">
-        <h1 className="text-2xl font-bold">Welcome to AthleteHub</h1>
+        <h1 className="text-2xl font-bold">Welcome to Rosterly</h1>
         <p className="text-muted-foreground">
           Sign in or create an account to accept your coaching invitation.
         </p>

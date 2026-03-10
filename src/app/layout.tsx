@@ -4,9 +4,9 @@ import { GlobalNav } from "@/components/composed/global-nav";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "AthleteHub | College Athlete Platform",
+  title: "Rosterly | Athletic Data Platform",
   description:
-    "The platform for college athletes to showcase their profile, track performance, and connect with opportunities.",
+    "Upload your athletic data, build your profile, and get discovered.",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
@@ -25,7 +25,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           {/* ── Footer ── */}
           <footer className="border-t py-8">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center text-sm text-muted-foreground">
-              &copy; {new Date().getFullYear()} AthleteHub. All rights reserved.
+              &copy; {new Date().getFullYear()} Rosterly. All rights reserved.
             </div>
           </footer>
         </Providers>

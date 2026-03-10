@@ -8,6 +8,7 @@ export default function SettingsPage() {
         Manage your account, security, and subscription.
       </p>
       <UserProfile
+        routing="hash"
         appearance={{
           elements: {
             rootBox: "w-full",

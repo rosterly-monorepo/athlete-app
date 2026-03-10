@@ -1,5 +1,5 @@
 /**
- * Augment Clerk's types for AthleteHub.
+ * Augment Clerk's types for Rosterly.
  *
  * User-level roles (via publicMetadata):
  *   "athlete" | "coach" | "admin"

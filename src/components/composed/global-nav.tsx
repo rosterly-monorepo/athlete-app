@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { SignInButton, SignUpButton, UserButton, useAuth } from "@clerk/nextjs";
+import { SignInButton, UserButton, useAuth } from "@clerk/nextjs";
 import { Button } from "@/components/ui/button";
 import { useUserRole } from "@/hooks/use-user-role";
 import { ThemeToggle } from "./theme-toggle";
@@ -11,7 +11,7 @@ import { ThemeToggle } from "./theme-toggle";
  *
  * Athletes see: Dashboard, Performance
  * Coaches see: Coach Dashboard, Roster
- * Signed out users see: Browse Athletes, Sign In, Get Started
+ * Signed out users see: Sign In
  */
 export function GlobalNav() {
   const { isSignedIn, isLoaded } = useAuth();
@@ -20,7 +20,7 @@ export function GlobalNav() {
   return (
     <nav className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
       <Link href="/" className="text-xl font-bold tracking-tight">
-        Athlete<span className="text-primary">Hub</span>
+        Rosterly
       </Link>
 
       <div className="flex items-center gap-3">
@@ -29,22 +29,9 @@ export function GlobalNav() {
           <div className="h-8 w-20" />
         ) : !isSignedIn ? (
           // Signed out
-          <>
-            <Link
-              href="/athletes"
-              className="text-sm text-muted-foreground hover:text-foreground transition-colors"
-            >
-              Browse Athletes
-            </Link>
-            <SignInButton>
-              <Button variant="ghost" size="sm">
-                Sign In
-              </Button>
-            </SignInButton>
-            <SignUpButton>
-              <Button size="sm">Get Started</Button>
-            </SignUpButton>
-          </>
+          <SignInButton>
+            <Button size="sm">Sign In</Button>
+          </SignInButton>
         ) : (
           // Signed in
           <>
