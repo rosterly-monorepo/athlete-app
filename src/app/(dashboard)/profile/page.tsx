@@ -25,7 +25,7 @@ export default function ProfilePage() {
         <Card>
           <CardContent className="py-8 text-center">
             <p className="text-muted-foreground">
-              Unable to load profile form. Please check that the backend is running.
+              Something went wrong loading your profile. Please try again later.
             </p>
           </CardContent>
         </Card>
