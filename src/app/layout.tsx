@@ -6,17 +6,16 @@ import "./globals.css";
 
 export const metadata: Metadata = {
   title: "Rosterly | Athletic Data Platform",
-  description:
-    "Upload your athletic data, build your profile, and get discovered.",
+  description: "Upload your athletic data, build your profile, and get discovered.",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className="min-h-screen flex flex-col">
+      <body className="flex min-h-screen flex-col">
         <Providers>
           {/* ── Global Navigation (role-aware) ── */}
-          <header className="border-b bg-background">
+          <header className="bg-background border-b">
             <GlobalNav />
           </header>
 
@@ -25,7 +24,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
 
           {/* ── Footer ── */}
           <footer className="border-t py-8">
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center text-sm text-muted-foreground">
+            <div className="text-muted-foreground mx-auto max-w-7xl px-4 text-center text-sm sm:px-6 lg:px-8">
               &copy; {new Date().getFullYear()} Rosterly. All rights reserved.
             </div>
           </footer>

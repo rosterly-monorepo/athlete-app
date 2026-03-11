@@ -4,17 +4,17 @@ The platform for college athletes to showcase their profile, track performance, 
 
 ## Tech Stack
 
-| Layer | Technology |
-|-------|-----------|
-| Framework | Next.js 15 (App Router, Turbopack) |
-| Auth & Billing | Clerk |
-| UI Components | shadcn/ui (Radix + Tailwind) |
-| Styling | Tailwind CSS v4 + CSS variables |
-| Data Fetching | TanStack Query (client) + React cache (server) |
-| Env Validation | T3 Env + Zod |
-| Toasts | Sonner |
-| Deployment | Vercel |
-| Language | TypeScript (strict) |
+| Layer          | Technology                                     |
+| -------------- | ---------------------------------------------- |
+| Framework      | Next.js 15 (App Router, Turbopack)             |
+| Auth & Billing | Clerk                                          |
+| UI Components  | shadcn/ui (Radix + Tailwind)                   |
+| Styling        | Tailwind CSS v4 + CSS variables                |
+| Data Fetching  | TanStack Query (client) + React cache (server) |
+| Env Validation | T3 Env + Zod                                   |
+| Toasts         | Sonner                                         |
+| Deployment     | Vercel                                         |
+| Language       | TypeScript (strict)                            |
 
 > **Architecture reference:** [next-forge](https://github.com/vercel/next-forge) by Vercel — our patterns for auth, theming, and env management are aligned with this production-grade template.
 

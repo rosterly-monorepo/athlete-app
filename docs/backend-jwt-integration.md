@@ -5,13 +5,15 @@
 The frontend is correctly sending Clerk JWTs to the backend, but the backend is returning `403 Forbidden` for authenticated endpoints like `PATCH /api/v1/athletes/me/profile`.
 
 **What we verified on the frontend:**
+
 - JWT token is being retrieved from Clerk successfully
 - Authorization header is being sent: `Authorization: Bearer eyJhbG...`
 - Request reaches the backend with the header intact
 
 **Backend response:**
+
 ```json
-{"detail": "Forbidden"}
+{ "detail": "Forbidden" }
 ```
 
 ## Required Backend Configuration
@@ -96,21 +98,21 @@ async def update_profile(
 #### Express (Node.js)
 
 ```javascript
-import { ClerkExpressRequireAuth } from '@clerk/clerk-sdk-node';
+import { ClerkExpressRequireAuth } from "@clerk/clerk-sdk-node";
 
 // Middleware to require authentication
-app.use('/api/v1', ClerkExpressRequireAuth());
+app.use("/api/v1", ClerkExpressRequireAuth());
 
 // Or manually verify
-import { verifyToken } from '@clerk/clerk-sdk-node';
+import { verifyToken } from "@clerk/clerk-sdk-node";
 
 async function requireAuth(req, res, next) {
   const authHeader = req.headers.authorization;
-  if (!authHeader?.startsWith('Bearer ')) {
-    return res.status(401).json({ detail: 'Missing token' });
+  if (!authHeader?.startsWith("Bearer ")) {
+    return res.status(401).json({ detail: "Missing token" });
   }
 
-  const token = authHeader.split(' ')[1];
+  const token = authHeader.split(" ")[1];
 
   try {
     const payload = await verifyToken(token, {
@@ -119,19 +121,19 @@ async function requireAuth(req, res, next) {
     req.user = payload;
     next();
   } catch (err) {
-    return res.status(401).json({ detail: 'Invalid token' });
+    return res.status(401).json({ detail: "Invalid token" });
   }
 }
 ```
 
 ### 3. Common Issues & Solutions
 
-| Symptom | Likely Cause | Solution |
-|---------|--------------|----------|
-| `403 Forbidden` | Token validation failing silently | Return `401` with error details for debugging |
-| `401 Invalid token` | Wrong JWKS URL or issuer | Verify `CLERK_ISSUER` matches your Clerk domain |
-| `401 Token expired` | Clock skew or expired token | Add leeway for clock skew (e.g., 60 seconds) |
-| `403 Forbidden` after valid token | Authorization check failing | Check role/permission logic in endpoint |
+| Symptom                           | Likely Cause                      | Solution                                        |
+| --------------------------------- | --------------------------------- | ----------------------------------------------- |
+| `403 Forbidden`                   | Token validation failing silently | Return `401` with error details for debugging   |
+| `401 Invalid token`               | Wrong JWKS URL or issuer          | Verify `CLERK_ISSUER` matches your Clerk domain |
+| `401 Token expired`               | Clock skew or expired token       | Add leeway for clock skew (e.g., 60 seconds)    |
+| `403 Forbidden` after valid token | Authorization check failing       | Check role/permission logic in endpoint         |
 
 ### 4. Debugging Tips
 
@@ -146,12 +148,13 @@ Clerk JWTs include these claims:
 
 ```json
 {
-  "sub": "user_2abc123...",           // Clerk user ID
+  "sub": "user_2abc123...", // Clerk user ID
   "iss": "https://your-app.clerk.accounts.dev",
   "iat": 1234567890,
   "exp": 1234567890,
   "azp": "your-client-id",
-  "metadata": {                        // Custom claims (if configured)
+  "metadata": {
+    // Custom claims (if configured)
     "role": "athlete"
   }
 }
@@ -175,6 +178,7 @@ curl -X GET http://localhost:8765/api/v1/athletes/me/profile \
 ## Frontend Configuration
 
 The frontend is already configured to:
+
 1. Retrieve JWTs from Clerk via `getToken()`
 2. Send them as `Authorization: Bearer <token>` headers
 3. Proxy requests through Next.js to avoid CORS issues

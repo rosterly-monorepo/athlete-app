@@ -1,12 +1,10 @@
 "use client";
 
-import { useOrganization } from "@clerk/nextjs";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { useUserRole } from "@/hooks/use-user-role";
 
 export default function CoachDashboardPage() {
-  const { organization } = useOrganization();
   const { orgRole, orgName } = useUserRole();
 
   return (
@@ -39,7 +37,7 @@ export default function CoachDashboardPage() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">—</div>
-            <p className="text-xs text-muted-foreground">Recruited athletes</p>
+            <p className="text-muted-foreground text-xs">Recruited athletes</p>
           </CardContent>
         </Card>
 
@@ -49,7 +47,7 @@ export default function CoachDashboardPage() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">—</div>
-            <p className="text-xs text-muted-foreground">Unread messages</p>
+            <p className="text-muted-foreground text-xs">Unread messages</p>
           </CardContent>
         </Card>
       </div>

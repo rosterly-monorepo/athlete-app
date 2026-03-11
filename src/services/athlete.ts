@@ -1,10 +1,5 @@
 import { apiClient } from "./api-client";
-import type {
-  Athlete,
-  AthleteProfile,
-  UpdateProfileInput,
-  PaginatedResponse,
-} from "./types";
+import type { Athlete, AthleteProfile, UpdateProfileInput, PaginatedResponse } from "./types";
 
 // ── Public (no token needed) ──
 

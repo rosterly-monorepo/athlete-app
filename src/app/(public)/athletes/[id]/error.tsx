@@ -11,11 +11,12 @@ export default function AthleteProfileError({
   reset: () => void;
 }) {
   return (
-    <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12 text-center">
-      <UserX className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
-      <h2 className="text-2xl font-bold mb-2">Couldn&apos;t load this profile</h2>
-      <p className="text-muted-foreground mb-6 max-w-md mx-auto">
-        The athlete profile you&apos;re looking for might not exist or there was an error loading it.
+    <div className="mx-auto max-w-4xl px-4 py-12 text-center sm:px-6 lg:px-8">
+      <UserX className="text-muted-foreground mx-auto mb-4 h-12 w-12" />
+      <h2 className="mb-2 text-2xl font-bold">Couldn&apos;t load this profile</h2>
+      <p className="text-muted-foreground mx-auto mb-6 max-w-md">
+        The athlete profile you&apos;re looking for might not exist or there was an error loading
+        it.
       </p>
       <div className="flex items-center justify-center gap-3">
         <Button onClick={reset}>Try again</Button>

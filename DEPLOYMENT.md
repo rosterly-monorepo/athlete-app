@@ -39,29 +39,29 @@ Set these in the Vercel Dashboard → Project → Settings → Environment Varia
 
 ### Required
 
-| Variable | Value | Environments |
-|----------|-------|-------------|
-| `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY` | `pk_live_...` | Production |
-| `CLERK_SECRET_KEY` | `sk_live_...` | Production |
+| Variable                            | Value         | Environments         |
+| ----------------------------------- | ------------- | -------------------- |
+| `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY` | `pk_live_...` | Production           |
+| `CLERK_SECRET_KEY`                  | `sk_live_...` | Production           |
 | `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY` | `pk_test_...` | Preview, Development |
-| `CLERK_SECRET_KEY` | `sk_test_...` | Preview, Development |
+| `CLERK_SECRET_KEY`                  | `sk_test_...` | Preview, Development |
 
 ### Recommended
 
-| Variable | Value | Notes |
-|----------|-------|-------|
-| `NEXT_PUBLIC_CLERK_SIGN_IN_URL` | `/sign-in` | |
-| `NEXT_PUBLIC_CLERK_SIGN_UP_URL` | `/sign-up` | |
-| `NEXT_PUBLIC_CLERK_AFTER_SIGN_IN_URL` | `/dashboard` | |
-| `NEXT_PUBLIC_CLERK_AFTER_SIGN_UP_URL` | `/dashboard` | |
-| `NEXT_PUBLIC_API_URL` | `` (empty) | Leave empty to use same-origin /api routes |
+| Variable                              | Value        | Notes                                      |
+| ------------------------------------- | ------------ | ------------------------------------------ |
+| `NEXT_PUBLIC_CLERK_SIGN_IN_URL`       | `/sign-in`   |                                            |
+| `NEXT_PUBLIC_CLERK_SIGN_UP_URL`       | `/sign-up`   |                                            |
+| `NEXT_PUBLIC_CLERK_AFTER_SIGN_IN_URL` | `/dashboard` |                                            |
+| `NEXT_PUBLIC_CLERK_AFTER_SIGN_UP_URL` | `/dashboard` |                                            |
+| `NEXT_PUBLIC_API_URL`                 | `` (empty)   | Leave empty to use same-origin /api routes |
 
 ### When backend is connected
 
-| Variable | Value | Notes |
-|----------|-------|-------|
-| `EXTERNAL_API_URL` | `https://api.yourdomain.com` | Your REST API base URL |
-| `API_SECRET_KEY` | `your_secret` | Server-side only — never exposed to browser |
+| Variable           | Value                        | Notes                                       |
+| ------------------ | ---------------------------- | ------------------------------------------- |
+| `EXTERNAL_API_URL` | `https://api.yourdomain.com` | Your REST API base URL                      |
+| `API_SECRET_KEY`   | `your_secret`                | Server-side only — never exposed to browser |
 
 > **Important:** Use separate Clerk applications for production vs development. Clerk's test keys (`pk_test_`, `sk_test_`) point to the development instance with test data.
 
@@ -118,6 +118,7 @@ Set these in the Vercel Dashboard → Project → Settings → Environment Varia
 Every pull request automatically gets a unique preview URL (e.g., `athlete-app-git-feature-xyz.vercel.app`). Preview deployments use the **Preview** environment variables, so they connect to your Clerk test instance.
 
 This means:
+
 - Designers can review UI changes on a real URL
 - QA can test features before they hit production
 - Clerk test users won't pollute production data
@@ -126,13 +127,14 @@ This means:
 
 ## Vercel Pricing Notes
 
-| Plan | Cost | What you get |
-|------|------|-------------|
-| **Hobby** | Free | 1 project, 100GB bandwidth, serverless functions |
-| **Pro** | $20/user/month | Unlimited projects, 1TB bandwidth, team features |
-| **Enterprise** | Custom | SLA, advanced security, dedicated support |
+| Plan           | Cost           | What you get                                     |
+| -------------- | -------------- | ------------------------------------------------ |
+| **Hobby**      | Free           | 1 project, 100GB bandwidth, serverless functions |
+| **Pro**        | $20/user/month | Unlimited projects, 1TB bandwidth, team features |
+| **Enterprise** | Custom         | SLA, advanced security, dedicated support        |
 
 The Hobby plan is sufficient through launch and early growth. Move to Pro when you:
+
 - Need team collaboration (multiple Vercel accounts)
 - Hit bandwidth limits
 - Need password-protected preview deployments

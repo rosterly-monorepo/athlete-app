@@ -24,11 +24,13 @@
 The application uses Clerk for authentication with role-based access control (RBAC).
 
 **User-Level Roles** (via `publicMetadata.role`):
+
 - `athlete` - Individual athlete users
 - `coach` - Coaching staff
 - `admin` - System administrators
 
 **Organization-Level Permissions** (Clerk Organizations):
+
 - `org:roster:read` - View coaching staff roster
 - `org:roster:manage` - Invite/remove staff members
 - `org:recruiting:read` - View recruited athletes
@@ -47,6 +49,7 @@ All protected routes require authentication via middleware (`src/middleware.ts:3
 ```
 
 **Implementation Files:**
+
 - `src/middleware.ts` - Route protection & role enforcement
 - `src/hooks/use-user-role.ts` - Client-side permission checking
 - `src/types/clerk.d.ts` - Role & permission type definitions
@@ -59,18 +62,19 @@ All protected routes require authentication via middleware (`src/middleware.ts:3
 
 **Implemented Headers** (`next.config.ts:25-41`):
 
-| Header | Value | Purpose |
-|--------|-------|---------|
-| X-Frame-Options | DENY | Prevents clickjacking |
-| X-Content-Type-Options | nosniff | Prevents MIME sniffing |
-| Referrer-Policy | strict-origin-when-cross-origin | Controls referrer leakage |
-| Permissions-Policy | camera=(), microphone=(), geolocation=() | Disables browser features |
+| Header                 | Value                                    | Purpose                   |
+| ---------------------- | ---------------------------------------- | ------------------------- |
+| X-Frame-Options        | DENY                                     | Prevents clickjacking     |
+| X-Content-Type-Options | nosniff                                  | Prevents MIME sniffing    |
+| Referrer-Policy        | strict-origin-when-cross-origin          | Controls referrer leakage |
+| Permissions-Policy     | camera=(), microphone=(), geolocation=() | Disables browser features |
 
 **Content-Security-Policy (CSP)** ✅
 
 Configured in `next.config.ts:6-17` with environment-aware directives:
 
 **Production:**
+
 ```
 default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://*.clerk.accounts.dev https://challenges.cloudflare.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: https: blob:; font-src 'self' data:; connect-src 'self' https://*.clerk.com https://*.clerk.accounts.dev; frame-src https://*.clerk.accounts.dev https://challenges.cloudflare.com; worker-src 'self' blob:
 ```
@@ -104,6 +108,7 @@ Strict-Transport-Security: max-age=63072000; includeSubDomains
 **Status:** Implemented
 
 **Implemented:**
+
 - Clerk provides authentication event logs (sign-in, sign-out, failed attempts)
 - Next.js logs API requests with full URLs (`next.config.ts`)
 - **Backend database audit logging** - all data changes are audited at the database level
@@ -117,11 +122,13 @@ Strict-Transport-Security: max-age=63072000; includeSubDomains
 **Status:** Compliant
 
 **Current State:**
+
 - Clerk authentication cookies (httpOnly, secure) - strictly necessary
 - No analytics or tracking cookies
 - No third-party cookies
 
 **Implementation:**
+
 - Cookie consent banner at `src/components/composed/cookie-consent.tsx`
 - Consent stored in localStorage (`rosterly-cookie-consent`)
 - Links to `/privacy` policy page
@@ -135,12 +142,12 @@ Strict-Transport-Security: max-age=63072000; includeSubDomains
 
 **Status:** Compliant
 
-| Storage Type | Personal Data | Notes |
-|--------------|---------------|-------|
-| localStorage | None | Not used for PII |
-| sessionStorage | None | Not used for PII |
-| Cookies | Auth tokens only | Clerk-managed, httpOnly |
-| Memory (React Query) | Cached API data | Cleared on page close |
+| Storage Type         | Personal Data    | Notes                   |
+| -------------------- | ---------------- | ----------------------- |
+| localStorage         | None             | Not used for PII        |
+| sessionStorage       | None             | Not used for PII        |
+| Cookies              | Auth tokens only | Clerk-managed, httpOnly |
+| Memory (React Query) | Cached API data  | Cleared on page close   |
 
 The application does not persist personal data in browser storage beyond Clerk's authentication cookies.
 
@@ -151,12 +158,14 @@ The application does not persist personal data in browser storage beyond Clerk's
 **Status:** Compliant
 
 **Implemented:**
+
 - `isPublic` flag controls visibility to accredited university recruiters (not public internet)
 - Profile sharing limited to onboarded, verified schools
 - No analytics or tracking scripts
 
 **Data Sharing Model:**
 Athlete profiles are **not publicly accessible**. The `isPublic` flag enables visibility only to:
+
 - Accredited universities onboarded to the platform
 - Verified coaching staff with organization membership
 
@@ -168,6 +177,7 @@ This B2B controlled sharing model has a clear lawful basis (legitimate interest 
    Users cannot self-service export their data. May be handled via support request.
 
 **Completed:**
+
 - Privacy policy page at `/privacy`
 
 ---
@@ -177,6 +187,7 @@ This B2B controlled sharing model has a clear lawful basis (legitimate interest 
 **Status:** Compliant
 
 The frontend collects only data necessary for the application's purpose:
+
 - Athletic profile information
 - Performance metrics
 - Contact information for coaches
@@ -193,14 +204,14 @@ Location: `next.config.ts`
 
 All security headers are configured and environment-aware:
 
-| Header | Value | Status |
-|--------|-------|--------|
-| X-Frame-Options | DENY | ✅ |
-| X-Content-Type-Options | nosniff | ✅ |
-| Referrer-Policy | strict-origin-when-cross-origin | ✅ |
-| Permissions-Policy | camera=(), microphone=(), geolocation=() | ✅ |
-| Strict-Transport-Security | max-age=63072000; includeSubDomains | ✅ |
-| Content-Security-Policy | Environment-aware (see CC6.6 above) | ✅ |
+| Header                    | Value                                    | Status |
+| ------------------------- | ---------------------------------------- | ------ |
+| X-Frame-Options           | DENY                                     | ✅     |
+| X-Content-Type-Options    | nosniff                                  | ✅     |
+| Referrer-Policy           | strict-origin-when-cross-origin          | ✅     |
+| Permissions-Policy        | camera=(), microphone=(), geolocation=() | ✅     |
+| Strict-Transport-Security | max-age=63072000; includeSubDomains      | ✅     |
+| Content-Security-Policy   | Environment-aware (see CC6.6 above)      | ✅     |
 
 ### Header Verification
 
@@ -216,13 +227,13 @@ Or use: https://securityheaders.com
 
 ## Remediation Roadmap
 
-| Priority | Item | Framework | Impact | Status |
-|----------|------|-----------|--------|--------|
-| **P1** | ~~Add CSP header~~ | SOC2 CC6.6 | Prevents XSS/injection | ✅ Done |
-| **P1** | ~~Add HSTS header~~ | SOC2 CC6.7 | Enforces HTTPS | ✅ Done |
-| **P1** | ~~Audit logging~~ | SOC2 CC7.2 | Monitoring & accountability | ✅ Backend |
-| **P2** | ~~Cookie consent banner~~ | GDPR Art. 7 | Legal compliance for EU | ✅ Done |
-| **P2** | ~~Privacy policy page~~ | GDPR Art. 13 | Transparency requirement | ✅ Done |
+| Priority | Item                      | Framework    | Impact                      | Status     |
+| -------- | ------------------------- | ------------ | --------------------------- | ---------- |
+| **P1**   | ~~Add CSP header~~        | SOC2 CC6.6   | Prevents XSS/injection      | ✅ Done    |
+| **P1**   | ~~Add HSTS header~~       | SOC2 CC6.7   | Enforces HTTPS              | ✅ Done    |
+| **P1**   | ~~Audit logging~~         | SOC2 CC7.2   | Monitoring & accountability | ✅ Backend |
+| **P2**   | ~~Cookie consent banner~~ | GDPR Art. 7  | Legal compliance for EU     | ✅ Done    |
+| **P2**   | ~~Privacy policy page~~   | GDPR Art. 13 | Transparency requirement    | ✅ Done    |
 
 ---
 

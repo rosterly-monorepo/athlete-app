@@ -13,16 +13,29 @@ export default async function DashboardPage() {
   ];
 
   const steps = [
-    { step: "1", title: "Complete your athlete profile", description: "Add your sport, position, school, and bio.", href: "/profile" },
-    { step: "2", title: "Add competition results", description: "Import or manually add your performance data.", href: "/performance" },
-    { step: "3", title: "Make your profile public", description: "Share your profile with scouts and recruiters.", href: "/settings" },
+    {
+      step: "1",
+      title: "Complete your athlete profile",
+      description: "Add your sport, position, school, and bio.",
+      href: "/profile",
+    },
+    {
+      step: "2",
+      title: "Add competition results",
+      description: "Import or manually add your performance data.",
+      href: "/performance",
+    },
+    {
+      step: "3",
+      title: "Make your profile public",
+      description: "Share your profile with scouts and recruiters.",
+      href: "/settings",
+    },
   ];
 
   return (
     <div>
-      <h1 className="text-2xl font-bold mb-2">
-        Welcome back, {user?.firstName || "Athlete"}
-      </h1>
+      <h1 className="mb-2 text-2xl font-bold">Welcome back, {user?.firstName || "Athlete"}</h1>
       <p className="text-muted-foreground mb-8">
         Here&apos;s an overview of your athlete profile and recent activity.
       </p>
@@ -40,14 +53,14 @@ export default async function DashboardPage() {
             <Link
               key={action.step}
               href={action.href}
-              className="flex items-start gap-4 rounded-lg p-3 hover:bg-accent transition-colors"
+              className="hover:bg-accent flex items-start gap-4 rounded-lg p-3 transition-colors"
             >
-              <span className="flex items-center justify-center w-8 h-8 rounded-full bg-primary text-primary-foreground text-sm font-bold shrink-0">
+              <span className="bg-primary text-primary-foreground flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-sm font-bold">
                 {action.step}
               </span>
               <div>
-                <p className="font-medium text-sm">{action.title}</p>
-                <p className="text-xs text-muted-foreground">{action.description}</p>
+                <p className="text-sm font-medium">{action.title}</p>
+                <p className="text-muted-foreground text-xs">{action.description}</p>
               </div>
             </Link>
           ))}

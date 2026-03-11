@@ -12,9 +12,7 @@ import type { ComponentProps } from "react";
  *
  * Pattern from: next-forge (packages/auth/provider.tsx)
  */
-export function AuthProvider(
-  props: ComponentProps<typeof ClerkProvider>
-) {
+export function AuthProvider(props: ComponentProps<typeof ClerkProvider>) {
   const { resolvedTheme } = useTheme();
 
   return (

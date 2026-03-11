@@ -4,10 +4,10 @@ import Link from "next/link";
 
 export default function AthleteNotFound() {
   return (
-    <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12 text-center">
-      <UserX className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
-      <h2 className="text-2xl font-bold mb-2">Athlete not found</h2>
-      <p className="text-muted-foreground mb-6 max-w-md mx-auto">
+    <div className="mx-auto max-w-4xl px-4 py-12 text-center sm:px-6 lg:px-8">
+      <UserX className="text-muted-foreground mx-auto mb-4 h-12 w-12" />
+      <h2 className="mb-2 text-2xl font-bold">Athlete not found</h2>
+      <p className="text-muted-foreground mx-auto mb-6 max-w-md">
         This athlete profile doesn&apos;t exist or may have been removed.
       </p>
       <Button asChild>

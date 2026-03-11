@@ -8,7 +8,8 @@ import { toast } from "sonner";
 
 export const athleteKeys = {
   all: ["athletes"] as const,
-  list: (filters?: Record<string, string | number | undefined>) => ["athletes", "list", filters] as const,
+  list: (filters?: Record<string, string | number | undefined>) =>
+    ["athletes", "list", filters] as const,
   byId: (id: string) => ["athletes", id] as const,
   myProfile: ["my-profile"] as const,
 };
@@ -58,7 +59,9 @@ export function useUpdateProfile() {
       toast.success("Profile saved", { description: "Your athlete profile has been updated." });
     },
     onError: () => {
-      toast.error("Failed to save profile", { description: "Something went wrong. Please try again." });
+      toast.error("Failed to save profile", {
+        description: "Something went wrong. Please try again.",
+      });
     },
   });
 }

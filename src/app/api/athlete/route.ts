@@ -24,8 +24,8 @@ export async function GET() {
     return NextResponse.json({ error: "Athlete account required" }, { status: 403 });
   }
 
-  // Get Clerk JWT to forward to FastAPI backend
-  const token = await getToken();
+  // Get Clerk JWT to forward to FastAPI backend (used when backend is connected)
+  const _token = await getToken();
 
   // TODO: Proxy to FastAPI backend when connected
   // const response = await fetch(`${process.env.EXTERNAL_API_URL}/api/v1/athletes/me/profile`, {

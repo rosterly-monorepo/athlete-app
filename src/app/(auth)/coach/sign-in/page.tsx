@@ -3,12 +3,10 @@ import Link from "next/link";
 
 export default function CoachSignInPage() {
   return (
-    <div className="flex flex-col items-center justify-center min-h-[calc(100vh-10rem)] gap-6">
-      <div className="text-center space-y-2">
+    <div className="flex min-h-[calc(100vh-10rem)] flex-col items-center justify-center gap-6">
+      <div className="space-y-2 text-center">
         <h1 className="text-2xl font-bold">Coach Sign In</h1>
-        <p className="text-muted-foreground">
-          Sign in to manage your team and recruit athletes.
-        </p>
+        <p className="text-muted-foreground">Sign in to manage your team and recruit athletes.</p>
       </div>
 
       <SignIn
@@ -22,7 +20,7 @@ export default function CoachSignInPage() {
 
       <Link
         href="/"
-        className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+        className="text-muted-foreground hover:text-foreground text-sm transition-colors"
       >
         Back to home
       </Link>

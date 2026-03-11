@@ -36,7 +36,9 @@ export function useAddResult() {
       toast.success("Result added", { description: "Your competition result has been saved." });
     },
     onError: () => {
-      toast.error("Failed to add result", { description: "Something went wrong. Please try again." });
+      toast.error("Failed to add result", {
+        description: "Something went wrong. Please try again.",
+      });
     },
   });
 }
@@ -55,7 +57,9 @@ export function useDeleteResult() {
       toast.success("Result deleted");
     },
     onError: () => {
-      toast.error("Failed to delete result", { description: "Something went wrong. Please try again." });
+      toast.error("Failed to delete result", {
+        description: "Something went wrong. Please try again.",
+      });
     },
   });
 }

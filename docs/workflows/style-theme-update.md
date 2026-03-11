@@ -24,13 +24,13 @@ globals.css (CSS variables)
 
 Pick a theme from any of these sources:
 
-| Source | What you get | URL |
-|---|---|---|
-| 21st.dev | Full component themes + CSS variables | https://21st.dev |
-| shadcn Themes | Official base color themes | https://ui.shadcn.com/themes |
-| shadcndesign | Generator with live preview | https://shadcndesign.com/theme-generator |
-| gradient.page | Generate from a single brand color | https://gradient.page/tools/shadcn-ui-theme-generator |
-| shadcn.rlabs.art | OKLCH generator with sacred geometry | https://shadcn.rlabs.art |
+| Source           | What you get                          | URL                                                   |
+| ---------------- | ------------------------------------- | ----------------------------------------------------- |
+| 21st.dev         | Full component themes + CSS variables | https://21st.dev                                      |
+| shadcn Themes    | Official base color themes            | https://ui.shadcn.com/themes                          |
+| shadcndesign     | Generator with live preview           | https://shadcndesign.com/theme-generator              |
+| gradient.page    | Generate from a single brand color    | https://gradient.page/tools/shadcn-ui-theme-generator |
+| shadcn.rlabs.art | OKLCH generator with sacred geometry  | https://shadcn.rlabs.art                              |
 
 Every source outputs the same thing: a block of CSS variables for `:root` (light) and `.dark` (dark mode).
 
@@ -179,8 +179,8 @@ This handles light/dark switching automatically. But if you want Clerk's compone
   appearance={{
     baseTheme: resolvedTheme === "dark" ? dark : undefined,
     variables: {
-      colorPrimary: "oklch(0.45 0.2 260)",  // Match your --primary
-      borderRadius: "0.5rem",                 // Match your --radius
+      colorPrimary: "oklch(0.45 0.2 260)", // Match your --primary
+      borderRadius: "0.5rem", // Match your --radius
     },
     elements: {
       // Override specific elements if needed
@@ -199,28 +199,28 @@ The `variables` approach is preferred for basic brand matching. The `elements` a
 
 Every variable, what it controls, and where it shows up:
 
-| Variable | Controls | Example usage |
-|---|---|---|
-| `--background` | Page background | `bg-background` |
-| `--foreground` | Default text color | `text-foreground` |
-| `--primary` | Buttons, links, active states | `bg-primary` |
-| `--primary-foreground` | Text on primary backgrounds | `text-primary-foreground` |
-| `--secondary` | Secondary buttons, subtle highlights | `bg-secondary` |
-| `--secondary-foreground` | Text on secondary backgrounds | `text-secondary-foreground` |
-| `--muted` | Disabled states, subtle backgrounds | `bg-muted` |
-| `--muted-foreground` | Placeholder text, captions | `text-muted-foreground` |
-| `--accent` | Hover states, sidebar highlights | `bg-accent` |
-| `--accent-foreground` | Text on accent backgrounds | `text-accent-foreground` |
-| `--destructive` | Delete buttons, error states | `bg-destructive` |
-| `--destructive-foreground` | Text on destructive backgrounds | `text-destructive-foreground` |
-| `--card` | Card backgrounds | `bg-card` |
-| `--card-foreground` | Text in cards | `text-card-foreground` |
-| `--popover` | Dropdown/popover backgrounds | `bg-popover` |
-| `--popover-foreground` | Text in popovers | `text-popover-foreground` |
-| `--border` | All borders | `border-border` |
-| `--input` | Input field borders | `border-input` |
-| `--ring` | Focus rings | `ring-ring` |
-| `--radius` | Border radius base | Computed into `rounded-sm/md/lg/xl` |
+| Variable                   | Controls                             | Example usage                       |
+| -------------------------- | ------------------------------------ | ----------------------------------- |
+| `--background`             | Page background                      | `bg-background`                     |
+| `--foreground`             | Default text color                   | `text-foreground`                   |
+| `--primary`                | Buttons, links, active states        | `bg-primary`                        |
+| `--primary-foreground`     | Text on primary backgrounds          | `text-primary-foreground`           |
+| `--secondary`              | Secondary buttons, subtle highlights | `bg-secondary`                      |
+| `--secondary-foreground`   | Text on secondary backgrounds        | `text-secondary-foreground`         |
+| `--muted`                  | Disabled states, subtle backgrounds  | `bg-muted`                          |
+| `--muted-foreground`       | Placeholder text, captions           | `text-muted-foreground`             |
+| `--accent`                 | Hover states, sidebar highlights     | `bg-accent`                         |
+| `--accent-foreground`      | Text on accent backgrounds           | `text-accent-foreground`            |
+| `--destructive`            | Delete buttons, error states         | `bg-destructive`                    |
+| `--destructive-foreground` | Text on destructive backgrounds      | `text-destructive-foreground`       |
+| `--card`                   | Card backgrounds                     | `bg-card`                           |
+| `--card-foreground`        | Text in cards                        | `text-card-foreground`              |
+| `--popover`                | Dropdown/popover backgrounds         | `bg-popover`                        |
+| `--popover-foreground`     | Text in popovers                     | `text-popover-foreground`           |
+| `--border`                 | All borders                          | `border-border`                     |
+| `--input`                  | Input field borders                  | `border-input`                      |
+| `--ring`                   | Focus rings                          | `ring-ring`                         |
+| `--radius`                 | Border radius base                   | Computed into `rounded-sm/md/lg/xl` |
 
 ---
 
@@ -289,18 +289,18 @@ The `--radius` variable controls the base radius. All components derive from it:
 
 ```css
 :root {
-  --radius: 0.5rem;    /* Default: medium roundness */
+  --radius: 0.5rem; /* Default: medium roundness */
 }
 ```
 
 The `@theme inline` block computes four sizes from this base:
 
-| Utility | Computed value | When `--radius: 0.5rem` |
-|---|---|---|
-| `rounded-sm` | `--radius - 4px` | ~0.25rem |
-| `rounded-md` | `--radius - 2px` | ~0.375rem |
-| `rounded-lg` | `--radius` | 0.5rem |
-| `rounded-xl` | `--radius + 4px` | ~0.75rem |
+| Utility      | Computed value   | When `--radius: 0.5rem` |
+| ------------ | ---------------- | ----------------------- |
+| `rounded-sm` | `--radius - 4px` | ~0.25rem                |
+| `rounded-md` | `--radius - 2px` | ~0.375rem               |
+| `rounded-lg` | `--radius`       | 0.5rem                  |
+| `rounded-xl` | `--radius + 4px` | ~0.75rem                |
 
 Common values: `0` for sharp edges, `0.375rem` for subtle rounding, `0.5rem` for standard, `0.75rem` for soft, `1rem` for pill-like.
 

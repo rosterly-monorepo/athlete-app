@@ -18,7 +18,7 @@ export function GlobalNav() {
   const { isCoach, orgId } = useUserRole();
 
   return (
-    <nav className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+    <nav className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
       <Link href="/" className="text-xl font-bold tracking-tight">
         Rosterly
       </Link>
@@ -40,13 +40,13 @@ export function GlobalNav() {
               <>
                 <Link
                   href="/coach/dashboard"
-                  className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+                  className="text-muted-foreground hover:text-foreground text-sm transition-colors"
                 >
                   Dashboard
                 </Link>
                 <Link
                   href="/coach/roster"
-                  className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+                  className="text-muted-foreground hover:text-foreground text-sm transition-colors"
                 >
                   Roster
                 </Link>
@@ -56,13 +56,13 @@ export function GlobalNav() {
               <>
                 <Link
                   href="/dashboard"
-                  className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+                  className="text-muted-foreground hover:text-foreground text-sm transition-colors"
                 >
                   Dashboard
                 </Link>
                 <Link
                   href="/performance"
-                  className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+                  className="text-muted-foreground hover:text-foreground text-sm transition-colors"
                 >
                   Performance
                 </Link>

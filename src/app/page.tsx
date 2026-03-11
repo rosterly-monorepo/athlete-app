@@ -4,13 +4,11 @@ import Link from "next/link";
 
 export default function HomePage() {
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
       {/* ── Hero ── */}
-      <section className="py-24 sm:py-40 text-center">
-        <h1 className="text-5xl sm:text-7xl font-bold tracking-tight mb-6">
-          Rosterly
-        </h1>
-        <p className="text-lg sm:text-xl text-muted-foreground max-w-xl mx-auto mb-12">
+      <section className="py-24 text-center sm:py-40">
+        <h1 className="mb-6 text-5xl font-bold tracking-tight sm:text-7xl">Rosterly</h1>
+        <p className="text-muted-foreground mx-auto mb-12 max-w-xl text-lg sm:text-xl">
           Upload your athletic data. Build your profile. Get discovered.
         </p>
 

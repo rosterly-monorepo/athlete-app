@@ -6,13 +6,7 @@ import { usePathname } from "next/navigation";
 import { OrganizationSwitcher } from "@clerk/nextjs";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
-import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-  SheetTrigger,
-} from "@/components/ui/sheet";
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { LayoutDashboard, Users, Settings, Menu } from "lucide-react";
 
 const navItems = [
@@ -48,10 +42,7 @@ function NavContent({ onNavigate }: { onNavigate?: () => void }) {
             <Button
               key={item.href}
               variant={isActive ? "secondary" : "ghost"}
-              className={cn(
-                "justify-start gap-3",
-                !isActive && "text-muted-foreground"
-              )}
+              className={cn("justify-start gap-3", !isActive && "text-muted-foreground")}
               asChild
               onClick={onNavigate}
             >
@@ -73,7 +64,7 @@ export function CoachNavSidebar() {
   return (
     <>
       {/* Mobile nav trigger */}
-      <div className="md:hidden fixed bottom-4 right-4 z-50">
+      <div className="fixed right-4 bottom-4 z-50 md:hidden">
         <Sheet open={open} onOpenChange={setOpen}>
           <SheetTrigger asChild>
             <Button size="icon" className="h-12 w-12 rounded-full shadow-lg">
@@ -92,7 +83,7 @@ export function CoachNavSidebar() {
       </div>
 
       {/* Desktop sidebar */}
-      <aside className="w-64 border-r border-border bg-card p-4 hidden md:block">
+      <aside className="border-border bg-card hidden w-64 border-r p-4 md:block">
         <NavContent />
       </aside>
     </>

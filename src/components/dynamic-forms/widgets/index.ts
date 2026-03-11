@@ -1,0 +1,9 @@
+export { TextWidget } from "./TextWidget";
+export { TextareaWidget } from "./TextareaWidget";
+export { NumberWidget } from "./NumberWidget";
+export { DateWidget } from "./DateWidget";
+export { SelectWidget } from "./SelectWidget";
+export { CheckboxWidget } from "./CheckboxWidget";
+export { ImageUploadWidget } from "./ImageUploadWidget";
+export { VideoUploadWidget } from "./VideoUploadWidget";
+export { DocumentUploadWidget } from "./DocumentUploadWidget";

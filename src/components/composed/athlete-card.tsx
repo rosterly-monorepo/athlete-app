@@ -18,11 +18,11 @@ export function AthleteCard({ athlete, variant = "compact" }: AthleteCardProps) 
           <AvatarImage src={athlete.avatarUrl ?? undefined} />
           <AvatarFallback>{initials}</AvatarFallback>
         </Avatar>
-        <div className="flex-1 min-w-0">
-          <h3 className="font-semibold truncate">
+        <div className="min-w-0 flex-1">
+          <h3 className="truncate font-semibold">
             {athlete.firstName} {athlete.lastName}
           </h3>
-          <p className="text-sm text-muted-foreground truncate">
+          <p className="text-muted-foreground truncate text-sm">
             {athlete.school} &middot; Class of {athlete.graduationYear}
           </p>
         </div>
@@ -30,7 +30,7 @@ export function AthleteCard({ athlete, variant = "compact" }: AthleteCardProps) 
       </CardHeader>
       {variant === "full" && athlete.bio && (
         <CardContent>
-          <p className="text-sm text-muted-foreground">{athlete.bio}</p>
+          <p className="text-muted-foreground text-sm">{athlete.bio}</p>
         </CardContent>
       )}
     </Card>
