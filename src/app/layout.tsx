@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Providers } from "@/components/providers";
 import { GlobalNav } from "@/components/composed/global-nav";
+import { CookieConsent } from "@/components/composed/cookie-consent";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -28,6 +29,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               &copy; {new Date().getFullYear()} Rosterly. All rights reserved.
             </div>
           </footer>
+
+          {/* ── Cookie Consent Banner ── */}
+          <CookieConsent />
         </Providers>
       </body>
     </html>

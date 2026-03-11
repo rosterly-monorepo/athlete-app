@@ -15,7 +15,7 @@ import { Search } from "lucide-react";
 import { SPORTS } from "@/lib/constants";
 
 export const metadata: Metadata = {
-  title: "Browse Athletes | AthleteHub",
+  title: "Browse Athletes | Rosterly",
   description: "Discover college athletes across all sports. View profiles, stats, and competition results.",
 };
 

@@ -1,6 +1,6 @@
-# AthleteHub — Style & Theme Update Guide
+# Rosterly — Style & Theme Update Guide
 
-How to apply a new visual theme to the AthleteHub frontend. This covers taking a theme from 21st.dev, shadcn's theme generator, or any other shadcn-compatible source, and applying it across the app — including dark mode and Clerk auth components.
+How to apply a new visual theme to the Rosterly frontend. This covers taking a theme from 21st.dev, shadcn's theme generator, or any other shadcn-compatible source, and applying it across the app — including dark mode and Clerk auth components.
 
 ## How the Design System Works
 

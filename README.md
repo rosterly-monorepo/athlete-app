@@ -1,4 +1,4 @@
-# AthleteHub — College Athlete Platform
+# Rosterly — College Athlete Platform
 
 The platform for college athletes to showcase their profile, track performance, and connect with opportunities.
 

@@ -14,11 +14,11 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
   try {
     const athlete = await getAthleteById(id);
     return {
-      title: `${athlete.firstName} ${athlete.lastName} — ${athlete.sport} | AthleteHub`,
-      description: athlete.bio || `View ${athlete.firstName}'s athlete profile on AthleteHub.`,
+      title: `${athlete.firstName} ${athlete.lastName} — ${athlete.sport} | Rosterly`,
+      description: athlete.bio || `View ${athlete.firstName}'s athlete profile on Rosterly.`,
     };
   } catch {
-    return { title: "Athlete Not Found | AthleteHub" };
+    return { title: "Athlete Not Found | Rosterly" };
   }
 }
 
