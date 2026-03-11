@@ -2,7 +2,23 @@
   "permissions": {
     "allow": [
       "Bash(git push:*)",
-      "Bash(npm run dev:*)"
+      "Bash(npm run dev:*)",
+      "Bash(tree:*)",
+      "Bash(npm install:*)",
+      "Bash(npx shadcn@latest add:*)",
+      "Bash(npx tsc:*)",
+      "Bash(npm run build:*)",
+      "Bash(ls:*)",
+      "Bash(git add:*)",
+      "Bash(git commit -m \"$\\(cat <<''EOF''\nAdd SOC2 Type 2 and GDPR compliance for frontend\n\n- Add CSP and HSTS security headers to next.config.ts\n- CSP is environment-aware \\(relaxed for local dev\\)\n- Add COMPLIANCE.md documenting all controls\n- Add privacy policy page at /privacy\n- Add cookie consent banner component\n- Update branding from AthleteHub to Rosterly\n\nCo-Authored-By: Claude Opus 4.5 <noreply@anthropic.com>\nEOF\n\\)\")",
+      "Bash(npm run format:*)",
+      "Bash(npm run lint:*)",
+      "Bash(npm run type-check:*)",
+      "Bash(npm run format:check:*)",
+      "Bash(npx husky:*)",
+      "Bash(npm run test:run:*)",
+      "Bash(npm run check-all:*)",
+      "Bash(git commit:*)"
     ]
   }
 }

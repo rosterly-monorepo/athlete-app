@@ -8,112 +8,29 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { DynamicForm, DynamicFormSkeleton } from "@/components/dynamic-forms";
 import type { FormSchema } from "@/types/form-schema";
 
-// Fallback schemas for when API is unavailable
-// These mirror what the backend would provide via /api/v1/forms/sections/all
-const FALLBACK_SCHEMAS: Record<string, FormSchema> = {
-  athletics: {
-    type: "object",
-    title: "Athletics",
-    properties: {
-      sport: {
-        type: "string",
-        title: "Sport",
-        "x-ui-widget": "select",
-        "x-ui-options": [
-          { value: "football", label: "Football" },
-          { value: "basketball", label: "Basketball" },
-          { value: "baseball", label: "Baseball" },
-          { value: "soccer", label: "Soccer" },
-          { value: "track_and_field", label: "Track & Field" },
-          { value: "swimming", label: "Swimming" },
-          { value: "volleyball", label: "Volleyball" },
-          { value: "tennis", label: "Tennis" },
-          { value: "golf", label: "Golf" },
-          { value: "wrestling", label: "Wrestling" },
-          { value: "lacrosse", label: "Lacrosse" },
-          { value: "softball", label: "Softball" },
-          { value: "other", label: "Other" },
-        ],
-        "x-ui-placeholder": "Select sport...",
-      },
-      position: {
-        type: "string",
-        title: "Position",
-        "x-ui-widget": "text",
-        "x-ui-placeholder": "e.g. Point Guard",
-      },
-      school: {
-        type: "string",
-        title: "School",
-        "x-ui-widget": "text",
-        "x-ui-placeholder": "e.g. University of Texas",
-      },
-      graduationYear: {
-        type: "integer",
-        title: "Graduation Year",
-        "x-ui-widget": "select",
-        "x-ui-options": [
-          { value: "2025", label: "2025" },
-          { value: "2026", label: "2026" },
-          { value: "2027", label: "2027" },
-          { value: "2028", label: "2028" },
-          { value: "2029", label: "2029" },
-          { value: "2030", label: "2030" },
-        ],
-        "x-ui-placeholder": "Select year...",
-      },
-    },
-    "x-ui-order": ["sport", "position", "school", "graduationYear"],
-  },
-  physical: {
-    type: "object",
-    title: "Physical Stats",
-    properties: {
-      heightFeet: {
-        type: "integer",
-        title: "Height (ft)",
-        "x-ui-widget": "number",
-        "x-ui-validation": { min: 4, max: 7 },
-      },
-      heightInches: {
-        type: "integer",
-        title: "Height (in)",
-        "x-ui-widget": "number",
-        "x-ui-validation": { min: 0, max: 11 },
-      },
-      weight: {
-        type: "number",
-        title: "Weight (lbs)",
-        "x-ui-widget": "number",
-      },
-    },
-    "x-ui-order": ["heightFeet", "heightInches", "weight"],
-  },
-  about: {
-    type: "object",
-    title: "About You",
-    properties: {
-      bio: {
-        type: "string",
-        title: "Bio",
-        "x-ui-widget": "textarea",
-        "x-ui-placeholder": "Tell coaches and recruiters about yourself...",
-        "x-ui-validation": { maxLength: 2000 },
-      },
-    },
-  },
-};
-
 export default function ProfilePage() {
   const { user } = useUser();
   const { data: profile, isLoading: profileLoading } = useMyProfile();
 
-  // Try to fetch schemas from API, fall back to hardcoded
-  const { data: apiSchemas, isLoading: schemasLoading, isError } = useAllFormSchemas();
-  const schemas = isError || !apiSchemas ? FALLBACK_SCHEMAS : apiSchemas;
+  const { data: schemas, isLoading: schemasLoading, isError } = useAllFormSchemas();
 
   if (profileLoading || schemasLoading) {
     return <ProfileSkeleton />;
+  }
+
+  if (isError || !schemas) {
+    return (
+      <div className="max-w-2xl">
+        <h1 className="mb-2 text-2xl font-bold">Athlete Profile</h1>
+        <Card>
+          <CardContent className="py-8 text-center">
+            <p className="text-muted-foreground">
+              Unable to load profile form. Please check that the backend is running.
+            </p>
+          </CardContent>
+        </Card>
+      </div>
+    );
   }
 
   return (
