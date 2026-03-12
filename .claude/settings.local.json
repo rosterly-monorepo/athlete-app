@@ -18,7 +18,8 @@
       "Bash(npx husky:*)",
       "Bash(npm run test:run:*)",
       "Bash(npm run check-all:*)",
-      "Bash(git commit:*)"
+      "Bash(git commit:*)",
+      "Bash(npm test:*)"
     ]
   }
 }
