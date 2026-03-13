@@ -19,7 +19,20 @@
       "Bash(npm run test:run:*)",
       "Bash(npm run check-all:*)",
       "Bash(git commit:*)",
-      "Bash(npm test:*)"
+      "Bash(npm test:*)",
+      "Bash(nvim --version 2>/dev/null | head -3)",
+      "WebFetch(domain:www.whoop.com)",
+      "Bash(find /Users/adam/code/rosterly/athlete-api/app/export -type f -name \"*.py\" 2>/dev/null | head -20)",
+      "Bash(cat /Users/adam/code/rosterly/athlete-app/src/app/\\\\\\(coach\\\\\\)/layout.tsx)",
+      "Bash(ls /Users/adam/code/rosterly/athlete-app/src/app/\\\\\\(coach\\\\\\)/)",
+      "Bash(ls /Users/adam/code/rosterly/athlete-app/src/app/\\\\\\(coach\\\\\\)/coach/)",
+      "Bash(ls -R /Users/adam/code/rosterly/athlete-app/src/app/\\\\\\(coach\\\\\\)/coach/recruiting/)",
+      "Bash(cd /Users/adam/code/rosterly/athlete-api && uv run ruff check app/athlete/models.py app/sports/models.py app/sports/rowing/models.py app/athlete/sections.py app/athlete/service.py app/athlete/router.py app/forms/generator.py app/search/documents.py app/db/models.py app/worker/tasks.py 2>&1)",
+      "Bash(cd /Users/adam/code/rosterly/athlete-api && uv run ruff check app/athlete/models.py app/sports/models.py app/sports/rowing/models.py app/athlete/sections.py app/athlete/service.py app/athlete/router.py app/forms/generator.py app/search/documents.py app/db/models.py app/worker/tasks.py app/sports/rowing/service.py app/sports/rowing/router.py 2>&1)",
+      "Bash(cd /Users/adam/code/rosterly/athlete-api && uv run ruff check --fix app/sports/rowing/router.py app/sports/rowing/service.py 2>&1)",
+      "Bash(cd /Users/adam/code/rosterly/athlete-api && uv run ruff check app/ 2>&1)",
+      "Read(//Users/adam/code/rosterly/athlete-api/**)",
+      "Bash(uv run:*)"
     ]
   }
 }

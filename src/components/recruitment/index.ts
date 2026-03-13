@@ -23,7 +23,6 @@ export {
   RecruitmentColumn,
   columnVariants,
   STAGE_LABELS,
-  STAGE_COLORS,
   type RecruitmentColumnProps,
 } from "./recruitment-column";
 

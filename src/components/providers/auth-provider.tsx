@@ -21,6 +21,9 @@ export function AuthProvider(props: ComponentProps<typeof ClerkProvider>) {
       afterSignOutUrl="/"
       appearance={{
         baseTheme: resolvedTheme === "dark" ? dark : undefined,
+        variables: {
+          colorPrimary: "#E8614A",
+        },
       }}
     />
   );

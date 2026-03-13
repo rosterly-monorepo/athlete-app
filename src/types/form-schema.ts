@@ -86,6 +86,10 @@ export interface FormSchema {
   // x-ui-* extensions at schema level
   "x-ui-groups"?: FormSchemaGroup[];
   "x-ui-order"?: string[];
+
+  // Profile key — derived from the SQLModel __tablename__ on the backend.
+  // Used to extract section data from the full profile response.
+  "x-profile-key"?: string;
 }
 
 /** Section metadata from /api/v1/forms/sections */

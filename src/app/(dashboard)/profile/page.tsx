@@ -66,10 +66,7 @@ export default function ProfilePage() {
             key={sectionId}
             sectionId={sectionId}
             schema={schema}
-            initialData={extractSectionData(
-              sectionId,
-              profile as Record<string, unknown> | undefined
-            )}
+            initialData={extractSectionData(schema, profile as Record<string, unknown> | undefined)}
           />
         ))}
       </div>
@@ -108,30 +105,22 @@ function ProfileSection({ sectionId, schema, initialData }: ProfileSectionProps)
 
 /**
  * Extract data for a specific section from the full profile.
+ * Uses x-profile-key from the schema (derived from the SQLModel __tablename__)
+ * so the mapping stays in sync with the backend models automatically.
  */
 function extractSectionData(
-  sectionId: string,
+  schema: FormSchema,
   profile?: Record<string, unknown>
 ): Record<string, unknown> | undefined {
   if (!profile) return undefined;
 
-  // Map section IDs to their field names
-  const sectionFields: Record<string, string[]> = {
-    athletics: ["sport", "position", "school", "graduationYear"],
-    physical: ["heightFeet", "heightInches", "weight"],
-    about: ["bio"],
-  };
+  const key = schema["x-profile-key"];
+  if (!key) return undefined;
 
-  const fields = sectionFields[sectionId];
-  if (!fields) return undefined;
+  const section = profile[key];
+  if (!section || typeof section !== "object") return undefined;
 
-  const data: Record<string, unknown> = {};
-  for (const field of fields) {
-    if (profile[field] !== undefined) {
-      data[field] = profile[field];
-    }
-  }
-  return data;
+  return section as Record<string, unknown>;
 }
 
 function ProfileSkeleton() {

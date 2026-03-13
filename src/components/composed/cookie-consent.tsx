@@ -27,7 +27,7 @@ export function CookieConsent() {
   if (showBanner !== true) return null;
 
   return (
-    <div className="bg-background fixed right-0 bottom-0 left-0 z-50 border-t p-4 shadow-lg">
+    <div className="bg-card/95 border-border/50 fixed right-0 bottom-0 left-0 z-50 border-t p-4 shadow-lg backdrop-blur-md">
       <div className="mx-auto flex max-w-4xl flex-col items-center justify-between gap-4 sm:flex-row">
         <p className="text-muted-foreground text-center text-sm sm:text-left">
           We use cookies to keep you signed in and improve your experience. By continuing, you agree

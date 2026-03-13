@@ -12,7 +12,7 @@ export function AthleteCard({ athlete, variant = "compact" }: AthleteCardProps) 
   const initials = `${athlete.firstName[0]}${athlete.lastName[0]}`;
 
   return (
-    <Card>
+    <Card className="hover:border-primary/30 transition-all duration-200">
       <CardHeader className="flex flex-row items-center gap-4">
         <Avatar className="h-12 w-12">
           <AvatarImage src={athlete.avatarUrl ?? undefined} />

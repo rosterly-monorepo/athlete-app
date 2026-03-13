@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { SignInButton, UserButton, useAuth } from "@clerk/nextjs";
+import { SignInButton, SignUpButton, UserButton, useAuth } from "@clerk/nextjs";
 import { Button } from "@/components/ui/button";
 import { useUserRole } from "@/hooks/use-user-role";
 import { ThemeToggle } from "./theme-toggle";
@@ -29,9 +29,16 @@ export function GlobalNav() {
           <div className="h-8 w-20" />
         ) : !isSignedIn ? (
           // Signed out
-          <SignInButton>
-            <Button size="sm">Sign In</Button>
-          </SignInButton>
+          <>
+            <SignInButton>
+              <Button size="sm" variant="ghost">
+                Login
+              </Button>
+            </SignInButton>
+            <SignUpButton>
+              <Button size="sm">Sign Up</Button>
+            </SignUpButton>
+          </>
         ) : (
           // Signed in
           <>

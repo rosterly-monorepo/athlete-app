@@ -1,7 +1,7 @@
 @import "tailwindcss";
 
 /* ── Register shadcn tokens with Tailwind v4 ──
-   Twitter theme from 21st.dev - uses hex colors directly */
+   Rosterly "Pitch + Ember" brand theme */
 @theme inline {
   --color-card: var(--card);
   --color-ring: var(--ring);
@@ -35,92 +35,143 @@
   --color-destructive-foreground: var(--destructive-foreground);
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
   --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  /* Brand tokens */
+  --color-ember: var(--ember);
+  --color-ember-alpha: var(--ember-alpha);
+  --color-verified: var(--verified);
+  /* Radius */
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
   --radius-xl: calc(var(--radius) + 4px);
 }
 
-/* ── Light theme (Twitter) ── */
+/* ── Dark theme (default) ── */
 :root {
-  --card: #f7f8f8;
-  --ring: #1da1f2;
-  --input: #f7f9fa;
-  --muted: #e5e5e6;
-  --accent: #e3ecf6;
-  --border: #e1eaef;
-  --radius: 1.3rem;
-  --chart-1: #1e9df1;
-  --chart-2: #00b87a;
-  --chart-3: #f7b928;
-  --chart-4: #17bf63;
-  --chart-5: #e0245e;
-  --popover: #ffffff;
-  --primary: #1e9df1;
-  --sidebar: #f7f8f8;
+  --card: #161616;
+  --ring: #e8614a;
+  --input: #1c1c1c;
+  --muted: #1a1a1a;
+  --accent: rgba(232, 97, 74, 0.08);
+  --border: #252525;
+  --radius: 0.75rem;
+  --chart-1: #e8614a;
+  --chart-2: #4caf7d;
+  --chart-3: #f5a623;
+  --chart-4: #5dade2;
+  --chart-5: #ef4444;
+  --popover: #161616;
+  --primary: #e8614a;
+  --sidebar: #121212;
   --font-mono: Menlo, monospace;
-  --font-sans: Open Sans, sans-serif;
-  --secondary: #0f1419;
-  --background: #ffffff;
+  --font-sans: Inter, system-ui, -apple-system, sans-serif;
+  --secondary: #1c1c1c;
+  --background: #0e0e0e;
   --font-serif: Georgia, serif;
-  --foreground: #0f1419;
-  --destructive: #f4212e;
+  --foreground: #f2f0ea;
+  --destructive: #ef4444;
+  --ember: #e8614a;
+  --ember-alpha: rgba(232, 97, 74, 0.2);
+  --verified: #4caf7d;
   --shadow-blur: 0px;
-  --shadow-color: rgba(29, 161, 242, 0.15);
-  --sidebar-ring: #1da1f2;
+  --shadow-color: rgba(232, 97, 74, 0.08);
+  --sidebar-ring: #e8614a;
   --shadow-spread: 0px;
   --shadow-opacity: 0;
-  --sidebar-accent: #e3ecf6;
-  --sidebar-border: #e1e8ed;
-  --card-foreground: #0f1419;
+  --sidebar-accent: rgba(232, 97, 74, 0.1);
+  --sidebar-border: #252525;
+  --card-foreground: #f2f0ea;
   --shadow-offset-x: 0px;
   --shadow-offset-y: 2px;
-  --sidebar-primary: #1e9df1;
-  --muted-foreground: #0f1419;
-  --accent-foreground: #1e9df1;
-  --popover-foreground: #0f1419;
+  --sidebar-primary: #e8614a;
+  --muted-foreground: #8a8a8a;
+  --accent-foreground: #e8614a;
+  --popover-foreground: #f2f0ea;
   --primary-foreground: #ffffff;
-  --sidebar-foreground: #0f1419;
-  --secondary-foreground: #ffffff;
+  --sidebar-foreground: #d5d3cd;
+  --secondary-foreground: #f2f0ea;
   --destructive-foreground: #ffffff;
-  --sidebar-accent-foreground: #1e9df1;
+  --sidebar-accent-foreground: #e8614a;
   --sidebar-primary-foreground: #ffffff;
 }
 
-/* ── Dark theme (Twitter) ── */
+/* ── Dark theme (explicit class from next-themes) ── */
 .dark {
-  --card: #17181c;
-  --ring: #1da1f2;
-  --input: #22303c;
-  --muted: #181818;
-  --accent: #061622;
-  --border: #242628;
-  --chart-1: #1e9df1;
-  --chart-2: #00b87a;
-  --chart-3: #f7b928;
-  --chart-4: #17bf63;
-  --chart-5: #e0245e;
-  --popover: #000000;
-  --primary: #1c9cf0;
-  --sidebar: #17181c;
-  --secondary: #f0f3f4;
-  --background: #000000;
-  --foreground: #e7e9ea;
-  --destructive: #f4212e;
-  --shadow-color: rgba(29, 161, 242, 0.25);
-  --sidebar-ring: #1da1f2;
-  --sidebar-accent: #061622;
-  --sidebar-border: #38444d;
-  --card-foreground: #d9d9d9;
-  --sidebar-primary: #1da1f2;
-  --muted-foreground: #72767a;
-  --accent-foreground: #1c9cf0;
-  --popover-foreground: #e7e9ea;
+  --card: #161616;
+  --ring: #e8614a;
+  --input: #1c1c1c;
+  --muted: #1a1a1a;
+  --accent: rgba(232, 97, 74, 0.08);
+  --border: #252525;
+  --chart-1: #e8614a;
+  --chart-2: #4caf7d;
+  --chart-3: #f5a623;
+  --chart-4: #5dade2;
+  --chart-5: #ef4444;
+  --popover: #161616;
+  --primary: #e8614a;
+  --sidebar: #121212;
+  --secondary: #1c1c1c;
+  --background: #0e0e0e;
+  --foreground: #f2f0ea;
+  --destructive: #ef4444;
+  --ember: #e8614a;
+  --ember-alpha: rgba(232, 97, 74, 0.2);
+  --verified: #4caf7d;
+  --shadow-color: rgba(232, 97, 74, 0.12);
+  --sidebar-ring: #e8614a;
+  --sidebar-accent: rgba(232, 97, 74, 0.1);
+  --sidebar-border: #252525;
+  --card-foreground: #f2f0ea;
+  --sidebar-primary: #e8614a;
+  --muted-foreground: #8a8a8a;
+  --accent-foreground: #e8614a;
+  --popover-foreground: #f2f0ea;
   --primary-foreground: #ffffff;
-  --sidebar-foreground: #d9d9d9;
-  --secondary-foreground: #0f1419;
+  --sidebar-foreground: #d5d3cd;
+  --secondary-foreground: #f2f0ea;
   --destructive-foreground: #ffffff;
-  --sidebar-accent-foreground: #1c9cf0;
+  --sidebar-accent-foreground: #e8614a;
+  --sidebar-primary-foreground: #ffffff;
+}
+
+/* ── Light theme ── */
+.light {
+  --card: #ffffff;
+  --ring: #e8614a;
+  --input: #efede8;
+  --muted: #efede8;
+  --accent: rgba(232, 97, 74, 0.06);
+  --border: #d4d0c8;
+  --chart-1: #e8614a;
+  --chart-2: #2e7d52;
+  --chart-3: #d4920a;
+  --chart-4: #2980b9;
+  --chart-5: #dc2626;
+  --popover: #ffffff;
+  --primary: #e8614a;
+  --sidebar: #f0ede8;
+  --secondary: #efede8;
+  --background: #f5f3ee;
+  --foreground: #0e0e0e;
+  --destructive: #dc2626;
+  --ember: #e8614a;
+  --ember-alpha: rgba(232, 97, 74, 0.15);
+  --verified: #2e7d52;
+  --shadow-color: rgba(232, 97, 74, 0.06);
+  --sidebar-ring: #e8614a;
+  --sidebar-accent: rgba(232, 97, 74, 0.08);
+  --sidebar-border: #d4d0c8;
+  --card-foreground: #0e0e0e;
+  --sidebar-primary: #e8614a;
+  --muted-foreground: #6b6b6b;
+  --accent-foreground: #e8614a;
+  --popover-foreground: #0e0e0e;
+  --primary-foreground: #ffffff;
+  --sidebar-foreground: #0e0e0e;
+  --secondary-foreground: #0e0e0e;
+  --destructive-foreground: #ffffff;
+  --sidebar-accent-foreground: #e8614a;
   --sidebar-primary-foreground: #ffffff;
 }
 

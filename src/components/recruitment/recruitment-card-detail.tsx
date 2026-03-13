@@ -37,10 +37,15 @@ import { NoteForm } from "./note-form";
 // ─────────────────────────────────────────────────────────────────────────────
 
 const STAGES: { value: RecruitmentStage; label: string }[] = [
-  { value: "prospect", label: "Prospect" },
-  { value: "actively_recruiting", label: "Actively Recruiting" },
-  { value: "offer", label: "Offer" },
-  { value: "recruited", label: "Recruited" },
+  { value: "interested", label: "Interested" },
+  { value: "initial_outreach", label: "Initial Outreach" },
+  { value: "initial_call", label: "Initial Call" },
+  { value: "monitoring", label: "Monitoring" },
+  { value: "pre_read", label: "Pre-Read" },
+  { value: "offer_extended", label: "Offer Extended" },
+  { value: "committed", label: "Committed" },
+  { value: "likely_letter", label: "Likely Letter" },
+  { value: "admitted", label: "Admitted" },
 ];
 
 const PRIORITIES: { value: Priority; label: string }[] = [

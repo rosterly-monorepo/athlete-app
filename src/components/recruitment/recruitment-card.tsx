@@ -6,12 +6,19 @@ import { CSS } from "@dnd-kit/utilities";
 import { cva, type VariantProps } from "class-variance-authority";
 import { Card } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Badge } from "@/components/ui/badge";
-import { MessageSquare } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { RecruitmentRecordWithAthlete } from "@/services/types";
 import { PriorityBadge } from "./priority-badge";
-import { RatingStars } from "./rating-stars";
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Helpers
+// ─────────────────────────────────────────────────────────────────────────────
+
+function formatShortDate(dateString: string | null): string | null {
+  if (!dateString) return null;
+  const date = new Date(dateString);
+  return date.toLocaleDateString("en-US", { month: "short", day: "numeric" });
+}
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Variants
@@ -20,7 +27,7 @@ import { RatingStars } from "./rating-stars";
 const recruitmentCardVariants = cva("cursor-pointer transition-all duration-200", {
   variants: {
     variant: {
-      default: "hover:shadow-md",
+      default: "hover:border-ember/30",
       dragging: "opacity-50",
       overlay: "rotate-3 shadow-lg",
     },
@@ -46,9 +53,8 @@ export interface RecruitmentCardProps
     VariantProps<typeof recruitmentCardVariants> {
   record: RecruitmentRecordWithAthlete;
   onClick?: (record: RecruitmentRecordWithAthlete) => void;
-  showNotes?: boolean;
-  showPosition?: boolean;
-  showRating?: boolean;
+  showGpa?: boolean;
+  showDate?: boolean;
   showPriority?: boolean;
 }
 
@@ -67,9 +73,8 @@ const RecruitmentCard = React.forwardRef<HTMLDivElement, RecruitmentCardProps>(
       variant,
       size,
       onClick,
-      showNotes = true,
-      showPosition = true,
-      showRating = true,
+      showGpa = true,
+      showDate = true,
       showPriority = true,
       className,
       ...props
@@ -77,6 +82,7 @@ const RecruitmentCard = React.forwardRef<HTMLDivElement, RecruitmentCardProps>(
     ref
   ) => {
     const initials = `${record.athlete_first_name[0]}${record.athlete_last_name[0]}`;
+    const shortDate = showDate ? formatShortDate(record.stage_changed_at) : null;
 
     return (
       <Card
@@ -86,9 +92,11 @@ const RecruitmentCard = React.forwardRef<HTMLDivElement, RecruitmentCardProps>(
         {...props}
       >
         <div className="flex items-start gap-3">
-          <Avatar className="h-10 w-10 flex-shrink-0">
+          <Avatar className="h-8 w-8 flex-shrink-0">
             <AvatarImage src={record.athlete_avatar_url ?? undefined} />
-            <AvatarFallback>{initials}</AvatarFallback>
+            <AvatarFallback className="bg-ember text-xs font-semibold text-white">
+              {initials}
+            </AvatarFallback>
           </Avatar>
 
           <div className="min-w-0 flex-1">
@@ -100,29 +108,20 @@ const RecruitmentCard = React.forwardRef<HTMLDivElement, RecruitmentCardProps>(
               {showPriority && <PriorityBadge priority={record.priority} size="sm" />}
             </div>
 
-            {/* School & Year */}
+            {/* Position & Year */}
             <p className="text-muted-foreground truncate text-xs">
-              {record.athlete_school} &middot; {record.athlete_graduation_year}
+              {[record.position, record.athlete_graduation_year].filter(Boolean).join(" · ")}
             </p>
 
-            {/* Position & Rating */}
-            <div className="mt-1 flex items-center justify-between">
-              {showPosition && record.position ? (
-                <Badge variant="outline" className="text-xs">
-                  {record.position}
-                </Badge>
-              ) : (
-                <span />
-              )}
-              {showRating && <RatingStars rating={record.rating} size="sm" readOnly />}
-            </div>
-
-            {/* Notes Preview */}
-            {showNotes && record.note_count > 0 && (
-              <div className="text-muted-foreground mt-2 flex items-center gap-1 text-xs">
-                <MessageSquare className="h-3 w-3 flex-shrink-0" />
-                <span>{record.note_count}</span>
-                {record.latest_note && <span className="truncate">· {record.latest_note}</span>}
+            {/* GPA & Date */}
+            {(showGpa || showDate) && (
+              <div className="mt-1 flex items-center justify-between">
+                {showGpa && record.athlete_gpa != null ? (
+                  <span className="text-ember text-xs font-medium">{record.athlete_gpa} GPA</span>
+                ) : (
+                  <span />
+                )}
+                {shortDate && <span className="text-muted-foreground text-xs">{shortDate}</span>}
               </div>
             )}
           </div>

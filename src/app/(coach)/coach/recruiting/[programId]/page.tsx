@@ -1,12 +1,13 @@
 "use client";
 
-import { use } from "react";
+import { use, useState } from "react";
 import { useMyPrograms } from "@/hooks/use-programs";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Plus, ArrowLeft } from "lucide-react";
 import Link from "next/link";
 import { RecruitmentBoard, AddAthleteDialog, ProgramSelector } from "@/components/recruitment";
+import type { RecruitmentStage } from "@/services/types";
 
 interface Props {
   params: Promise<{ programId: string }>;
@@ -16,6 +17,7 @@ export default function RecruitingBoardPage({ params }: Props) {
   const { programId } = use(params);
   const numericProgramId = parseInt(programId, 10);
   const { data: programs, isLoading: programsLoading } = useMyPrograms();
+  const [addToStage, setAddToStage] = useState<RecruitmentStage | null>(null);
 
   const hasMultiplePrograms = (programs?.length ?? 0) > 1;
 
@@ -56,7 +58,17 @@ export default function RecruitingBoardPage({ params }: Props) {
       </div>
 
       {/* Board */}
-      <RecruitmentBoard programId={numericProgramId} />
+      <RecruitmentBoard programId={numericProgramId} onAddToStage={setAddToStage} />
+
+      {/* Controlled dialog for per-column "+ Add" buttons */}
+      <AddAthleteDialog
+        programId={numericProgramId}
+        defaultStage={addToStage ?? "interested"}
+        open={addToStage !== null}
+        onOpenChange={(open) => {
+          if (!open) setAddToStage(null);
+        }}
+      />
     </div>
   );
 }

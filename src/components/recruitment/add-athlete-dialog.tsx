@@ -19,12 +19,14 @@ import { AthleteSearch } from "./athlete-search";
 
 export interface AddAthleteDialogProps {
   programId: number;
-  children: React.ReactNode;
+  children?: React.ReactNode;
   defaultStage?: RecruitmentStage;
   defaultPriority?: Priority;
   onAthleteAdded?: (athlete: Athlete) => void;
   title?: string;
   description?: string;
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -34,13 +36,21 @@ export interface AddAthleteDialogProps {
 function AddAthleteDialog({
   programId,
   children,
-  defaultStage = "prospect",
+  defaultStage = "interested",
   defaultPriority,
   onAthleteAdded,
   title = "Add Athlete to Board",
   description = "Search for an athlete to add to your recruitment board.",
+  open: controlledOpen,
+  onOpenChange: controlledOnOpenChange,
 }: AddAthleteDialogProps) {
-  const [open, setOpen] = React.useState(false);
+  const [internalOpen, setInternalOpen] = React.useState(false);
+  const isControlled = controlledOpen !== undefined;
+  const open = isControlled ? controlledOpen : internalOpen;
+  const setOpen = React.useMemo(
+    () => (isControlled ? (controlledOnOpenChange ?? (() => {})) : setInternalOpen),
+    [isControlled, controlledOnOpenChange]
+  );
   const addRecord = useAddRecord(programId);
 
   const handleSelect = React.useCallback(
@@ -61,12 +71,12 @@ function AddAthleteDialog({
         }
       );
     },
-    [addRecord, defaultStage, defaultPriority, onAthleteAdded]
+    [addRecord, defaultStage, defaultPriority, onAthleteAdded, setOpen]
   );
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>{children}</DialogTrigger>
+      {children && <DialogTrigger asChild>{children}</DialogTrigger>}
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle>{title}</DialogTitle>

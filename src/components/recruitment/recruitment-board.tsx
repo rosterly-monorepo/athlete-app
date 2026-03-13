@@ -22,6 +22,7 @@ import type {
   RecruitmentBoard as BoardData,
   RecruitmentBoardColumn,
   RecruitmentRecordWithAthlete,
+  RecruitmentStage,
 } from "@/services/types";
 import { RecruitmentColumn } from "./recruitment-column";
 import { RecruitmentCard } from "./recruitment-card";
@@ -73,6 +74,7 @@ export interface RecruitmentBoardProps
   ) => React.ReactNode;
   renderDragOverlay?: (record: RecruitmentRecordWithAthlete) => React.ReactNode;
   columnWidth?: "sm" | "default" | "lg";
+  onAddToStage?: (stage: RecruitmentStage) => void;
 }
 
 export interface RecruitmentBoardContentProps
@@ -92,6 +94,7 @@ export interface RecruitmentBoardContentProps
   renderColumn?: RecruitmentBoardProps["renderColumn"];
   renderDragOverlay?: RecruitmentBoardProps["renderDragOverlay"];
   columnWidth?: RecruitmentBoardProps["columnWidth"];
+  onAddToStage?: (stage: RecruitmentStage) => void;
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -116,6 +119,7 @@ const RecruitmentBoardContent = React.forwardRef<HTMLDivElement, RecruitmentBoar
       renderColumn,
       renderDragOverlay,
       columnWidth = "default",
+      onAddToStage,
       className,
       ...props
     },
@@ -151,6 +155,7 @@ const RecruitmentBoardContent = React.forwardRef<HTMLDivElement, RecruitmentBoar
                 column={column}
                 width={columnWidth}
                 onOpenDetail={onRecordSelect}
+                onAddClick={onAddToStage}
               />
             )
           )}
@@ -187,6 +192,7 @@ const RecruitmentBoard = React.forwardRef<HTMLDivElement, RecruitmentBoardProps>
       renderColumn,
       renderDragOverlay,
       columnWidth,
+      onAddToStage,
       className,
       ...props
     },
@@ -243,6 +249,7 @@ const RecruitmentBoard = React.forwardRef<HTMLDivElement, RecruitmentBoardProps>
         renderColumn={renderColumn}
         renderDragOverlay={renderDragOverlay}
         columnWidth={columnWidth}
+        onAddToStage={onAddToStage}
         className={className}
         {...props}
       />

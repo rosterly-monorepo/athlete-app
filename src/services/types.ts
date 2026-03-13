@@ -14,11 +14,121 @@ export interface Athlete {
   isPublic: boolean;
 }
 
+export interface PersonalInfo {
+  id: number;
+  firstName: string;
+  middleName: string | null;
+  lastName: string;
+  preferredName: string | null;
+  dateOfBirth: string | null;
+  heightFeet: number | null;
+  heightInches: number | null;
+  weightLbs: number | null;
+}
+
+export interface Address {
+  id: number;
+  streetLine1: string | null;
+  streetLine2: string | null;
+  city: string | null;
+  stateProvince: string | null;
+  postalCode: string | null;
+  country: string;
+  isVerified: boolean;
+}
+
+export interface ContactDetails {
+  id: number;
+  phonePrimary: string | null;
+  phoneSecondary: string | null;
+  emailPrimary: string | null;
+  emailSecondary: string | null;
+  socialTwitter: string | null;
+  socialInstagram: string | null;
+  socialLinkedin: string | null;
+  socialTiktok: string | null;
+}
+
+export interface Demographics {
+  id: number;
+  gender: string | null;
+  legalSex: string | null;
+  pronouns: string | null;
+  isMilitaryConnected: boolean | null;
+  militaryStatus: string | null;
+  militaryBranch: string | null;
+  ethnicity: string[] | null;
+}
+
+export interface Education {
+  id: number;
+  highSchoolName: string | null;
+  highSchoolCity: string | null;
+  highSchoolState: string | null;
+  highSchoolCeeb: string | null;
+  graduationYear: number | null;
+  gpaUnweighted: number | null;
+  gpaWeighted: number | null;
+  gpaScale: number;
+  classRank: number | null;
+  classSize: number | null;
+  ncaaCoreGpa: number | null;
+  transcriptUrl: string | null;
+  transcriptUploadedAt: string | null;
+}
+
+export interface Testing {
+  id: number;
+  satTotal: number | null;
+  satReadingWriting: number | null;
+  satMath: number | null;
+  satDate: string | null;
+  actComposite: number | null;
+  actEnglish: number | null;
+  actMath: number | null;
+  actReading: number | null;
+  actScience: number | null;
+  actWriting: number | null;
+  actDate: string | null;
+  apScores: Record<string, unknown>[] | null;
+  isTestOptional: boolean;
+}
+
+export interface FamilyInfo {
+  id: number;
+  isFirstGenCollege: boolean | null;
+  parent1Education: string | null;
+  parent2Education: string | null;
+  needsFinancialAid: boolean | null;
+  estimatedFamilyContribution: string | null;
+  siblingCount: number | null;
+  siblingsInCollege: number | null;
+  legacySchools: string[] | null;
+}
+
+export interface Writing {
+  id: number;
+  personalStatement: string | null;
+  personalStatementWordCount: number | null;
+  personalStatementUpdatedAt: string | null;
+  essays: Record<string, unknown>[] | null;
+  athleticStatement: string | null;
+  athleticStatementWordCount: number | null;
+}
+
 export interface AthleteProfile extends Athlete {
   heightFeet: number;
   heightInches: number;
   weight: number;
   email: string;
+  personalInfo: PersonalInfo | null;
+  address: Address | null;
+  contactDetails: ContactDetails | null;
+  demographics: Demographics | null;
+  education: Education | null;
+  testing: Testing | null;
+  familyInfo: FamilyInfo | null;
+  writing: Writing | null;
 }
 
 export interface UpdateProfileInput {
@@ -77,13 +187,31 @@ export interface OrganizationProgram {
   recruiting_email: string | null;
   is_active: boolean;
   recruiting_status: "active" | "paused" | "closed" | null;
+  // Recruiting requirements
+  minimum_gpa: number | null;
+  minimum_sat: number | null;
+  minimum_act: number | null;
+  minimum_height_inches: number | null;
+  graduation_years_of_interest: number[] | null;
+  geographic_preferences: string[] | null;
+  citizenship_requirements: string | null;
+  roster_spots: number | null;
   created_at: string;
   updated_at: string;
 }
 
 // ── Recruitment ──
 
-export type RecruitmentStage = "prospect" | "actively_recruiting" | "offer" | "recruited";
+export type RecruitmentStage =
+  | "interested"
+  | "initial_outreach"
+  | "initial_call"
+  | "monitoring"
+  | "pre_read"
+  | "offer_extended"
+  | "committed"
+  | "likely_letter"
+  | "admitted";
 
 export type NoteType = "general" | "call" | "email" | "visit" | "evaluation";
 

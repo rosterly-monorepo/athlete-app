@@ -54,6 +54,17 @@ export function DynamicForm({
     }
   }, [initialData, methods, schema]);
 
+  const handleSubmit = (data: Record<string, unknown>) => {
+    const dirty = methods.formState.dirtyFields;
+    const filtered: Record<string, unknown> = {};
+    for (const key of Object.keys(data)) {
+      if ((dirty as Record<string, unknown>)[key]) {
+        filtered[key] = data[key];
+      }
+    }
+    onSubmit(filtered);
+  };
+
   const groups = schema["x-ui-groups"];
   const useGroupedLayout = hasGroups(schema);
 
@@ -61,7 +72,7 @@ export function DynamicForm({
     // Render grouped layout
     return (
       <FormProvider {...methods}>
-        <form onSubmit={methods.handleSubmit(onSubmit)} className="space-y-6">
+        <form onSubmit={methods.handleSubmit(handleSubmit)} className="space-y-6">
           {showTitle && schema.title && (
             <div className="mb-4">
               <h2 className="text-lg font-semibold">{schema.title}</h2>
@@ -116,7 +127,7 @@ export function DynamicForm({
 
   return (
     <FormProvider {...methods}>
-      <form onSubmit={methods.handleSubmit(onSubmit)} className="space-y-4">
+      <form onSubmit={methods.handleSubmit(handleSubmit)} className="space-y-4">
         {showTitle && schema.title && (
           <div className="mb-4">
             <h2 className="text-lg font-semibold">{schema.title}</h2>

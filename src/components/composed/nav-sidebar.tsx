@@ -27,8 +27,11 @@ function NavContent({ onNavigate }: { onNavigate?: () => void }) {
         return (
           <Button
             key={item.href}
-            variant={isActive ? "secondary" : "ghost"}
-            className={cn("justify-start gap-3", !isActive && "text-muted-foreground")}
+            variant="ghost"
+            className={cn(
+              "justify-start gap-3",
+              isActive ? "bg-primary/10 text-primary font-medium" : "text-muted-foreground"
+            )}
             asChild
             onClick={onNavigate}
           >
@@ -68,7 +71,7 @@ export function NavSidebar() {
       </div>
 
       {/* Desktop sidebar */}
-      <aside className="border-border bg-card hidden w-64 border-r p-4 md:block">
+      <aside className="border-border/50 bg-card/50 hidden w-64 border-r p-4 md:block">
         <NavContent />
       </aside>
     </>

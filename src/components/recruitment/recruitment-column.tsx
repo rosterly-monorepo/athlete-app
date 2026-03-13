@@ -19,18 +19,18 @@ import { SortableRecruitmentCard } from "./recruitment-card";
 // ─────────────────────────────────────────────────────────────────────────────
 
 const STAGE_LABELS: Record<RecruitmentStage, string> = {
-  prospect: "Prospects",
-  actively_recruiting: "Actively Recruiting",
-  offer: "Offer Extended",
-  recruited: "Recruited",
+  interested: "Interested",
+  initial_outreach: "Outreach",
+  initial_call: "Initial Call",
+  monitoring: "Monitoring",
+  pre_read: "Pre-Read",
+  offer_extended: "Offer",
+  committed: "Committed",
+  likely_letter: "Likely Letter",
+  admitted: "Admitted",
 };
 
-const STAGE_COLORS: Record<RecruitmentStage, string> = {
-  prospect: "bg-slate-50 dark:bg-slate-900/50",
-  actively_recruiting: "bg-blue-50 dark:bg-blue-950/50",
-  offer: "bg-amber-50 dark:bg-amber-950/50",
-  recruited: "bg-green-50 dark:bg-green-950/50",
-};
+const EMBER_HEADER_STAGES: Set<RecruitmentStage> = new Set(["pre_read"]);
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Variants
@@ -49,7 +49,7 @@ const columnVariants = cva("flex flex-col transition-all duration-200", {
     },
   },
   defaultVariants: {
-    width: "default",
+    width: "sm",
     state: "default",
   },
 });
@@ -64,6 +64,7 @@ export interface RecruitmentColumnProps
     VariantProps<typeof columnVariants> {
   column: ColumnData;
   onOpenDetail?: (record: RecruitmentRecordWithAthlete) => void;
+  onAddClick?: (stage: RecruitmentStage) => void;
   showCount?: boolean;
   emptyMessage?: string;
   renderHeader?: (column: ColumnData) => React.ReactNode;
@@ -84,6 +85,7 @@ const RecruitmentColumn = React.forwardRef<HTMLDivElement, RecruitmentColumnProp
       column,
       width,
       onOpenDetail,
+      onAddClick,
       showCount = true,
       emptyMessage = "No athletes",
       renderHeader,
@@ -111,15 +113,14 @@ const RecruitmentColumn = React.forwardRef<HTMLDivElement, RecruitmentColumnProp
       [ref, setNodeRef]
     );
 
-    const stageColor = STAGE_COLORS[column.stage] ?? "";
     const stageLabel = STAGE_LABELS[column.stage] ?? column.stage_label;
+    const isEmberHeader = EMBER_HEADER_STAGES.has(column.stage);
 
     return (
       <Card
         ref={combinedRef}
         className={cn(
           columnVariants({ width, state: isOver ? "over" : "default" }),
-          stageColor,
           "flex-shrink-0",
           className
         )}
@@ -131,7 +132,14 @@ const RecruitmentColumn = React.forwardRef<HTMLDivElement, RecruitmentColumnProp
             renderHeader(column)
           ) : (
             <div className="flex items-center justify-between">
-              <CardTitle className="text-sm font-medium">{stageLabel}</CardTitle>
+              <CardTitle
+                className={cn(
+                  "text-xs font-semibold tracking-widest uppercase",
+                  isEmberHeader && "text-ember"
+                )}
+              >
+                {stageLabel}
+              </CardTitle>
               {showCount && <Badge variant="secondary">{column.count}</Badge>}
             </div>
           )}
@@ -161,11 +169,23 @@ const RecruitmentColumn = React.forwardRef<HTMLDivElement, RecruitmentColumnProp
         </CardContent>
 
         {/* Footer */}
-        {renderFooter && <div className="border-t p-3">{renderFooter(column)}</div>}
+        {renderFooter ? (
+          <div className="border-t p-3">{renderFooter(column)}</div>
+        ) : onAddClick ? (
+          <div className="p-3 pt-0">
+            <button
+              type="button"
+              onClick={() => onAddClick(column.stage)}
+              className="border-border/50 text-muted-foreground hover:border-ember hover:text-ember w-full rounded-lg border border-dashed py-2 text-xs transition-colors"
+            >
+              + Add
+            </button>
+          </div>
+        ) : null}
       </Card>
     );
   }
 );
 RecruitmentColumn.displayName = "RecruitmentColumn";
 
-export { RecruitmentColumn, columnVariants, STAGE_LABELS, STAGE_COLORS };
+export { RecruitmentColumn, columnVariants, STAGE_LABELS };
