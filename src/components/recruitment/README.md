@@ -83,25 +83,14 @@ Override default colors using Tailwind classes:
 />
 ```
 
-### 6. Stage Colors (Column Backgrounds)
+### 6. Column Styling
 
-Modify `STAGE_COLORS` in `recruitment-column.tsx`:
-
-```tsx
-const STAGE_COLORS: Record<RecruitmentStage, string> = {
-  prospect: "bg-slate-50 dark:bg-slate-900/50",
-  actively_recruiting: "bg-blue-50 dark:bg-blue-950/50",
-  offer: "bg-amber-50 dark:bg-amber-950/50",
-  recruited: "bg-green-50 dark:bg-green-950/50",
-};
-```
-
-Or override per-column with `className`:
+The Pre-Read column header uses the `text-ember` accent color via `EMBER_HEADER_STAGES` in `recruitment-column.tsx`. Override per-column with `className`:
 
 ```tsx
 <RecruitmentColumn
   column={column}
-  className={column.stage === "recruited" ? "bg-emerald-100" : ""}
+  className={column.stage === "admitted" ? "bg-emerald-100" : ""}
 />
 ```
 
@@ -333,9 +322,8 @@ interface MyExtendedCardProps extends RecruitmentCardProps {
 
 ```tsx
 import {
-  // Stage labels for display
-  STAGE_LABELS, // { prospect: "Prospects", ... }
-  STAGE_COLORS, // { prospect: "bg-slate-50 ...", ... }
+  // Stage labels for display (9-stage NCAA pipeline)
+  STAGE_LABELS, // { interested: "Interested", initial_outreach: "Outreach", ... }
 
   // Priority labels
   PRIORITY_LABELS, // { high: "High", medium: "Medium", low: "Low" }
@@ -345,8 +333,8 @@ import {
   NOTE_TYPE_ICONS, // { general: MessageSquare, call: Phone, ... }
   NOTE_TYPE_COLORS, // { general: "bg-slate-100 ...", ... }
 
-  // Selectors config
-  STAGES, // [{ value: "prospect", label: "Prospect" }, ...]
+  // Selectors config (9 stages)
+  STAGES, // [{ value: "interested", label: "Interested" }, ... through "admitted"]
   PRIORITIES, // [{ value: "high", label: "High" }, ...]
 
   // Utilities

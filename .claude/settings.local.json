@@ -32,7 +32,8 @@
       "Bash(cd /Users/adam/code/rosterly/athlete-api && uv run ruff check --fix app/sports/rowing/router.py app/sports/rowing/service.py 2>&1)",
       "Bash(cd /Users/adam/code/rosterly/athlete-api && uv run ruff check app/ 2>&1)",
       "Read(//Users/adam/code/rosterly/athlete-api/**)",
-      "Bash(uv run:*)"
+      "Bash(uv run:*)",
+      "Bash(git branch:*)"
     ]
   }
 }

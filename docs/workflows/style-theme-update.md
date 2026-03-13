@@ -1,10 +1,40 @@
 # Rosterly — Style & Theme Update Guide
 
-How to apply a new visual theme to the Rosterly frontend. This covers taking a theme from 21st.dev, shadcn's theme generator, or any other shadcn-compatible source, and applying it across the app — including dark mode and Clerk auth components.
+How to apply a new visual theme to the Rosterly frontend. This covers taking a theme from a brand kit, shadcn generator, or any other source, and applying it across the app — including dark mode, Clerk auth components, and custom brand tokens.
+
+## Current Theme: Pitch + Ember
+
+The app uses the **Rosterly Brand Kit** — a warm, dark-first palette centered on Ember (`#E8614A`) as the single accent color. The design avoids cool grays in favor of warm neutrals throughout.
+
+### Dark Mode Palette (default)
+
+| Name      | Hex / Value               | Token           | Usage                          |
+| --------- | ------------------------- | --------------- | ------------------------------ |
+| Pitch     | `#0E0E0E`                 | `--background`  | Page background                |
+| Carbon    | `#161616`                 | `--card`        | Cards, popovers, sidebar       |
+| Ash       | `#252525`                 | `--border`      | Borders, dividers              |
+| Chalk     | `#F2F0EA`                 | `--foreground`  | Body text (warm off-white)     |
+| Ember     | `#E8614A`                 | `--primary`     | Buttons, links, focus rings    |
+| Ember 20% | `rgba(232, 97, 74, 0.20)` | `--ember-alpha` | Subtle highlights, hover tints |
+| Verified  | `#4CAF7D`                 | `--verified`    | Verified badges, success       |
+
+### Light Mode Palette
+
+| Name      | Hex / Value               | Token           | Usage                        |
+| --------- | ------------------------- | --------------- | ---------------------------- |
+| Linen     | `#F5F3EE`                 | `--background`  | Page background (warm cream) |
+| White     | `#FFFFFF`                 | `--card`        | Cards, popovers              |
+| Stone     | `#D4D0C8`                 | `--border`      | Borders (warm gray)          |
+| Pitch     | `#0E0E0E`                 | `--foreground`  | Body text                    |
+| Ember     | `#E8614A`                 | `--primary`     | Same accent in both modes    |
+| Ember 15% | `rgba(232, 97, 74, 0.15)` | `--ember-alpha` | Subtle highlights            |
+| Verified  | `#2E7D52`                 | `--verified`    | Darker green for light bg    |
+
+---
 
 ## How the Design System Works
 
-The entire visual identity of the app flows from one file: `src/app/globals.css`. Every color used by every component — buttons, cards, sidebars, inputs, badges — comes from CSS variables defined in that file. Change the variables, and the whole app updates. You never need to touch individual components.
+The entire visual identity flows from one file: `src/app/globals.css`. Every color used by every component — buttons, cards, sidebars, inputs, badges — comes from CSS variables defined in that file. Change the variables, and the whole app updates.
 
 The chain is:
 
@@ -16,182 +46,124 @@ globals.css (CSS variables)
   → Dark mode handled by .dark class (next-themes)
 ```
 
+### Three blocks in `globals.css`
+
+| Block    | Purpose                                             |
+| -------- | --------------------------------------------------- |
+| `:root`  | Dark theme (default — dark-first design)            |
+| `.dark`  | Dark theme (explicit class toggle from next-themes) |
+| `.light` | Light theme                                         |
+
+Both `:root` and `.dark` should have identical values. The `:root` block ensures dark mode works before JavaScript hydrates the page.
+
 ---
 
-## Applying a Theme (5 Minutes)
+## Applying a New Theme
 
 ### Step 1: Get a Theme
 
-Pick a theme from any of these sources:
+Pick a theme from any of these sources, or design one from a brand kit:
 
-| Source           | What you get                          | URL                                                   |
-| ---------------- | ------------------------------------- | ----------------------------------------------------- |
-| 21st.dev         | Full component themes + CSS variables | https://21st.dev                                      |
-| shadcn Themes    | Official base color themes            | https://ui.shadcn.com/themes                          |
-| shadcndesign     | Generator with live preview           | https://shadcndesign.com/theme-generator              |
-| gradient.page    | Generate from a single brand color    | https://gradient.page/tools/shadcn-ui-theme-generator |
-| shadcn.rlabs.art | OKLCH generator with sacred geometry  | https://shadcn.rlabs.art                              |
-
-Every source outputs the same thing: a block of CSS variables for `:root` (light) and `.dark` (dark mode).
+| Source        | What you get                          |
+| ------------- | ------------------------------------- |
+| Brand kit PDF | Color swatches → manual mapping       |
+| 21st.dev      | Full component themes + CSS variables |
+| shadcn Themes | Official base color themes            |
+| shadcndesign  | Generator with live preview           |
+| gradient.page | Generate from a single brand color    |
 
 ### Step 2: Replace the Variables in `globals.css`
 
-Open `src/app/globals.css`. You'll see two blocks — `:root` and `.dark`. Replace them with the theme you copied.
+Open `src/app/globals.css`. Replace the values in `:root`, `.dark`, and `.light` blocks.
 
-**Before (current HSL theme):**
-
-```css
-:root {
-  --background: 0 0% 100%;
-  --foreground: 222.2 84% 4.9%;
-  --primary: 221.2 83.2% 53.3%;
-  /* ... */
-}
-
-.dark {
-  --background: 222.2 84% 4.9%;
-  --foreground: 210 40% 98%;
-  --primary: 217.2 91.2% 59.8%;
-  /* ... */
-}
-```
-
-**After (example: pasting a new theme):**
+**Current format — hex and rgba values (no wrapping):**
 
 ```css
 :root {
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.145 0 0);
-  --primary: oklch(0.45 0.2 260);
-  /* ... rest of the theme */
-}
-
-.dark {
-  --background: oklch(0.145 0 0);
-  --foreground: oklch(0.985 0 0);
-  --primary: oklch(0.65 0.2 260);
+  --background: #0e0e0e;
+  --foreground: #f2f0ea;
+  --primary: #e8614a;
+  --accent: rgba(232, 97, 74, 0.08);
   /* ... */
 }
 ```
 
-That's it. Save the file. Every component in the app updates instantly.
-
-### Step 3: Update the `@theme inline` Block (If Switching to OKLCH)
-
-Our current `@theme inline` block wraps values in `hsl()`. If your new theme uses OKLCH (which most modern generators do), you need to update the wrapper to use raw `var()` references instead:
-
-**Current (HSL wrapping):**
-
-```css
-@theme inline {
-  --color-background: hsl(var(--background));
-  --color-foreground: hsl(var(--foreground));
-  --color-primary: hsl(var(--primary));
-  /* ... */
-}
-```
-
-**Updated (works with both OKLCH and HSL):**
+The `@theme inline` block uses raw `var()` references, so any color format works (hex, rgba, oklch):
 
 ```css
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-primary: var(--primary);
-  --color-primary-foreground: var(--primary-foreground);
-  --color-secondary: var(--secondary);
-  --color-secondary-foreground: var(--secondary-foreground);
-  --color-muted: var(--muted);
-  --color-muted-foreground: var(--muted-foreground);
-  --color-accent: var(--accent);
-  --color-accent-foreground: var(--accent-foreground);
-  --color-destructive: var(--destructive);
-  --color-destructive-foreground: var(--destructive-foreground);
-  --color-card: var(--card);
-  --color-card-foreground: var(--card-foreground);
-  --color-popover: var(--popover);
-  --color-popover-foreground: var(--popover-foreground);
-  --color-border: var(--border);
-  --color-input: var(--input);
-  --color-ring: var(--ring);
-  --radius-sm: calc(var(--radius) - 4px);
-  --radius-md: calc(var(--radius) - 2px);
-  --radius-lg: var(--radius);
-  --radius-xl: calc(var(--radius) + 4px);
+  /* ... */
 }
 ```
 
-The key change: remove the `hsl()` wrapper. When the CSS variables already contain the full color value (like `oklch(0.45 0.2 260)`), wrapping them in `hsl()` breaks things. Using raw `var()` references works regardless of the color format.
+### Step 3: Update Custom Brand Tokens
 
-### Step 4: Update the `body` Base Styles
-
-Same idea — remove `hsl()` if switching to OKLCH:
+Beyond the standard shadcn tokens, we register three custom brand tokens:
 
 ```css
-/* Before */
-body {
-  color: hsl(var(--foreground));
-  background: hsl(var(--background));
-}
+/* In :root / .dark / .light */
+--ember: #e8614a;
+--ember-alpha: rgba(232, 97, 74, 0.2);
+--verified: #4caf7d;
 
-* {
-  border-color: hsl(var(--border));
-}
-
-/* After (works with any color format) */
-body {
-  color: var(--foreground);
-  background: var(--background);
-}
-
-* {
-  border-color: var(--border);
-}
+/* In @theme inline */
+--color-ember: var(--ember);
+--color-ember-alpha: var(--ember-alpha);
+--color-verified: var(--verified);
 ```
 
----
+These enable Tailwind classes like `text-ember`, `bg-ember-alpha`, `text-verified`, `border-ember/50`, etc. Use them for brand-specific styling that goes beyond the standard shadcn palette (e.g., recruitment card stats, priority badges, verified indicators).
 
-## What About the Components?
+When adding new brand tokens, always add them to all three places:
 
-You don't need to change them. All shadcn components use Tailwind utilities like `bg-primary`, `text-muted-foreground`, `border-border`. These resolve to your CSS variables through the `@theme inline` block. New theme → new colors → all components update.
+1. `:root` block (dark default)
+2. `.dark` block (explicit dark)
+3. `.light` block (with an appropriate light-mode variant)
+4. `@theme inline` block (register with Tailwind)
 
-If a theme source also gives you updated component code (like 21st.dev sometimes does), you can replace individual files in `src/components/ui/`. But this is optional — the CSS variables alone handle the color change.
+### Step 4: Update Clerk Appearance
 
----
-
-## Clerk Auth Components (Sign-in, Sign-up, UserButton)
-
-Clerk's UI components have their own internal styling. Our `AuthProvider` already syncs the Clerk theme with the app's dark/light mode:
-
-```tsx
-// src/components/providers/auth-provider.tsx
-<ClerkProvider
-  appearance={{
-    baseTheme: resolvedTheme === "dark" ? dark : undefined,
-  }}
-/>
-```
-
-This handles light/dark switching automatically. But if you want Clerk's components to match your brand colors more closely, you can add Clerk appearance overrides:
+The `AuthProvider` at `src/components/providers/auth-provider.tsx` syncs Clerk components with the brand:
 
 ```tsx
 <ClerkProvider
   appearance={{
     baseTheme: resolvedTheme === "dark" ? dark : undefined,
     variables: {
-      colorPrimary: "oklch(0.45 0.2 260)", // Match your --primary
-      borderRadius: "0.5rem", // Match your --radius
-    },
-    elements: {
-      // Override specific elements if needed
-      formButtonPrimary: "bg-primary text-primary-foreground hover:bg-primary/90",
-      card: "shadow-none border border-border",
+      colorPrimary: "#E8614A", // Match your --primary
     },
   }}
 />
 ```
 
-The `variables` approach is preferred for basic brand matching. The `elements` approach gives you full Tailwind class control over individual Clerk components.
+Update `colorPrimary` whenever `--primary` changes. Additional Clerk overrides are available:
+
+```tsx
+variables: {
+  colorPrimary: "#E8614A",
+  borderRadius: "0.75rem",         // Match --radius
+  colorBackground: "#161616",       // Match --card (for dark)
+}
+```
+
+The `elements` key gives full Tailwind class control over individual Clerk components if needed.
+
+---
+
+## What About the Components?
+
+You generally don't need to change them. All shadcn components use Tailwind utilities like `bg-primary`, `text-muted-foreground`, `border-border`. These resolve to your CSS variables through the `@theme inline` block. New theme → new colors → all components update.
+
+**Exception**: Components that use hardcoded color classes (e.g., `text-red-400`, `bg-blue-950/30`) won't update automatically. These need manual changes. Examples in our codebase:
+
+- `recruitment/priority-badge.tsx` — uses `text-ember`, `text-verified` (brand tokens)
+- `recruitment/recruitment-card.tsx` — uses `bg-ember` for avatar fallbacks, `text-ember` for stats
+- `recruitment/rating-stars.tsx` — uses `fill-yellow-400` (intentionally universal, not brand-colored)
+
+When writing new components, prefer `bg-primary` / `text-primary` over hardcoding `bg-ember` unless the color should stay fixed regardless of theme changes.
 
 ---
 
@@ -221,92 +193,50 @@ Every variable, what it controls, and where it shows up:
 | `--input`                  | Input field borders                  | `border-input`                      |
 | `--ring`                   | Focus rings                          | `ring-ring`                         |
 | `--radius`                 | Border radius base                   | Computed into `rounded-sm/md/lg/xl` |
-
----
-
-## Adding Brand Colors Beyond the Base Theme
-
-If you need additional colors (e.g., a `--success` or `--warning`), add them to all three places:
-
-```css
-/* 1. Define the variable */
-:root {
-  --success: oklch(0.72 0.19 149);
-  --success-foreground: oklch(0.98 0.01 149);
-}
-
-.dark {
-  --success: oklch(0.45 0.15 149);
-  --success-foreground: oklch(0.98 0.01 149);
-}
-
-/* 2. Register with Tailwind */
-@theme inline {
-  --color-success: var(--success);
-  --color-success-foreground: var(--success-foreground);
-}
-```
-
-Now you can use `bg-success`, `text-success-foreground` in any component.
+| `--ember`                  | Brand accent (direct use)            | `text-ember`, `bg-ember/10`         |
+| `--ember-alpha`            | Brand accent at low opacity          | `bg-ember-alpha`                    |
+| `--verified`               | Verified/success green               | `text-verified`, `bg-verified/10`   |
 
 ---
 
 ## Typography
 
-The current font stack is `system-ui, -apple-system, sans-serif` (set in the `body` rule in `globals.css`). To use a custom font:
-
-1. Add the font to `src/app/layout.tsx` using `next/font`:
+The font stack is **Inter** loaded via `next/font` in `src/app/layout.tsx`, registered as `--font-sans`:
 
 ```tsx
-import { Inter } from "next/font/google";
-
-const inter = Inter({ subsets: ["latin"], variable: "--font-sans" });
-
-export default function RootLayout({ children }) {
-  return (
-    <html lang="en" className={inter.variable} suppressHydrationWarning>
-      {/* ... */}
-    </html>
-  );
-}
+const inter = Inter({ subsets: ["latin"], variable: "--font-sans", display: "swap" });
 ```
 
-2. Reference it in `globals.css`:
+Referenced in `globals.css`:
 
 ```css
 body {
-  font-family: var(--font-sans), system-ui, sans-serif;
+  font-family:
+    var(--font-sans),
+    system-ui,
+    -apple-system,
+    sans-serif;
 }
 ```
 
-3. If you want a separate heading font, add a second `next/font` import with a different variable name (e.g., `--font-heading`) and apply it to heading elements.
+To switch fonts, change the `next/font` import in `layout.tsx`. The CSS variable cascades everywhere automatically.
 
 ---
 
 ## Border Radius
 
-The `--radius` variable controls the base radius. All components derive from it:
+The `--radius` variable controls the base radius. Currently set to `0.75rem` (12px — soft rounding). All components derive from it:
 
-```css
-:root {
-  --radius: 0.5rem; /* Default: medium roundness */
-}
-```
-
-The `@theme inline` block computes four sizes from this base:
-
-| Utility      | Computed value   | When `--radius: 0.5rem` |
-| ------------ | ---------------- | ----------------------- |
-| `rounded-sm` | `--radius - 4px` | ~0.25rem                |
-| `rounded-md` | `--radius - 2px` | ~0.375rem               |
-| `rounded-lg` | `--radius`       | 0.5rem                  |
-| `rounded-xl` | `--radius + 4px` | ~0.75rem                |
-
-Common values: `0` for sharp edges, `0.375rem` for subtle rounding, `0.5rem` for standard, `0.75rem` for soft, `1rem` for pill-like.
+| Utility      | Computed value   | Current result |
+| ------------ | ---------------- | -------------- |
+| `rounded-sm` | `--radius - 4px` | ~0.5rem        |
+| `rounded-md` | `--radius - 2px` | ~0.625rem      |
+| `rounded-lg` | `--radius`       | 0.75rem        |
+| `rounded-xl` | `--radius + 4px` | ~1rem          |
 
 ---
 
-## Verifying the Theme
+## Verifying a Theme Change
 
 After applying a theme, check these pages:
 
@@ -314,6 +244,7 @@ After applying a theme, check these pages:
 2. **Sign-in page** (`/sign-in`) — Clerk components should match the theme
 3. **Athlete dashboard** (`/dashboard`) — cards, stats grid, sidebar active state
 4. **Coach dashboard** (`/coach/dashboard`) — org switcher, badges, card backgrounds
-5. **Toggle dark mode** — everything should feel intentional in both modes
+5. **Recruiting board** (`/coach/recruiting/[id]`) — kanban columns, card styling, drag overlay, "+ Add" buttons
+6. **Toggle dark/light mode** — everything should feel intentional in both modes
 
-Use your browser's DevTools to check contrast ratios. The WCAG AA minimum is 4.5:1 for normal text and 3:1 for large text. OKLCH themes from the generators above are usually pre-checked, but verify if you're creating custom values.
+Use your browser's DevTools to check contrast ratios. The WCAG AA minimum is 4.5:1 for normal text and 3:1 for large text.
