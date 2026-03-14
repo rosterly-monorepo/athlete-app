@@ -63,11 +63,43 @@ export function useAddRecord(programId: number) {
       queryClient.invalidateQueries({
         queryKey: recruitmentKeys.board(programId),
       });
+      queryClient.invalidateQueries({
+        queryKey: ["recruitment", "pipeline-athletes"],
+      });
       toast.success("Athlete added to board");
     },
     onError: () => {
       toast.error("Failed to add athlete");
     },
+  });
+}
+
+// ── Pipeline membership check ──
+
+/**
+ * Returns a Set of athlete IDs that are already on any of the coach's program boards.
+ * Used by search and profile pages to show "In Pipeline" status.
+ */
+export function usePipelineAthleteIds(programIds: number[]) {
+  const { getToken } = useAuth();
+
+  return useQuery({
+    queryKey: ["recruitment", "pipeline-athletes", programIds],
+    queryFn: async () => {
+      const token = await getToken();
+      const ids = new Set<number>();
+      for (const pid of programIds) {
+        const board = await getRecruitmentBoard(token!, pid);
+        for (const col of board.columns) {
+          for (const rec of col.records) {
+            ids.add(rec.athlete_id);
+          }
+        }
+      }
+      return [...ids];
+    },
+    enabled: programIds.length > 0,
+    staleTime: 30_000, // 30s — pipeline doesn't change frequently
   });
 }
 

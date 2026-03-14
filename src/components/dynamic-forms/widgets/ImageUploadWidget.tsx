@@ -15,9 +15,16 @@ interface ImageUploadWidgetProps {
   property: FormSchemaProperty;
   fieldKey: string;
   error?: string;
+  required?: boolean;
 }
 
-export function ImageUploadWidget({ field, property, fieldKey, error }: ImageUploadWidgetProps) {
+export function ImageUploadWidget({
+  field,
+  property,
+  fieldKey,
+  error,
+  required,
+}: ImageUploadWidgetProps) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(field.value || null);
 
@@ -76,7 +83,10 @@ export function ImageUploadWidget({ field, property, fieldKey, error }: ImageUpl
 
   return (
     <div className="grid gap-2">
-      <Label htmlFor={fieldKey}>{property.title || fieldKey}</Label>
+      <Label htmlFor={fieldKey}>
+        {property.title || fieldKey}
+        {required && <span className="text-destructive ml-1">*</span>}
+      </Label>
 
       <div className="flex items-start gap-4">
         {/* Preview */}

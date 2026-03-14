@@ -10,14 +10,24 @@ interface TextareaWidgetProps {
   property: FormSchemaProperty;
   fieldKey: string;
   error?: string;
+  required?: boolean;
 }
 
-export function TextareaWidget({ field, property, fieldKey, error }: TextareaWidgetProps) {
+export function TextareaWidget({
+  field,
+  property,
+  fieldKey,
+  error,
+  required,
+}: TextareaWidgetProps) {
   const maxLength = property["x-ui-validation"]?.maxLength;
 
   return (
     <div className="grid gap-2">
-      <Label htmlFor={fieldKey}>{property.title || fieldKey}</Label>
+      <Label htmlFor={fieldKey}>
+        {property.title || fieldKey}
+        {required && <span className="text-destructive ml-1">*</span>}
+      </Label>
       <Textarea
         id={fieldKey}
         placeholder={property["x-ui-placeholder"]}

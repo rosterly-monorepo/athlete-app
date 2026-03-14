@@ -17,6 +17,7 @@ import {
 interface FormFieldRendererProps {
   fieldKey: string;
   property: FormSchemaProperty;
+  required?: boolean;
 }
 
 const WIDGET_MAP = {
@@ -64,7 +65,7 @@ function inferWidgetType(property: FormSchemaProperty): string {
  * Renders a single form field based on the JSON Schema property definition.
  * Maps x-ui-widget to the appropriate widget component.
  */
-export function FormFieldRenderer({ fieldKey, property }: FormFieldRendererProps) {
+export function FormFieldRenderer({ fieldKey, property, required }: FormFieldRendererProps) {
   const {
     control,
     formState: { errors },
@@ -81,7 +82,13 @@ export function FormFieldRenderer({ fieldKey, property }: FormFieldRendererProps
       name={fieldKey}
       control={control}
       render={({ field }) => (
-        <Widget field={field} property={property} fieldKey={fieldKey} error={error} />
+        <Widget
+          field={field}
+          property={property}
+          fieldKey={fieldKey}
+          error={error}
+          required={required}
+        />
       )}
     />
   );

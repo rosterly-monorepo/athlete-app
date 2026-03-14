@@ -10,12 +10,16 @@ interface DateWidgetProps {
   property: FormSchemaProperty;
   fieldKey: string;
   error?: string;
+  required?: boolean;
 }
 
-export function DateWidget({ field, property, fieldKey, error }: DateWidgetProps) {
+export function DateWidget({ field, property, fieldKey, error, required }: DateWidgetProps) {
   return (
     <div className="grid gap-2">
-      <Label htmlFor={fieldKey}>{property.title || fieldKey}</Label>
+      <Label htmlFor={fieldKey}>
+        {property.title || fieldKey}
+        {required && <span className="text-destructive ml-1">*</span>}
+      </Label>
       <Input
         id={fieldKey}
         type="date"

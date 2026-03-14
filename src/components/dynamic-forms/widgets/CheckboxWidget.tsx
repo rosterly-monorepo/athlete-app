@@ -10,9 +10,16 @@ interface CheckboxWidgetProps {
   property: FormSchemaProperty;
   fieldKey: string;
   error?: string;
+  required?: boolean;
 }
 
-export function CheckboxWidget({ field, property, fieldKey, error }: CheckboxWidgetProps) {
+export function CheckboxWidget({
+  field,
+  property,
+  fieldKey,
+  error,
+  required,
+}: CheckboxWidgetProps) {
   return (
     <div className="flex flex-col gap-2">
       <div className="flex items-center space-x-2">
@@ -28,6 +35,7 @@ export function CheckboxWidget({ field, property, fieldKey, error }: CheckboxWid
           className="text-sm leading-none font-medium peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
         >
           {property.title || fieldKey}
+          {required && <span className="text-destructive ml-1">*</span>}
         </Label>
       </div>
       {property.description && (

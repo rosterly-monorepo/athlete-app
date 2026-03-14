@@ -6,8 +6,13 @@ import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Plus, ArrowLeft } from "lucide-react";
 import Link from "next/link";
-import { RecruitmentBoard, AddAthleteDialog, ProgramSelector } from "@/components/recruitment";
-import type { RecruitmentStage } from "@/services/types";
+import {
+  RecruitmentBoard,
+  AddAthleteDialog,
+  ProgramSelector,
+  RecruitmentCardDetail,
+} from "@/components/recruitment";
+import type { RecruitmentStage, RecruitmentRecordWithAthlete } from "@/services/types";
 
 interface Props {
   params: Promise<{ programId: string }>;
@@ -18,6 +23,7 @@ export default function RecruitingBoardPage({ params }: Props) {
   const numericProgramId = parseInt(programId, 10);
   const { data: programs, isLoading: programsLoading } = useMyPrograms();
   const [addToStage, setAddToStage] = useState<RecruitmentStage | null>(null);
+  const [selectedRecord, setSelectedRecord] = useState<RecruitmentRecordWithAthlete | null>(null);
 
   const hasMultiplePrograms = (programs?.length ?? 0) > 1;
 
@@ -58,7 +64,21 @@ export default function RecruitingBoardPage({ params }: Props) {
       </div>
 
       {/* Board */}
-      <RecruitmentBoard programId={numericProgramId} onAddToStage={setAddToStage} />
+      <RecruitmentBoard
+        programId={numericProgramId}
+        onAddToStage={setAddToStage}
+        onRecordSelect={setSelectedRecord}
+      />
+
+      {/* Record detail sheet */}
+      <RecruitmentCardDetail
+        programId={numericProgramId}
+        record={selectedRecord}
+        open={selectedRecord !== null}
+        onOpenChange={(open) => {
+          if (!open) setSelectedRecord(null);
+        }}
+      />
 
       {/* Controlled dialog for per-column "+ Add" buttons */}
       <AddAthleteDialog

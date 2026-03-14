@@ -4,23 +4,20 @@ import { NextResponse } from "next/server";
 /**
  * BFF proxy: GET /api/athlete → FastAPI GET /api/v1/athletes/me/profile
  *
- * Checks auth AND role before proxying. This is the pattern:
+ * Checks auth AND role before proxying:
  * 1. Clerk middleware ensures the user is signed in
- * 2. This route checks the role from session claims
+ * 2. This route checks org claims — coaches (active org) are blocked
  * 3. Attaches the Clerk JWT to the upstream request
  */
 export async function GET() {
-  const { userId, sessionClaims, getToken } = await auth();
+  const { userId, orgId, getToken } = await auth();
 
   if (!userId) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  // Role check: only athletes can access this endpoint
-  const metadata = sessionClaims?.metadata as { role?: string } | undefined;
-  const role = metadata?.role;
-  if (role !== "athlete" && role !== undefined) {
-    // role is set and it's not athlete → forbidden
+  // Role check: coaches (users with an active org) can't access athlete endpoints
+  if (orgId) {
     return NextResponse.json({ error: "Athlete account required" }, { status: 403 });
   }
 

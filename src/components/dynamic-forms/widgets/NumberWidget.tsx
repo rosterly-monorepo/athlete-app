@@ -10,15 +10,19 @@ interface NumberWidgetProps {
   property: FormSchemaProperty;
   fieldKey: string;
   error?: string;
+  required?: boolean;
 }
 
-export function NumberWidget({ field, property, fieldKey, error }: NumberWidgetProps) {
+export function NumberWidget({ field, property, fieldKey, error, required }: NumberWidgetProps) {
   const validation = property["x-ui-validation"] || {};
   const isInteger = property.type === "integer";
 
   return (
     <div className="grid gap-2">
-      <Label htmlFor={fieldKey}>{property.title || fieldKey}</Label>
+      <Label htmlFor={fieldKey}>
+        {property.title || fieldKey}
+        {required && <span className="text-destructive ml-1">*</span>}
+      </Label>
       <Input
         id={fieldKey}
         type="number"

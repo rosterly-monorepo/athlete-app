@@ -2,16 +2,14 @@
 
 import { useAuth } from "@clerk/nextjs";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { getMyProfile, updateProfile, getAthleteById, getAthletes } from "@/services/athlete";
+import { getMyProfile, updateProfile, getAthleteCoachView } from "@/services/athlete";
 import type { UpdateProfileInput } from "@/services/types";
 import { toast } from "sonner";
 
 export const athleteKeys = {
   all: ["athletes"] as const,
-  list: (filters?: Record<string, string | number | undefined>) =>
-    ["athletes", "list", filters] as const,
-  byId: (id: string) => ["athletes", id] as const,
   myProfile: ["my-profile"] as const,
+  coachView: (id: number) => ["athletes", "coach-view", id] as const,
 };
 
 // ── Read hooks ──
@@ -28,18 +26,16 @@ export function useMyProfile() {
   });
 }
 
-export function useAthlete(id: string) {
-  return useQuery({
-    queryKey: athleteKeys.byId(id),
-    queryFn: () => getAthleteById(id), // public endpoint, no token
-    enabled: !!id,
-  });
-}
+export function useAthleteCoachView(id: number) {
+  const { getToken } = useAuth();
 
-export function useAthletes(filters?: { sport?: string; school?: string; page?: number }) {
   return useQuery({
-    queryKey: athleteKeys.list(filters),
-    queryFn: () => getAthletes(filters), // public endpoint, no token
+    queryKey: athleteKeys.coachView(id),
+    queryFn: async () => {
+      const token = await getToken();
+      return getAthleteCoachView(token!, id);
+    },
+    enabled: !!id,
   });
 }
 

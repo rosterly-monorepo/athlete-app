@@ -335,3 +335,342 @@ export interface UpdateNoteInput {
   note_type?: NoteType;
   is_private?: boolean;
 }
+
+// ── Search ──
+
+export interface SearchFilterOption {
+  value: string;
+  label: string;
+}
+
+export interface SearchFilterSchema {
+  field: string;
+  filter_type: "range" | "checkboxes" | "toggle";
+  value_type: "range" | "set" | "boolean";
+  label: string;
+  min?: number;
+  max?: number;
+  step?: number;
+  unit?: string;
+  display_format?: string;
+  options?: SearchFilterOption[];
+  options_from_agg: boolean;
+  group: string;
+  order: number;
+}
+
+export interface FilterGroup {
+  key: string;
+  label: string;
+  order: number;
+  sport_code: string | null;
+}
+
+export interface SortOption {
+  value: string;
+  label: string;
+  sport_code: string | null;
+}
+
+export interface SearchFiltersResponse {
+  filters: SearchFilterSchema[];
+  groups: FilterGroup[];
+  sort_options: SortOption[];
+}
+
+export interface AthleteSearchRequest {
+  query?: string;
+  filters: Record<string, unknown>;
+  sort_by: string;
+  offset: number;
+  limit: number;
+}
+
+// ── Coach Athlete View ──
+
+export interface ReferenceCoachView {
+  id: number;
+  first_name: string;
+  last_name: string;
+  email: string | null;
+  phone: string | null;
+  display_order: number;
+}
+
+export interface RowingConfigView {
+  id: number;
+  primary_side: string | null;
+  is_sculler: boolean;
+  is_sweep: boolean;
+  can_cox: boolean;
+  wingspan_inches: number | null;
+  seat_racing_weight_lbs: number | null;
+  weight_class: string;
+  primary_boats: string[];
+  best_2k_seconds: number | null;
+  best_2k_date: string | null;
+  erg_2k_na: boolean;
+  best_5k_seconds: number | null;
+  best_5k_date: string | null;
+  erg_5k_na: boolean;
+  best_6k_seconds: number | null;
+  best_6k_date: string | null;
+  erg_6k_na: boolean;
+  best_2k_split: number | null;
+}
+
+export interface RowingPerformanceView {
+  id: number;
+  event: string;
+  event_category: string;
+  boat_class: string | null;
+  distance_meters: number | null;
+  result_seconds: number;
+  result_display: string;
+  split_seconds: number | null;
+  split_display: string | null;
+  watts_avg: number | null;
+  stroke_rate_avg: number | null;
+  heart_rate_avg: number | null;
+  event_name: string;
+  event_date: string;
+  event_location: string | null;
+  event_type: string | null;
+  seat_position: number | null;
+  is_coxswain: boolean;
+  crew_members: string[] | null;
+  water_conditions: string | null;
+  is_personal_record: boolean;
+  is_erg_record: boolean;
+  is_verified: boolean;
+  place: number | null;
+  margin_seconds: number | null;
+  regatta_central_url: string | null;
+  created_at: string;
+}
+
+export interface AthleteSportView {
+  id: number;
+  sport_code: string;
+  is_primary: boolean;
+  years_experience: number | null;
+  current_club: string | null;
+  current_coach: string | null;
+  recruiting_status: string | null;
+  reference_coaches: ReferenceCoachView[];
+  config: Record<string, unknown> | null;
+  performances: Record<string, unknown>[];
+}
+
+// Snake_case section types matching actual API response (for coach view)
+export interface CoachViewPersonalInfo {
+  id: number;
+  first_name: string;
+  middle_name: string | null;
+  last_name: string;
+  preferred_name: string | null;
+  date_of_birth: string | null;
+  height_feet: number | null;
+  height_inches: number | null;
+  weight_lbs: number | null;
+}
+
+export interface CoachViewAddress {
+  id: number;
+  street_line_1: string | null;
+  street_line_2: string | null;
+  city: string | null;
+  state_province: string | null;
+  postal_code: string | null;
+  country: string;
+  is_verified: boolean;
+}
+
+export interface CoachViewContactDetails {
+  id: number;
+  phone_primary: string | null;
+  phone_type: string | null;
+  phone_type_other: string | null;
+  phone_secondary: string | null;
+  email_primary: string | null;
+  email_secondary: string | null;
+  social_twitter: string | null;
+  social_instagram: string | null;
+  social_linkedin: string | null;
+  social_tiktok: string | null;
+}
+
+export interface CoachViewDemographics {
+  id: number;
+  gender: string | null;
+  legal_sex: string | null;
+  pronouns: string | null;
+  birth_country: string | null;
+  citizenship_status: string | null;
+  citizenship_country_other: string | null;
+  is_military_connected: boolean | null;
+  military_status: string | null;
+  military_branch: string | null;
+  ethnicity: string[] | null;
+}
+
+export interface CoachViewEducation {
+  id: number;
+  high_school_name: string | null;
+  high_school_city: string | null;
+  high_school_state: string | null;
+  high_school_country: string;
+  high_school_ceeb: string | null;
+  graduation_year: number | null;
+  gpa_unweighted: number | null;
+  gpa_weighted: number | null;
+  gpa_scale: number;
+  class_rank: number | null;
+  class_size: number | null;
+  academic_honors: string | null;
+  ncaa_core_gpa: number | null;
+  ncaa_registered: boolean | null;
+  ncaa_id: string | null;
+  transcript_url: string | null;
+  transcript_uploaded_at: string | null;
+}
+
+export interface CoachViewTesting {
+  id: number;
+  sat_total: number | null;
+  sat_reading_writing: number | null;
+  sat_math: number | null;
+  sat_date: string | null;
+  act_composite: number | null;
+  act_english: number | null;
+  act_math: number | null;
+  act_reading: number | null;
+  act_science: number | null;
+  act_writing: number | null;
+  act_date: string | null;
+  ap_scores: Record<string, unknown>[] | null;
+  sat_score_url: string | null;
+  act_score_url: string | null;
+  is_test_optional: boolean;
+}
+
+export interface CoachViewFamilyInfo {
+  id: number;
+  is_first_gen_college: boolean | null;
+  parent1_education: string | null;
+  parent2_education: string | null;
+  needs_financial_aid: boolean | null;
+  estimated_family_contribution: string | null;
+  sibling_count: number | null;
+  siblings_in_college: number | null;
+  legacy_schools: string[] | null;
+}
+
+export interface CoachViewWriting {
+  id: number;
+  personal_statement: string | null;
+  personal_statement_word_count: number | null;
+  personal_statement_updated_at: string | null;
+  essays: Record<string, unknown>[] | null;
+  athletic_statement: string | null;
+  athletic_statement_word_count: number | null;
+}
+
+export interface CoachViewActivity {
+  id: number;
+  activity_type: string;
+  name: string;
+  organization: string | null;
+  description: string | null;
+  start_date: string | null;
+  end_date: string | null;
+  hours_per_week: number | null;
+  weeks_per_year: number | null;
+  position_title: string | null;
+  recognition_level: string | null;
+  display_order: number;
+}
+
+export interface CoachViewParentGuardian {
+  id: number;
+  first_name: string;
+  last_name: string;
+  relation: string;
+  email: string | null;
+  phone: string | null;
+  display_order: number;
+}
+
+export interface AthleteCoachView {
+  id: number;
+  first_name: string;
+  last_name: string;
+  email: string;
+  avatar_url: string | null;
+  profile_completion_pct: number;
+  is_verified: boolean;
+  // Legacy fields from AthleteBase
+  sport: string | null;
+  position: string | null;
+  school: string | null;
+  graduation_year: number | null;
+  height_feet: number | null;
+  height_inches: number | null;
+  weight: number | null;
+  bio: string | null;
+  is_public: boolean;
+  created_at: string;
+  updated_at: string;
+  // 1:1 sections
+  personal_info: CoachViewPersonalInfo | null;
+  address: CoachViewAddress | null;
+  contact_details: CoachViewContactDetails | null;
+  demographics: CoachViewDemographics | null;
+  education: CoachViewEducation | null;
+  testing: CoachViewTesting | null;
+  family_info: CoachViewFamilyInfo | null;
+  writing: CoachViewWriting | null;
+  // 1:many
+  activities: CoachViewActivity[];
+  parent_guardians: CoachViewParentGuardian[];
+  // Sports
+  sports: AthleteSportView[];
+}
+
+// ── Search ──
+
+export interface AthleteSearchHit {
+  id: number;
+  first_name: string;
+  last_name: string;
+  full_name: string;
+  avatar_url: string | null;
+  primary_sport: string | null;
+  sports: string[];
+  position: string | null;
+  school: string | null;
+  high_school_name: string | null;
+  high_school_state: string | null;
+  graduation_year: number | null;
+  gpa_unweighted: number | null;
+  height_inches: number | null;
+  weight_lbs: number | null;
+  sat_total: number | null;
+  act_composite: number | null;
+  profile_completion_pct: number;
+  _score: number;
+  // Sport-specific fields are included dynamically (e.g. rowing_best_2k_seconds)
+  [key: string]: unknown;
+}
+
+export interface AggBucket {
+  key: string;
+  count: number;
+}
+
+export interface AthleteSearchResponse {
+  hits: AthleteSearchHit[];
+  total: number;
+  aggregations: Record<string, AggBucket[]>;
+  max_score: number;
+}

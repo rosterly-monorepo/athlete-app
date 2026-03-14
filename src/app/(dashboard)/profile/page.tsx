@@ -1,18 +1,54 @@
 "use client";
 
-import { useUser } from "@clerk/nextjs";
+import { useCallback, useState } from "react";
+import { ArrowRight, Check } from "lucide-react";
 import { useMyProfile } from "@/hooks/use-athlete";
 import { useAllFormSchemas, useSaveProfileSection } from "@/hooks/use-form-schema";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Skeleton } from "@/components/ui/skeleton";
 import { DynamicForm, DynamicFormSkeleton } from "@/components/dynamic-forms";
+import { Progress } from "@/components/ui/progress";
+import {
+  getSectionCompletion,
+  getFirstIncompleteSection,
+  getFirstUnfilledField,
+  getOverallCompletion,
+} from "@/lib/profile-completion";
 import type { FormSchema } from "@/types/form-schema";
 
 export default function ProfilePage() {
-  const { user } = useUser();
   const { data: profile, isLoading: profileLoading } = useMyProfile();
-
   const { data: schemas, isLoading: schemasLoading, isError } = useAllFormSchemas();
+
+  const sectionEntries = Object.entries(schemas ?? {});
+  const profileData = profile as Record<string, unknown> | undefined;
+
+  const initialSection = schemas
+    ? getFirstIncompleteSection(schemas, profileData, extractSectionData) || sectionEntries[0]?.[0]
+    : undefined;
+  const [activeTab, setActiveTab] = useState<string | undefined>(initialSection);
+
+  // Keep activeTab in sync when data loads for the first time
+  const resolvedTab = activeTab || initialSection;
+
+  const nextUnfilled = schemas
+    ? getFirstUnfilledField(schemas, profileData, extractSectionData)
+    : null;
+
+  const handleContinue = useCallback(() => {
+    if (!nextUnfilled) return;
+    setActiveTab(nextUnfilled.sectionId);
+    // Wait for tab content to render, then focus the field
+    requestAnimationFrame(() => {
+      const el = document.getElementById(nextUnfilled.fieldKey);
+      if (el) {
+        el.scrollIntoView({ behavior: "smooth", block: "center" });
+        el.focus();
+      }
+    });
+  }, [nextUnfilled]);
 
   if (profileLoading || schemasLoading) {
     return <ProfileSkeleton />;
@@ -33,43 +69,64 @@ export default function ProfilePage() {
     );
   }
 
+  const overallPct = getOverallCompletion(schemas, profileData, extractSectionData);
+
   return (
     <div className="max-w-2xl">
-      <h1 className="mb-2 text-2xl font-bold">Athlete Profile</h1>
-      <p className="text-muted-foreground mb-8">
-        This information will appear on your public athlete profile page.
-      </p>
-
-      <div className="space-y-6">
-        {/* Clerk-managed identity section */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-base">Identity</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <label className="mb-1 block text-sm font-medium">Full Name</label>
-            <input
-              type="text"
-              value={user?.fullName || ""}
-              disabled
-              className="border-input bg-muted w-full rounded-md border px-3 py-2 text-sm opacity-60"
-            />
-            <p className="text-muted-foreground mt-1 text-xs">
-              Managed through your account settings.
-            </p>
-          </CardContent>
-        </Card>
-
-        {/* Dynamic sections from schemas */}
-        {Object.entries(schemas).map(([sectionId, schema]) => (
-          <ProfileSection
-            key={sectionId}
-            sectionId={sectionId}
-            schema={schema}
-            initialData={extractSectionData(schema, profile as Record<string, unknown> | undefined)}
-          />
-        ))}
+      <div className="mb-1 flex items-center justify-between">
+        <h1 className="text-2xl font-bold">Athlete Profile</h1>
+        <span className="text-sm font-medium">{overallPct}% complete</span>
       </div>
+      <Progress value={overallPct} className="mb-2 h-2" />
+      <div className="mb-6 flex items-center justify-between">
+        <p className="text-muted-foreground">
+          This information will appear on your public athlete profile page.
+        </p>
+        {nextUnfilled && (
+          <Button size="sm" className="ml-4 shrink-0 gap-1.5" onClick={handleContinue}>
+            Continue
+            <ArrowRight className="h-4 w-4" />
+          </Button>
+        )}
+      </div>
+
+      {/* Tabbed profile sections */}
+      {resolvedTab && (
+        <Tabs value={resolvedTab} onValueChange={setActiveTab}>
+          <TabsList variant="line" className="!h-auto w-full flex-wrap justify-start gap-y-1 pb-2">
+            {sectionEntries.map(([sectionId, schema]) => {
+              const completion = getSectionCompletion(
+                schema,
+                extractSectionData(schema, profileData)
+              );
+              return (
+                <TabsTrigger key={sectionId} value={sectionId} className="gap-1.5">
+                  {schema.title || sectionId}
+                  {completion.total > 0 &&
+                    (completion.done ? (
+                      <Check className="h-3.5 w-3.5 text-emerald-500" />
+                    ) : (
+                      <span className="text-muted-foreground text-xs">
+                        {Math.round((completion.filled / completion.total) * 100)}%
+                      </span>
+                    ))}
+                </TabsTrigger>
+              );
+            })}
+          </TabsList>
+          <div className="mt-4">
+            {sectionEntries.map(([sectionId, schema]) => (
+              <TabsContent key={sectionId} value={sectionId}>
+                <ProfileSection
+                  sectionId={sectionId}
+                  schema={schema}
+                  initialData={extractSectionData(schema, profileData)}
+                />
+              </TabsContent>
+            ))}
+          </div>
+        </Tabs>
+      )}
     </div>
   );
 }
@@ -86,20 +143,13 @@ function ProfileSection({ sectionId, schema, initialData }: ProfileSectionProps)
   });
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="text-base">{schema.title || sectionId}</CardTitle>
-      </CardHeader>
-      <CardContent>
-        <DynamicForm
-          schema={schema}
-          initialData={initialData}
-          onSubmit={(data) => mutation.mutate(data)}
-          isSubmitting={mutation.isPending}
-          submitLabel={`Save ${schema.title || sectionId}`}
-        />
-      </CardContent>
-    </Card>
+    <DynamicForm
+      schema={schema}
+      initialData={initialData}
+      onSubmit={(data) => mutation.mutate(data)}
+      isSubmitting={mutation.isPending}
+      submitLabel={`Save ${schema.title || sectionId}`}
+    />
   );
 }
 
@@ -125,11 +175,18 @@ function extractSectionData(
 
 function ProfileSkeleton() {
   return (
-    <div className="max-w-2xl space-y-6">
+    <div className="max-w-2xl">
       <Skeleton className="h-8 w-48" />
-      <Skeleton className="h-4 w-72" />
-      <Skeleton className="h-32 w-full rounded-xl" />
-      <DynamicFormSkeleton />
+      <Skeleton className="mt-2 h-4 w-72" />
+      <Skeleton className="mt-6 h-24 w-full rounded-xl" />
+      <div className="mt-6 flex gap-2">
+        {Array.from({ length: 5 }).map((_, i) => (
+          <Skeleton key={i} className="h-8 w-24 rounded-md" />
+        ))}
+      </div>
+      <div className="mt-4">
+        <DynamicFormSkeleton />
+      </div>
     </div>
   );
 }

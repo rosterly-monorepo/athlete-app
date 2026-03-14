@@ -10,7 +10,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { useAddRecord } from "@/hooks/use-recruitment";
-import type { Athlete, RecruitmentStage, Priority } from "@/services/types";
+import type { AthleteSearchHit, RecruitmentStage, Priority } from "@/services/types";
 import { AthleteSearch } from "./athlete-search";
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -22,7 +22,7 @@ export interface AddAthleteDialogProps {
   children?: React.ReactNode;
   defaultStage?: RecruitmentStage;
   defaultPriority?: Priority;
-  onAthleteAdded?: (athlete: Athlete) => void;
+  onAthleteAdded?: (athleteId: number) => void;
   title?: string;
   description?: string;
   open?: boolean;
@@ -54,19 +54,19 @@ function AddAthleteDialog({
   const addRecord = useAddRecord(programId);
 
   const handleSelect = React.useCallback(
-    (athlete: Athlete) => {
+    (athlete: AthleteSearchHit) => {
       addRecord.mutate(
         {
-          athlete_id: parseInt(athlete.id, 10),
-          sport_code: athlete.sport,
-          position: athlete.position,
+          athlete_id: athlete.id,
+          sport_code: athlete.primary_sport ?? undefined,
+          position: athlete.position ?? undefined,
           stage: defaultStage,
           priority: defaultPriority,
         },
         {
           onSuccess: () => {
             setOpen(false);
-            onAthleteAdded?.(athlete);
+            onAthleteAdded?.(athlete.id);
           },
         }
       );

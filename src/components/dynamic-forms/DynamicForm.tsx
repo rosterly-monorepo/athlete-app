@@ -67,6 +67,7 @@ export function DynamicForm({
 
   const groups = schema["x-ui-groups"];
   const useGroupedLayout = hasGroups(schema);
+  const requiredFields = new Set(schema.required || []);
 
   if (useGroupedLayout && groups) {
     // Render grouped layout
@@ -93,7 +94,12 @@ export function DynamicForm({
                   const property = schema.properties[fieldKey];
                   if (!property || property["x-ui-hidden"]) return null;
                   return (
-                    <FormFieldRenderer key={fieldKey} fieldKey={fieldKey} property={property} />
+                    <FormFieldRenderer
+                      key={fieldKey}
+                      fieldKey={fieldKey}
+                      property={property}
+                      required={requiredFields.has(fieldKey)}
+                    />
                   );
                 })}
               </CardContent>
@@ -108,7 +114,12 @@ export function DynamicForm({
               </CardHeader>
               <CardContent className="space-y-4">
                 {getUngroupedFields(schema).map(([fieldKey, property]) => (
-                  <FormFieldRenderer key={fieldKey} fieldKey={fieldKey} property={property} />
+                  <FormFieldRenderer
+                    key={fieldKey}
+                    fieldKey={fieldKey}
+                    property={property}
+                    required={requiredFields.has(fieldKey)}
+                  />
                 ))}
               </CardContent>
             </Card>
@@ -138,7 +149,12 @@ export function DynamicForm({
         )}
 
         {orderedFields.map(([fieldKey, property]) => (
-          <FormFieldRenderer key={fieldKey} fieldKey={fieldKey} property={property} />
+          <FormFieldRenderer
+            key={fieldKey}
+            fieldKey={fieldKey}
+            property={property}
+            required={requiredFields.has(fieldKey)}
+          />
         ))}
 
         <Button type="submit" disabled={isSubmitting}>

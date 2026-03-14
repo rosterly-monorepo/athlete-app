@@ -1,26 +1,27 @@
 "use client";
 
-import { useAuth, useOrganization, useUser } from "@clerk/nextjs";
-import type { UserRole, OrgPermission } from "@/types/clerk.d";
+import { useAuth, useOrganization } from "@clerk/nextjs";
+import type { OrgPermission } from "@/types/clerk.d";
 
 /**
  * Hook to access the current user's role, org context, and permissions.
  *
+ * Role is derived from org claims only: if the user has an active
+ * organization they're a coach, otherwise they're an athlete.
+ *
  * Usage:
- *   const { role, isAthlete, isCoach, hasPermission } = useUserRole();
+ *   const { isAthlete, isCoach, hasPermission } = useUserRole();
  *   if (hasPermission("org:roster:manage")) { ... }
  */
 export function useUserRole() {
   const { has } = useAuth();
-  const { user } = useUser();
   const { organization, membership } = useOrganization();
 
-  // Role from publicMetadata (set by webhook on signup / org join)
-  const role = (user?.publicMetadata as { role?: UserRole } | undefined)?.role ?? null;
-
-  // Organization context (coaches only)
   const orgId = organization?.id ?? null;
   const orgRole = membership?.role ?? null;
+  const isCoach = !!orgId;
+  const isAthlete = !orgId;
+  const isHeadCoach = orgRole === "org:head_coach" || orgRole === "org:admin";
 
   // Permission checker — delegates to Clerk's has() which reads JWT claims
   const hasPermission = (permission: OrgPermission): boolean => {
@@ -29,10 +30,10 @@ export function useUserRole() {
   };
 
   return {
-    role,
-    isAthlete: role === "athlete" || role === null, // null = pre-webhook, treat as athlete
-    isCoach: role === "coach",
-    isAdmin: role === "admin",
+    isAthlete,
+    isCoach,
+    isHeadCoach,
+    isAdmin: orgRole === "org:admin",
     orgId,
     orgRole,
     orgName: organization?.name ?? null,

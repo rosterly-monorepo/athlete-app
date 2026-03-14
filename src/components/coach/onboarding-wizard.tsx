@@ -169,6 +169,7 @@ export function OnboardingWizard() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["programs"] });
+      queryClient.invalidateQueries({ queryKey: ["organization", "me"] });
       router.push("/coach/dashboard");
     },
   });

@@ -16,9 +16,10 @@ interface SelectWidgetProps {
   property: FormSchemaProperty;
   fieldKey: string;
   error?: string;
+  required?: boolean;
 }
 
-export function SelectWidget({ field, property, fieldKey, error }: SelectWidgetProps) {
+export function SelectWidget({ field, property, fieldKey, error, required }: SelectWidgetProps) {
   // Get options from x-ui-options or build from enum
   const options: Array<{ value: string; label: string; category?: string }> =
     property["x-ui-options"] || property.enum?.map((v) => ({ value: v, label: v })) || [];
@@ -28,7 +29,10 @@ export function SelectWidget({ field, property, fieldKey, error }: SelectWidgetP
 
   return (
     <div className="grid gap-2">
-      <Label htmlFor={fieldKey}>{property.title || fieldKey}</Label>
+      <Label htmlFor={fieldKey}>
+        {property.title || fieldKey}
+        {required && <span className="text-destructive ml-1">*</span>}
+      </Label>
       <Select
         value={field.value ?? ""}
         onValueChange={field.onChange}

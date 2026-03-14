@@ -14,6 +14,7 @@ interface DocumentUploadWidgetProps {
   property: FormSchemaProperty;
   fieldKey: string;
   error?: string;
+  required?: boolean;
 }
 
 export function DocumentUploadWidget({
@@ -21,6 +22,7 @@ export function DocumentUploadWidget({
   property,
   fieldKey,
   error,
+  required,
 }: DocumentUploadWidgetProps) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [fileName, setFileName] = useState<string | null>(null);
@@ -73,7 +75,10 @@ export function DocumentUploadWidget({
 
   return (
     <div className="grid gap-2">
-      <Label htmlFor={fieldKey}>{property.title || fieldKey}</Label>
+      <Label htmlFor={fieldKey}>
+        {property.title || fieldKey}
+        {required && <span className="text-destructive ml-1">*</span>}
+      </Label>
 
       <div className="space-y-3">
         {/* File display */}

@@ -19,14 +19,9 @@ import { NextResponse } from "next/server";
  *      - org:recruiting:read    (assigned to org:coach, org:head_coach)
  *      - org:recruiting:manage  (assigned to org:head_coach only)
  *
- * 3. Sessions → Customize session token:
- *    {
- *      "metadata": "{{user.public_metadata}}"
- *    }
- *
  * Authorization strategy:
- * - Athletes: checked via publicMetadata.role (no org needed)
- * - Coaches: checked via org permissions using has()
+ * - Athletes: no active org → athlete routes
+ * - Coaches: active org (orgId + orgRole present) → coach routes
  * - Public routes: no auth required
  */
 
@@ -44,7 +39,7 @@ const isCoachRoute = createRouteMatcher(["/coach(.*)"]);
 export default clerkMiddleware(async (auth, req) => {
   if (!isProtectedRoute(req)) return;
 
-  const { userId, sessionClaims, orgId } = await auth();
+  const { userId, orgId, orgRole } = await auth();
 
   // Not signed in → redirect to sign-in
   if (!userId) {
@@ -52,23 +47,19 @@ export default clerkMiddleware(async (auth, req) => {
     return;
   }
 
-  // Extract user-level role from publicMetadata
-  const metadata = sessionClaims?.metadata as { role?: string } | undefined;
-  const role = metadata?.role;
+  // Coach = has an active org with a role
+  const isCoach = !!orgId && !!orgRole;
 
   if (isCoachRoute(req)) {
     // ── Coach routes: require org membership ──
-    // Coaches must have an active organization (school).
-    // The org permissions (has()) handle fine-grained access
-    // within the coach pages themselves (see <Protect> in components).
-    if (!orgId || role !== "coach") {
+    if (!isCoach) {
       // Not a coach or no active org → send to athlete dashboard
       return NextResponse.redirect(new URL("/dashboard", req.url));
     }
   } else {
     // ── Athlete routes: block coaches ──
     // Coaches should use /coach/* routes, not /dashboard
-    if (role === "coach" && orgId) {
+    if (isCoach) {
       return NextResponse.redirect(new URL("/coach/dashboard", req.url));
     }
   }

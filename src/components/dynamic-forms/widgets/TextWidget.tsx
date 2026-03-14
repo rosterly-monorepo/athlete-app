@@ -10,16 +10,20 @@ interface TextWidgetProps {
   property: FormSchemaProperty;
   fieldKey: string;
   error?: string;
+  required?: boolean;
 }
 
-export function TextWidget({ field, property, fieldKey, error }: TextWidgetProps) {
+export function TextWidget({ field, property, fieldKey, error, required }: TextWidgetProps) {
   const widget = property["x-ui-widget"];
   const inputType =
     widget === "email" ? "email" : widget === "tel" ? "tel" : widget === "url" ? "url" : "text";
 
   return (
     <div className="grid gap-2">
-      <Label htmlFor={fieldKey}>{property.title || fieldKey}</Label>
+      <Label htmlFor={fieldKey}>
+        {property.title || fieldKey}
+        {required && <span className="text-destructive ml-1">*</span>}
+      </Label>
       <Input
         id={fieldKey}
         type={inputType}

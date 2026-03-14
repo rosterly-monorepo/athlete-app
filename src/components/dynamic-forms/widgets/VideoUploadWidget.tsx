@@ -14,9 +14,16 @@ interface VideoUploadWidgetProps {
   property: FormSchemaProperty;
   fieldKey: string;
   error?: string;
+  required?: boolean;
 }
 
-export function VideoUploadWidget({ field, property, fieldKey, error }: VideoUploadWidgetProps) {
+export function VideoUploadWidget({
+  field,
+  property,
+  fieldKey,
+  error,
+  required,
+}: VideoUploadWidgetProps) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(field.value || null);
 
@@ -72,7 +79,10 @@ export function VideoUploadWidget({ field, property, fieldKey, error }: VideoUpl
 
   return (
     <div className="grid gap-2">
-      <Label htmlFor={fieldKey}>{property.title || fieldKey}</Label>
+      <Label htmlFor={fieldKey}>
+        {property.title || fieldKey}
+        {required && <span className="text-destructive ml-1">*</span>}
+      </Label>
 
       <div className="space-y-3">
         {/* Video preview */}

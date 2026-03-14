@@ -108,7 +108,28 @@ export function HeroSection() {
                   </div>
                 </Link>
 
-                <h1 className="mx-auto mt-8 max-w-4xl text-6xl font-bold tracking-tight text-balance md:text-7xl lg:mt-16 xl:text-[5.25rem]">
+                <div className="mx-auto mt-8 flex justify-center lg:mt-16">
+                  {/* Light theme: dark logo */}
+                  <Image
+                    src="/branding/logo-light.png"
+                    alt="Rosterly"
+                    width={400}
+                    height={100}
+                    className="h-16 w-auto md:h-20 dark:hidden"
+                    priority
+                  />
+                  {/* Dark theme: light logo */}
+                  <Image
+                    src="/branding/logo-dark.png"
+                    alt="Rosterly"
+                    width={400}
+                    height={100}
+                    className="hidden h-16 w-auto md:h-20 dark:block"
+                    priority
+                  />
+                </div>
+
+                <h1 className="mx-auto mt-8 max-w-4xl text-6xl font-bold tracking-tight text-balance md:text-7xl xl:text-[5.25rem]">
                   Your Athletic Career Starts Here
                 </h1>
                 <p className="text-muted-foreground mx-auto mt-8 max-w-2xl text-lg text-balance">
