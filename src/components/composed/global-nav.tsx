@@ -86,10 +86,10 @@ export function GlobalNav() {
                   Dashboard
                 </Link>
                 <Link
-                  href="/performance"
+                  href="/sports"
                   className="text-muted-foreground hover:text-foreground text-sm transition-colors"
                 >
-                  Performance
+                  Sports
                 </Link>
               </>
             )}

@@ -21,9 +21,9 @@ export default async function DashboardPage() {
     },
     {
       step: "2",
-      title: "Add competition results",
-      description: "Import or manually add your performance data.",
-      href: "/performance",
+      title: "Add your sports",
+      description: "Select your sports and fill in your athletic profile.",
+      href: "/sports",
     },
     {
       step: "3",

@@ -143,28 +143,6 @@ export interface UpdateProfileInput {
   isPublic?: boolean;
 }
 
-// ── Performance ──
-
-export interface CompetitionResult {
-  id: string;
-  athleteId: string;
-  date: string;
-  competitionName: string;
-  event: string;
-  result: string;
-  unit: string;
-  source: "manual" | "imported";
-  providerName?: string;
-}
-
-export interface AddResultInput {
-  date: string;
-  competitionName: string;
-  event: string;
-  result: string;
-  unit: string;
-}
-
 // ── Paginated response ──
 
 export interface PaginatedResponse<T> {
