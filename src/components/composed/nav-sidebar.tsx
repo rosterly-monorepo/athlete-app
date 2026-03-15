@@ -6,7 +6,17 @@ import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
-import { LayoutDashboard, User, Zap, Settings, Menu } from "lucide-react";
+import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
+import { useSidebar } from "@/components/providers/sidebar-provider";
+import {
+  LayoutDashboard,
+  User,
+  Zap,
+  Settings,
+  Menu,
+  ChevronsLeft,
+  ChevronsRight,
+} from "lucide-react";
 
 const navItems = [
   { href: "/dashboard", label: "Overview", icon: LayoutDashboard },
@@ -15,7 +25,13 @@ const navItems = [
   { href: "/settings", label: "Settings", icon: Settings },
 ];
 
-function NavContent({ onNavigate }: { onNavigate?: () => void }) {
+function NavContent({
+  collapsed = false,
+  onNavigate,
+}: {
+  collapsed?: boolean;
+  onNavigate?: () => void;
+}) {
   const pathname = usePathname();
 
   return (
@@ -23,6 +39,30 @@ function NavContent({ onNavigate }: { onNavigate?: () => void }) {
       {navItems.map((item) => {
         const isActive = pathname === item.href;
         const Icon = item.icon;
+
+        if (collapsed) {
+          return (
+            <Tooltip key={item.href}>
+              <TooltipTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className={cn(
+                    "h-9 w-9",
+                    isActive ? "bg-primary/10 text-primary font-medium" : "text-muted-foreground"
+                  )}
+                  asChild
+                  onClick={onNavigate}
+                >
+                  <Link href={item.href}>
+                    <Icon className="h-4 w-4" />
+                  </Link>
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent side="right">{item.label}</TooltipContent>
+            </Tooltip>
+          );
+        }
 
         return (
           <Button
@@ -48,6 +88,7 @@ function NavContent({ onNavigate }: { onNavigate?: () => void }) {
 
 export function NavSidebar() {
   const [open, setOpen] = useState(false);
+  const { collapsed, setCollapsed } = useSidebar();
 
   return (
     <>
@@ -71,8 +112,27 @@ export function NavSidebar() {
       </div>
 
       {/* Desktop sidebar */}
-      <aside className="border-border/50 bg-card/50 hidden w-64 border-r p-4 md:block">
-        <NavContent />
+      <aside
+        className={cn(
+          "border-border/50 bg-card/50 hidden flex-col border-r p-3 transition-all duration-200 md:flex",
+          collapsed ? "w-14 items-center" : "w-64"
+        )}
+      >
+        <NavContent collapsed={collapsed} />
+        <div className={cn("mt-auto pt-4", collapsed ? "" : "self-end")}>
+          <Button
+            variant="ghost"
+            size="icon"
+            className="text-muted-foreground h-8 w-8"
+            onClick={() => setCollapsed(!collapsed)}
+          >
+            {collapsed ? (
+              <ChevronsRight className="h-4 w-4" />
+            ) : (
+              <ChevronsLeft className="h-4 w-4" />
+            )}
+          </Button>
+        </div>
       </aside>
     </>
   );
