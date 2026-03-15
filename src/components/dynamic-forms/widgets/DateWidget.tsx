@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { CalendarIcon } from "lucide-react";
-import { format, parse, isValid } from "date-fns";
+import { format, parse, isValid, subYears } from "date-fns";
 import type { ControllerRenderProps } from "react-hook-form";
 import type { FormSchemaProperty } from "@/types/form-schema";
 import { cn } from "@/lib/utils";
@@ -29,6 +29,9 @@ export function DateWidget({ field, property, fieldKey, error, required }: DateW
 
   // Get calendar bounds from field validation rules
   const constraints = getDateConstraints(fieldKey, property);
+
+  // Default to ~16 years ago for date_of_birth so the calendar opens to a useful month
+  const defaultMonth = validDate ?? (constraints ? subYears(new Date(), 16) : undefined);
 
   return (
     <div className="grid gap-2">
@@ -66,7 +69,8 @@ export function DateWidget({ field, property, fieldKey, error, required }: DateW
               }
               setOpen(false);
             }}
-            defaultMonth={validDate}
+            defaultMonth={defaultMonth}
+            captionLayout={constraints ? "dropdown" : undefined}
             startMonth={constraints?.fromDate}
             endMonth={constraints?.toDate}
             disabled={
