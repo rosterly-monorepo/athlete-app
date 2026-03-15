@@ -6,6 +6,7 @@
 import type { ZodTypeAny } from "zod";
 import { z } from "zod";
 import type { FormSchema, FormSchemaProperty } from "@/types/form-schema";
+import { applyFieldValidations } from "./field-validations";
 
 /**
  * Convert a full JSON Schema to a Zod object schema.
@@ -19,6 +20,7 @@ export function jsonSchemaToZod(schema: FormSchema): z.ZodObject<Record<string, 
     if (prop["x-ui-hidden"]) continue;
 
     let zodType = propertyToZod(prop);
+    zodType = applyFieldValidations(zodType, key, prop);
 
     // Apply required/optional based on schema.required or x-ui-validation.required
     const isRequired = requiredFields.has(key) || prop["x-ui-validation"]?.required;
