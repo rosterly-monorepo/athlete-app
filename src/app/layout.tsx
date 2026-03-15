@@ -15,6 +15,19 @@ const inter = Inter({
 export const metadata: Metadata = {
   title: "Rosterly | Athletic Data Platform",
   description: "Upload your athletic data, build your profile, and get discovered.",
+  icons: {
+    icon: [
+      {
+        url: "/branding/icon-light.png",
+        media: "(prefers-color-scheme: light)",
+      },
+      {
+        url: "/branding/icon-dark.png",
+        media: "(prefers-color-scheme: dark)",
+      },
+    ],
+    apple: "/branding/apple-touch-icon.png",
+  },
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

@@ -65,7 +65,22 @@ const dateOfBirthRule: FieldRule = {
   },
 };
 
-const FIELD_RULES: FieldRule[] = [dateOfBirthRule];
+const phoneRule: FieldRule = {
+  name: "phone-number",
+  matches: (_key, prop) => prop["x-ui-widget"] === "tel",
+  refine: (schema) => {
+    return (schema as ZodString).refine(
+      (val) => {
+        if (!val) return true;
+        const digits = val.replace(/[\s\-().+]/g, "");
+        return /^\d{10,15}$/.test(digits);
+      },
+      { message: "Please enter a valid phone number" }
+    );
+  },
+};
+
+const FIELD_RULES: FieldRule[] = [dateOfBirthRule, phoneRule];
 
 /**
  * Apply all matching field validation rules to a Zod schema.

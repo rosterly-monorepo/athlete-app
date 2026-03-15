@@ -7,3 +7,5 @@ export { CheckboxWidget } from "./CheckboxWidget";
 export { ImageUploadWidget } from "./ImageUploadWidget";
 export { VideoUploadWidget } from "./VideoUploadWidget";
 export { DocumentUploadWidget } from "./DocumentUploadWidget";
+export { ComboboxWidget } from "./ComboboxWidget";
+export { DependentComboboxWidget } from "./DependentComboboxWidget";

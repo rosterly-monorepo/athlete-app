@@ -88,6 +88,60 @@ describe("applyFieldValidations", () => {
   });
 });
 
+const telProperty: FormSchemaProperty = {
+  type: "string",
+  title: "Phone Number",
+  "x-ui-widget": "tel",
+};
+
+describe("phone-number rule", () => {
+  const rule = FIELD_RULES.find((r) => r.name === "phone-number")!;
+
+  it("matches any field with tel widget", () => {
+    expect(rule.matches("phone_primary", telProperty)).toBe(true);
+    expect(rule.matches("phone_secondary", telProperty)).toBe(true);
+  });
+
+  it("does not match non-tel widgets", () => {
+    const textProp: FormSchemaProperty = { type: "string", "x-ui-widget": "text" };
+    expect(rule.matches("phone_primary", textProp)).toBe(false);
+  });
+
+  function validatePhone(value: string) {
+    const base = z.string();
+    const refined = applyFieldValidations(base, "phone_primary", telProperty);
+    return refined.safeParse(value);
+  }
+
+  it("accepts standard US format (555) 123-4567", () => {
+    expect(validatePhone("(555) 123-4567").success).toBe(true);
+  });
+
+  it("accepts digits only", () => {
+    expect(validatePhone("5551234567").success).toBe(true);
+  });
+
+  it("accepts international format +1 555 123 4567", () => {
+    expect(validatePhone("+1 555 123 4567").success).toBe(true);
+  });
+
+  it("rejects too few digits", () => {
+    const result = validatePhone("555-1234");
+    expect(result.success).toBe(false);
+    if (!result.success) {
+      expect(result.error.issues[0].message).toBe("Please enter a valid phone number");
+    }
+  });
+
+  it("rejects non-numeric input", () => {
+    expect(validatePhone("not-a-phone").success).toBe(false);
+  });
+
+  it("passes empty string through (optional field handling)", () => {
+    expect(validatePhone("").success).toBe(true);
+  });
+});
+
 describe("getDateConstraints", () => {
   it("returns constraints for date_of_birth", () => {
     const constraints = getDateConstraints("date_of_birth", dateProperty);

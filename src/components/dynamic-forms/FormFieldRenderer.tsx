@@ -12,6 +12,8 @@ import {
   ImageUploadWidget,
   VideoUploadWidget,
   DocumentUploadWidget,
+  ComboboxWidget,
+  DependentComboboxWidget,
 } from "./widgets";
 
 interface FormFieldRendererProps {
@@ -30,9 +32,9 @@ const WIDGET_MAP = {
   date: DateWidget,
   select: SelectWidget,
   checkbox: CheckboxWidget,
-  "country-select": SelectWidget, // Same as select, backend provides options
-  "state-select": SelectWidget,
-  "language-select": SelectWidget,
+  "country-select": ComboboxWidget,
+  "state-select": DependentComboboxWidget,
+  "language-select": ComboboxWidget,
   "image-upload": ImageUploadWidget,
   "video-upload": VideoUploadWidget,
   "document-upload": DocumentUploadWidget,

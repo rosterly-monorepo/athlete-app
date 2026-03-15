@@ -61,6 +61,10 @@ export interface FormSchemaProperty {
   "x-ui-disabled"?: boolean;
   "x-ui-hidden"?: boolean;
   "x-ui-upload"?: UIUpload;
+  "x-ui-depends-on"?: {
+    field: string;
+    options_key: string;
+  };
 
   // For array types
   items?: FormSchemaProperty;
