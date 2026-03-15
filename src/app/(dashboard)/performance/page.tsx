@@ -1,92 +1,101 @@
 "use client";
 
-import { useMyResults, useDeleteResult } from "@/hooks/use-performance";
-import { Button } from "@/components/ui/button";
+import { useState } from "react";
+import { Dumbbell } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Skeleton } from "@/components/ui/skeleton";
-import { AddResultDialog } from "@/components/forms/add-result-dialog";
-import { Trophy, Trash2 } from "lucide-react";
+import { SportSelector } from "@/components/sports/sport-selector";
+import { SportTabContent } from "@/components/sports/sport-tab-content";
+import { useMySports } from "@/hooks/use-sports";
 
-export default function PerformancePage() {
-  const { data: results, isLoading } = useMyResults();
-  const deleteResult = useDeleteResult();
+export default function SportsPage() {
+  const { data: sports, isLoading, isError, error } = useMySports();
+  const [activeTab, setActiveTab] = useState<string | undefined>(undefined);
 
-  const handleDelete = (id: string) => {
-    if (confirm("Are you sure you want to delete this result?")) {
-      deleteResult.mutate(id);
-    }
-  };
+  // Resolve the active tab — default to first sport
+  const resolvedTab =
+    activeTab && sports?.some((s) => s.sport_code === activeTab)
+      ? activeTab
+      : sports?.[0]?.sport_code;
 
-  return (
-    <div className="max-w-3xl">
-      <div className="mb-8 flex items-center justify-between">
-        <div>
-          <h1 className="mb-2 text-2xl font-bold">Performance</h1>
-          <p className="text-muted-foreground">
-            Track your competition results and training progress.
-          </p>
-        </div>
-        {results && results.length > 0 && <AddResultDialog />}
-      </div>
+  if (isLoading) {
+    return <SportsPageSkeleton />;
+  }
 
-      {isLoading ? (
-        <div className="space-y-4">
-          <Skeleton className="h-20 w-full rounded-xl" />
-          <Skeleton className="h-20 w-full rounded-xl" />
-          <Skeleton className="h-20 w-full rounded-xl" />
-        </div>
-      ) : results && results.length > 0 ? (
-        <div className="space-y-3">
-          {results.map((result) => (
-            <Card key={result.id}>
-              <CardContent className="flex items-center justify-between p-4">
-                <div>
-                  <p className="text-sm font-medium">{result.competitionName}</p>
-                  <p className="text-muted-foreground text-xs">
-                    {result.event} &middot; {new Date(result.date).toLocaleDateString()}
-                  </p>
-                </div>
-                <div className="flex items-center gap-3">
-                  <span className="font-bold">
-                    {result.result} {result.unit}
-                  </span>
-                  <Badge variant={result.source === "imported" ? "default" : "secondary"}>
-                    {result.source}
-                  </Badge>
-                  {result.source === "manual" && (
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="text-muted-foreground hover:text-destructive h-8 w-8"
-                      onClick={() => handleDelete(result.id)}
-                      disabled={deleteResult.isPending}
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
-                  )}
-                </div>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
-      ) : (
-        /* ── Empty State ── */
-        <Card className="border-dashed">
-          <CardContent className="p-12 text-center">
-            <Trophy className="text-muted-foreground mx-auto mb-4 h-10 w-10" />
-            <h3 className="mb-2 text-lg font-semibold">No results yet</h3>
-            <p className="text-muted-foreground mx-auto mb-6 max-w-md text-sm">
-              Add your competition results manually or connect a data provider to automatically
-              import your athletic performance data.
+  if (isError) {
+    return (
+      <div className="max-w-2xl">
+        <h1 className="mb-2 text-2xl font-bold">Sports</h1>
+        <Card>
+          <CardContent className="py-8 text-center">
+            <p className="text-destructive text-sm font-medium">
+              Failed to load sports: {error instanceof Error ? error.message : "Unknown error"}
             </p>
-            <div className="flex items-center justify-center gap-3">
-              <AddResultDialog />
-              <Button variant="outline">Connect Data Provider</Button>
-            </div>
           </CardContent>
         </Card>
+      </div>
+    );
+  }
+
+  return (
+    <div className="max-w-2xl">
+      <div className="mb-6 flex items-center justify-between">
+        <div>
+          <h1 className="mb-1 text-2xl font-bold">Sports</h1>
+          <p className="text-muted-foreground text-sm">
+            Add your sports and fill in your athletic profile.
+          </p>
+        </div>
+        <SportSelector existingSports={sports ?? []} />
+      </div>
+
+      {!sports || sports.length === 0 ? (
+        <Card className="border-dashed">
+          <CardContent className="p-12 text-center">
+            <Dumbbell className="text-muted-foreground mx-auto mb-4 h-10 w-10" />
+            <h3 className="mb-2 text-lg font-semibold">No sports yet</h3>
+            <p className="text-muted-foreground mx-auto mb-6 max-w-md text-sm">
+              Add a sport to start building your athletic profile. Coaches will be able to find you
+              based on your sport-specific information.
+            </p>
+            <SportSelector existingSports={[]} />
+          </CardContent>
+        </Card>
+      ) : sports.length === 1 ? (
+        <SportTabContent sport={sports[0]} />
+      ) : (
+        <Tabs value={resolvedTab} onValueChange={setActiveTab}>
+          <TabsList variant="line" className="mb-4 w-full justify-start">
+            {sports.map((sport) => (
+              <TabsTrigger key={sport.sport_code} value={sport.sport_code}>
+                {sport.sport_name}
+              </TabsTrigger>
+            ))}
+          </TabsList>
+          {sports.map((sport) => (
+            <TabsContent key={sport.sport_code} value={sport.sport_code}>
+              <SportTabContent sport={sport} />
+            </TabsContent>
+          ))}
+        </Tabs>
       )}
+    </div>
+  );
+}
+
+function SportsPageSkeleton() {
+  return (
+    <div className="max-w-2xl">
+      <div className="mb-6 flex items-center justify-between">
+        <div>
+          <Skeleton className="mb-2 h-8 w-32" />
+          <Skeleton className="h-4 w-64" />
+        </div>
+        <Skeleton className="h-9 w-24" />
+      </div>
+      <Skeleton className="h-10 w-48" />
+      <Skeleton className="mt-4 h-64 w-full rounded-xl" />
     </div>
   );
 }

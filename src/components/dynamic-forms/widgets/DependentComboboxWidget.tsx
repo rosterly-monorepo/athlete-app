@@ -27,7 +27,7 @@ export function DependentComboboxWidget({
   const parentValue = dependsOn ? watch(dependsOn.field) : undefined;
   const prevParentValue = useRef(parentValue);
 
-  const allOptions: UIOption[] = property["x-ui-options"] || [];
+  const allOptions = useMemo<UIOption[]>(() => property["x-ui-options"] || [], [property]);
 
   // Filter options based on parent field value
   const filteredProperty = useMemo(() => {

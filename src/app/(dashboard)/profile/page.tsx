@@ -21,6 +21,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { DynamicForm, DynamicFormSkeleton } from "@/components/dynamic-forms";
+import { LanguageCollection } from "@/components/forms/LanguageCollection";
 import { Progress } from "@/components/ui/progress";
 import { useSidebar } from "@/components/providers/sidebar-provider";
 import { cn } from "@/lib/utils";
@@ -245,6 +246,15 @@ interface ProfileSectionProps {
 }
 
 function ProfileSection({ sectionId, schema, initialData }: ProfileSectionProps) {
+  // Collection sections get their own dedicated components
+  if (sectionId === "language") {
+    return <LanguageCollection schema={schema} />;
+  }
+
+  return <StandardProfileSection sectionId={sectionId} schema={schema} initialData={initialData} />;
+}
+
+function StandardProfileSection({ sectionId, schema, initialData }: ProfileSectionProps) {
   const mutation = useSaveProfileSection(sectionId, {
     successMessage: `${schema.title || sectionId} saved`,
   });

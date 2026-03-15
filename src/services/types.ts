@@ -674,3 +674,33 @@ export interface AthleteSearchResponse {
   aggregations: Record<string, AggBucket[]>;
   max_score: number;
 }
+
+// ── Sport Management (athlete self-service) ──
+
+export interface SportInfo {
+  code: string;
+  name: string;
+}
+
+export interface AthleteSportDetail {
+  id: number;
+  sport_code: string;
+  sport_name: string;
+  is_primary: boolean;
+  years_experience: number | null;
+  current_club: string | null;
+  current_coach: string | null;
+  recruiting_status: string | null;
+  created_at: string;
+  reference_coaches: ReferenceCoachView[];
+  config: Record<string, unknown> | null;
+  has_config: boolean;
+}
+
+export interface ReferenceCoachInput {
+  first_name: string;
+  last_name: string;
+  email?: string | null;
+  phone?: string | null;
+  display_order?: number;
+}

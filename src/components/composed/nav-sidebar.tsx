@@ -21,7 +21,7 @@ import {
 const navItems = [
   { href: "/dashboard", label: "Overview", icon: LayoutDashboard },
   { href: "/profile", label: "My Profile", icon: User },
-  { href: "/performance", label: "Performance", icon: Zap },
+  { href: "/performance", label: "Sports", icon: Zap },
   { href: "/settings", label: "Settings", icon: Settings },
 ];
 
