@@ -684,3 +684,36 @@ export interface ReferenceCoachInput {
   phone?: string | null;
   display_order?: number;
 }
+
+// ── Integrations ──
+
+export interface IntegrationProviderInfo {
+  code: string;
+  name: string;
+  auth_method: string;
+  description: string;
+}
+
+export interface IntegrationConnection {
+  id: number;
+  provider_code: string;
+  status: string;
+  external_user_id: string | null;
+  external_username: string | null;
+  last_sync_at: string | null;
+  sync_error_count: number;
+  created_at: string;
+}
+
+export interface IntegrationSyncLog {
+  id: number;
+  trigger: string;
+  status: string;
+  records_fetched: number;
+  records_created: number;
+  records_updated: number;
+  records_skipped: number;
+  error_message: string | null;
+  started_at: string;
+  completed_at: string | null;
+}

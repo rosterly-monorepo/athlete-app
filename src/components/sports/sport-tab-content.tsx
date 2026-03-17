@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { SportConfigForm } from "./sport-config-form";
 import { ReferenceCoachesSection } from "./reference-coaches-section";
+import { IntegrationConnectionCard } from "@/components/integrations/integration-connection-card";
 import { useRemoveSport, useUpdateSport } from "@/hooks/use-sports";
 import type { AthleteSportDetail } from "@/services/types";
 
@@ -70,6 +71,9 @@ export function SportTabContent({ sport }: SportTabContentProps) {
 
       {/* Reference coaches */}
       <ReferenceCoachesSection sportId={sport.id} />
+
+      {/* External integrations (e.g., Concept2 for rowing) */}
+      <IntegrationConnectionCard sportCode={sport.sport_code} />
     </div>
   );
 }

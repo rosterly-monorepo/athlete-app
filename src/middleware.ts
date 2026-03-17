@@ -32,6 +32,7 @@ const isProtectedRoute = createRouteMatcher([
   "/sports(.*)",
   "/settings(.*)",
   "/coach(.*)",
+  "/integrations(.*)",
 ]);
 
 const isCoachRoute = createRouteMatcher(["/coach(.*)"]);
