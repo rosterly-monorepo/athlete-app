@@ -18,8 +18,23 @@ export interface FieldError {
   message: string;
 }
 
+/** Raw Pydantic validation error item (FastAPI default 422 format). */
+interface PydanticErrorItem {
+  loc: (string | number)[];
+  msg: string;
+  type: string;
+  input?: unknown;
+}
+
+/**
+ * API error response body.
+ *
+ * Handles two formats:
+ * - Normalized: `{detail: string, field_errors: [{field, message}]}`
+ * - FastAPI default: `{detail: [{loc, msg, type}]}`
+ */
 export interface ApiErrorBody {
-  detail: string;
+  detail: string | PydanticErrorItem[];
   field_errors?: FieldError[];
 }
 
@@ -34,20 +49,43 @@ export class ApiClientError extends Error {
     this.body = body;
   }
 
-  /** True when the backend returned Pydantic field-level validation errors (422). */
+  /** True when the backend returned field-level validation errors (422). */
   get isValidationError(): boolean {
-    return this.status === 422 && Array.isArray(this.body?.field_errors);
+    if (this.status !== 422) return false;
+    // Normalized format
+    if (Array.isArray(this.body?.field_errors)) return true;
+    // FastAPI default format (detail is an array of Pydantic errors)
+    if (Array.isArray(this.body?.detail)) return true;
+    return false;
   }
 
   /** Human-readable detail string for toast messages. */
   get userMessage(): string {
-    return this.body?.detail ?? "Something went wrong. Please try again.";
+    if (!this.body?.detail) return "Something went wrong. Please try again.";
+    // Normalized format: detail is a string
+    if (typeof this.body.detail === "string") return this.body.detail;
+    // FastAPI default format: detail is an array — summarize
+    if (Array.isArray(this.body.detail)) return "Please fix the highlighted fields.";
+    return "Something went wrong. Please try again.";
   }
 
   /** Extract field-level errors as a Record for React Hook Form's setError. */
   get fieldErrors(): Record<string, string> {
-    if (!this.body?.field_errors) return {};
-    return Object.fromEntries(this.body.field_errors.map((e) => [e.field, e.message]));
+    // Normalized format: use field_errors array
+    if (Array.isArray(this.body?.field_errors)) {
+      return Object.fromEntries(this.body!.field_errors.map((e) => [e.field, e.message]));
+    }
+    // FastAPI default format: parse from detail array
+    if (this.status === 422 && Array.isArray(this.body?.detail)) {
+      const errors: Record<string, string> = {};
+      for (const item of this.body!.detail as PydanticErrorItem[]) {
+        const fieldPath = item.loc.filter((s) => s !== "body" && s !== "query" && s !== "path");
+        const fieldName = fieldPath.join(".") || "__root__";
+        errors[fieldName] = item.msg;
+      }
+      return errors;
+    }
+    return {};
   }
 }
 
