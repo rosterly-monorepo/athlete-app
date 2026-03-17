@@ -3,92 +3,92 @@
 import { useAuth } from "@clerk/nextjs";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import {
-  listLanguages,
-  createLanguage,
-  updateLanguage,
-  deleteLanguage,
-} from "@/services/languages";
-import type { LanguageCreateInput, LanguageUpdateInput } from "@/services/languages";
+  listActivities,
+  createActivity,
+  updateActivity,
+  deleteActivity,
+} from "@/services/activities";
+import type { ActivityCreateInput, ActivityUpdateInput } from "@/services/activities";
 import { ApiClientError } from "@/services/api-client";
 import { toast } from "sonner";
 import { athleteKeys } from "./use-athlete";
 
-export const languageKeys = {
-  all: ["languages"] as const,
-  list: () => [...languageKeys.all, "list"] as const,
+export const activityKeys = {
+  all: ["activities"] as const,
+  list: () => [...activityKeys.all, "list"] as const,
 };
 
-export function useLanguages() {
+export function useActivities() {
   const { getToken } = useAuth();
 
   return useQuery({
-    queryKey: languageKeys.list(),
+    queryKey: activityKeys.list(),
     queryFn: async () => {
       const token = await getToken();
-      return listLanguages(token!);
+      return listActivities(token!);
     },
   });
 }
 
-export function useCreateLanguage() {
+export function useCreateActivity() {
   const { getToken } = useAuth();
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (data: LanguageCreateInput) => {
+    mutationFn: async (data: ActivityCreateInput) => {
       const token = await getToken();
-      return createLanguage(token!, data);
+      return createActivity(token!, data);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: languageKeys.all });
+      queryClient.invalidateQueries({ queryKey: activityKeys.all });
       queryClient.invalidateQueries({ queryKey: athleteKeys.myProfile });
-      toast.success("Language added");
+      toast.success("Activity added");
     },
     onError: (error) => {
       const message = error instanceof ApiClientError ? error.userMessage : "Something went wrong.";
-      toast.error("Failed to add language", { description: message });
+      toast.error("Failed to add activity", { description: message });
     },
   });
 }
 
-export function useUpdateLanguage() {
+export function useUpdateActivity() {
   const { getToken } = useAuth();
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async ({ id, data }: { id: number; data: LanguageUpdateInput }) => {
+    mutationFn: async ({ id, data }: { id: number; data: ActivityUpdateInput }) => {
       const token = await getToken();
-      return updateLanguage(token!, id, data);
+      return updateActivity(token!, id, data);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: languageKeys.all });
+      queryClient.invalidateQueries({ queryKey: activityKeys.all });
       queryClient.invalidateQueries({ queryKey: athleteKeys.myProfile });
-      toast.success("Language updated");
+      toast.success("Activity updated");
     },
     onError: (error) => {
       const message = error instanceof ApiClientError ? error.userMessage : "Something went wrong.";
-      toast.error("Failed to update language", { description: message });
+      toast.error("Failed to update activity", { description: message });
     },
   });
 }
 
-export function useDeleteLanguage() {
+export function useDeleteActivity() {
   const { getToken } = useAuth();
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (langId: number) => {
+    mutationFn: async (activityId: number) => {
       const token = await getToken();
-      return deleteLanguage(token!, langId);
+      return deleteActivity(token!, activityId);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: languageKeys.all });
+      queryClient.invalidateQueries({ queryKey: activityKeys.all });
       queryClient.invalidateQueries({ queryKey: athleteKeys.myProfile });
-      toast.success("Language removed");
+      toast.success("Activity removed");
     },
     onError: (error) => {
       const message = error instanceof ApiClientError ? error.userMessage : "Something went wrong.";
-      toast.error("Failed to remove language", { description: message });
+      toast.error("Failed to remove activity", { description: message });
     },
   });
 }

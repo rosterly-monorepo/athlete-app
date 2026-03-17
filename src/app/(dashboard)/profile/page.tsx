@@ -1,9 +1,10 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   ArrowRight,
   Check,
+  ChevronDown,
   UserCircle,
   MapPin,
   Phone,
@@ -21,7 +22,9 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { DynamicForm, DynamicFormSkeleton } from "@/components/dynamic-forms";
+import { ActivityCollection } from "@/components/forms/ActivityCollection";
 import { LanguageCollection } from "@/components/forms/LanguageCollection";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { Progress } from "@/components/ui/progress";
 import { useSidebar } from "@/components/providers/sidebar-provider";
 import { cn } from "@/lib/utils";
@@ -32,6 +35,7 @@ import {
   getOverallCompletion,
 } from "@/lib/profile-completion";
 import type { FormSchema } from "@/types/form-schema";
+import { ApiClientError } from "@/services/api-client";
 import type { LucideIcon } from "lucide-react";
 
 const sectionIcons: Record<string, LucideIcon> = {
@@ -58,7 +62,11 @@ export default function ProfilePage() {
     return () => setCollapsed(false);
   }, [setCollapsed]);
 
-  const sectionEntries = Object.entries(schemas ?? {});
+  const allSchemaEntries = Object.entries(schemas ?? {});
+  const embeddedSchemas = Object.fromEntries(
+    allSchemaEntries.filter(([, schema]) => schema["x-ui-embedded-in"])
+  );
+  const sectionEntries = allSchemaEntries.filter(([, schema]) => !schema["x-ui-embedded-in"]);
   const profileData = profile as Record<string, unknown> | undefined;
 
   const initialSection = schemas
@@ -214,6 +222,7 @@ export default function ProfilePage() {
                     sectionId={sectionId}
                     schema={schema}
                     initialData={extractSectionData(schema, profileData)}
+                    embeddedSchemas={embeddedSchemas}
                   />
                 ) : null
               )}
@@ -229,6 +238,7 @@ export default function ProfilePage() {
                   sectionId={sectionId}
                   schema={schema}
                   initialData={extractSectionData(schema, profileData)}
+                  embeddedSchemas={embeddedSchemas}
                 />
               ) : null
             )}
@@ -243,21 +253,144 @@ interface ProfileSectionProps {
   sectionId: string;
   schema: FormSchema;
   initialData?: Record<string, unknown>;
+  embeddedSchemas?: Record<string, FormSchema>;
 }
 
-function ProfileSection({ sectionId, schema, initialData }: ProfileSectionProps) {
+function ProfileSection({ sectionId, schema, initialData, embeddedSchemas }: ProfileSectionProps) {
   // Collection sections get their own dedicated components
   if (sectionId === "language") {
     return <LanguageCollection schema={schema} />;
   }
+  if (sectionId === "activity") {
+    return <ActivityCollection schema={schema} />;
+  }
+
+  // Sections with embedded sub-sections (e.g., address + alternate address)
+  const embedded = Object.entries(embeddedSchemas ?? {}).filter(
+    ([, s]) => s["x-ui-embedded-in"] === sectionId
+  );
+  if (embedded.length > 0) {
+    return (
+      <SectionWithEmbedded
+        sectionId={sectionId}
+        schema={schema}
+        initialData={initialData}
+        embeddedSections={embedded}
+      />
+    );
+  }
 
   return <StandardProfileSection sectionId={sectionId} schema={schema} initialData={initialData} />;
+}
+
+interface SectionWithEmbeddedProps {
+  sectionId: string;
+  schema: FormSchema;
+  initialData?: Record<string, unknown>;
+  embeddedSections: [string, FormSchema][];
+}
+
+function SectionWithEmbedded({
+  sectionId,
+  schema,
+  initialData,
+  embeddedSections,
+}: SectionWithEmbeddedProps) {
+  const mutation = useSaveProfileSection(sectionId, {
+    successMessage: `${schema.title || sectionId} saved`,
+  });
+
+  const { fieldErrors, formError } = useMemo(() => {
+    if (!mutation.error || !(mutation.error instanceof ApiClientError)) {
+      return { fieldErrors: {} as Record<string, string>, formError: null as string | null };
+    }
+    return { fieldErrors: mutation.error.fieldErrors, formError: mutation.error.userMessage };
+  }, [mutation.error]);
+
+  const { data: profile } = useMyProfile();
+  const profileData = profile as Record<string, unknown> | undefined;
+
+  return (
+    <div className="space-y-6">
+      <DynamicForm
+        schema={schema}
+        initialData={initialData}
+        onSubmit={(data) => mutation.mutate(data)}
+        isSubmitting={mutation.isPending}
+        submitLabel={`Save ${schema.title || sectionId}`}
+        serverErrors={Object.keys(fieldErrors).length > 0 ? fieldErrors : undefined}
+        formError={mutation.error ? formError : null}
+      />
+
+      {embeddedSections.map(([embeddedId, embeddedSchema]) => (
+        <EmbeddedCollapsibleSection
+          key={embeddedId}
+          sectionId={embeddedId}
+          schema={embeddedSchema}
+          initialData={extractSectionData(embeddedSchema, profileData)}
+        />
+      ))}
+    </div>
+  );
+}
+
+function EmbeddedCollapsibleSection({
+  sectionId,
+  schema,
+  initialData,
+}: {
+  sectionId: string;
+  schema: FormSchema;
+  initialData?: Record<string, unknown>;
+}) {
+  const [open, setOpen] = useState(false);
+  const mutation = useSaveProfileSection(sectionId, {
+    successMessage: `${schema.title || sectionId} saved`,
+  });
+
+  const { fieldErrors, formError } = useMemo(() => {
+    if (!mutation.error || !(mutation.error instanceof ApiClientError)) {
+      return { fieldErrors: {} as Record<string, string>, formError: null as string | null };
+    }
+    return { fieldErrors: mutation.error.fieldErrors, formError: mutation.error.userMessage };
+  }, [mutation.error]);
+
+  return (
+    <Collapsible open={open} onOpenChange={setOpen}>
+      <CollapsibleTrigger asChild>
+        <Button variant="ghost" className="flex w-full items-center justify-between px-0">
+          <span className="text-sm font-medium">{schema.title || sectionId}</span>
+          <ChevronDown className={cn("h-4 w-4 transition-transform", open && "rotate-180")} />
+        </Button>
+      </CollapsibleTrigger>
+      <CollapsibleContent>
+        <div className="pt-2">
+          <DynamicForm
+            schema={schema}
+            initialData={initialData}
+            onSubmit={(data) => mutation.mutate(data)}
+            isSubmitting={mutation.isPending}
+            submitLabel={`Save ${schema.title || sectionId}`}
+            serverErrors={Object.keys(fieldErrors).length > 0 ? fieldErrors : undefined}
+            formError={mutation.error ? formError : null}
+          />
+        </div>
+      </CollapsibleContent>
+    </Collapsible>
+  );
 }
 
 function StandardProfileSection({ sectionId, schema, initialData }: ProfileSectionProps) {
   const mutation = useSaveProfileSection(sectionId, {
     successMessage: `${schema.title || sectionId} saved`,
   });
+
+  const { fieldErrors, formError } = useMemo(() => {
+    if (!mutation.error || !(mutation.error instanceof ApiClientError)) {
+      return { fieldErrors: {} as Record<string, string>, formError: null as string | null };
+    }
+    return { fieldErrors: mutation.error.fieldErrors, formError: mutation.error.userMessage };
+  }, [mutation.error]);
 
   return (
     <DynamicForm
@@ -266,6 +399,8 @@ function StandardProfileSection({ sectionId, schema, initialData }: ProfileSecti
       onSubmit={(data) => mutation.mutate(data)}
       isSubmitting={mutation.isPending}
       submitLabel={`Save ${schema.title || sectionId}`}
+      serverErrors={Object.keys(fieldErrors).length > 0 ? fieldErrors : undefined}
+      formError={mutation.error ? formError : null}
     />
   );
 }

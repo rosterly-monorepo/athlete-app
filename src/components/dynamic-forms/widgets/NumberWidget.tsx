@@ -1,9 +1,9 @@
 "use client";
 
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import type { ControllerRenderProps } from "react-hook-form";
 import type { FormSchemaProperty } from "@/types/form-schema";
+import { FieldLabel } from "../FieldLabel";
 
 interface NumberWidgetProps {
   field: ControllerRenderProps;
@@ -19,10 +19,7 @@ export function NumberWidget({ field, property, fieldKey, error, required }: Num
 
   return (
     <div className="grid gap-2">
-      <Label htmlFor={fieldKey}>
-        {property.title || fieldKey}
-        {required && <span className="text-destructive ml-1">*</span>}
-      </Label>
+      <FieldLabel fieldKey={fieldKey} property={property} required={required} />
       <Input
         id={fieldKey}
         type="number"

@@ -9,8 +9,8 @@ import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { Label } from "@/components/ui/label";
 import { getDateConstraints } from "../utils/field-validations";
+import { FieldLabel } from "../FieldLabel";
 
 interface DateWidgetProps {
   field: ControllerRenderProps;
@@ -35,10 +35,7 @@ export function DateWidget({ field, property, fieldKey, error, required }: DateW
 
   return (
     <div className="grid gap-2">
-      <Label htmlFor={fieldKey}>
-        {property.title || fieldKey}
-        {required && <span className="text-destructive ml-1">*</span>}
-      </Label>
+      <FieldLabel fieldKey={fieldKey} property={property} required={required} />
       <Popover open={open} onOpenChange={setOpen}>
         <PopoverTrigger asChild>
           <Button

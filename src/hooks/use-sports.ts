@@ -2,6 +2,7 @@
 
 import { useAuth } from "@clerk/nextjs";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { ApiClientError } from "@/services/api-client";
 import { toast } from "sonner";
 import {
   getAvailableSports,
@@ -73,8 +74,9 @@ export function useAddSport() {
       queryClient.invalidateQueries({ queryKey: sportsKeys.mine() });
       toast.success(`${result.sport_name} added`);
     },
-    onError: () => {
-      toast.error("Failed to add sport");
+    onError: (error) => {
+      const message = error instanceof ApiClientError ? error.userMessage : "Something went wrong.";
+      toast.error("Failed to add sport", { description: message });
     },
   });
 }
@@ -92,8 +94,9 @@ export function useUpdateSport() {
       queryClient.invalidateQueries({ queryKey: sportsKeys.mine() });
       toast.success("Sport updated");
     },
-    onError: () => {
-      toast.error("Failed to update sport");
+    onError: (error) => {
+      const message = error instanceof ApiClientError ? error.userMessage : "Something went wrong.";
+      toast.error("Failed to update sport", { description: message });
     },
   });
 }
@@ -111,8 +114,9 @@ export function useRemoveSport() {
       queryClient.invalidateQueries({ queryKey: sportsKeys.mine() });
       toast.success("Sport removed");
     },
-    onError: () => {
-      toast.error("Failed to remove sport");
+    onError: (error) => {
+      const message = error instanceof ApiClientError ? error.userMessage : "Something went wrong.";
+      toast.error("Failed to remove sport", { description: message });
     },
   });
 }
@@ -161,8 +165,9 @@ export function useSaveSportConfig(sportCode: string) {
       queryClient.invalidateQueries({ queryKey: sportsKeys.mine() });
       toast.success("Sport profile saved");
     },
-    onError: () => {
-      toast.error("Failed to save sport profile");
+    onError: (error) => {
+      const message = error instanceof ApiClientError ? error.userMessage : "Something went wrong.";
+      toast.error("Failed to save sport profile", { description: message });
     },
   });
 }
@@ -198,8 +203,9 @@ export function useAddReferenceCoach(sportId: number) {
       queryClient.invalidateQueries({ queryKey: sportsKeys.mine() });
       toast.success("Reference coach added");
     },
-    onError: () => {
-      toast.error("Failed to add reference coach");
+    onError: (error) => {
+      const message = error instanceof ApiClientError ? error.userMessage : "Something went wrong.";
+      toast.error("Failed to add reference coach", { description: message });
     },
   });
 }
@@ -226,8 +232,9 @@ export function useUpdateReferenceCoach(sportId: number) {
       queryClient.invalidateQueries({ queryKey: sportsKeys.mine() });
       toast.success("Reference coach updated");
     },
-    onError: () => {
-      toast.error("Failed to update reference coach");
+    onError: (error) => {
+      const message = error instanceof ApiClientError ? error.userMessage : "Something went wrong.";
+      toast.error("Failed to update reference coach", { description: message });
     },
   });
 }
@@ -248,8 +255,9 @@ export function useDeleteReferenceCoach(sportId: number) {
       queryClient.invalidateQueries({ queryKey: sportsKeys.mine() });
       toast.success("Reference coach removed");
     },
-    onError: () => {
-      toast.error("Failed to remove reference coach");
+    onError: (error) => {
+      const message = error instanceof ApiClientError ? error.userMessage : "Something went wrong.";
+      toast.error("Failed to remove reference coach", { description: message });
     },
   });
 }

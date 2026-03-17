@@ -8,6 +8,7 @@ import {
   getAllFormSchemas,
   saveProfileSection,
 } from "@/services/forms";
+import { ApiClientError } from "@/services/api-client";
 import { toast } from "sonner";
 import type { FormSchema } from "@/types/form-schema";
 import { athleteKeys } from "./use-athlete";
@@ -112,10 +113,12 @@ export function useSaveProfileSection<T extends Record<string, unknown>>(
       });
       onSuccess?.();
     },
-    onError: () => {
-      toast.error(errorMessage, {
-        description: "Something went wrong. Please try again.",
-      });
+    onError: (error) => {
+      const message =
+        error instanceof ApiClientError
+          ? error.userMessage
+          : "Something went wrong. Please try again.";
+      toast.error(errorMessage, { description: message });
     },
   });
 }

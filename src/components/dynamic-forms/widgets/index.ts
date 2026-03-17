@@ -9,3 +9,5 @@ export { VideoUploadWidget } from "./VideoUploadWidget";
 export { DocumentUploadWidget } from "./DocumentUploadWidget";
 export { ComboboxWidget } from "./ComboboxWidget";
 export { DependentComboboxWidget } from "./DependentComboboxWidget";
+export { SwitchWidget } from "./SwitchWidget";
+export { TimeInputWidget } from "./TimeInputWidget";

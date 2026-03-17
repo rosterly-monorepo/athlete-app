@@ -1,9 +1,9 @@
 "use client";
 
 import { Textarea } from "@/components/ui/textarea";
-import { Label } from "@/components/ui/label";
 import type { ControllerRenderProps } from "react-hook-form";
 import type { FormSchemaProperty } from "@/types/form-schema";
+import { FieldLabel } from "../FieldLabel";
 
 interface TextareaWidgetProps {
   field: ControllerRenderProps;
@@ -24,10 +24,7 @@ export function TextareaWidget({
 
   return (
     <div className="grid gap-2">
-      <Label htmlFor={fieldKey}>
-        {property.title || fieldKey}
-        {required && <span className="text-destructive ml-1">*</span>}
-      </Label>
+      <FieldLabel fieldKey={fieldKey} property={property} required={required} />
       <Textarea
         id={fieldKey}
         placeholder={property["x-ui-placeholder"]}

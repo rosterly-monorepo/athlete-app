@@ -1,6 +1,5 @@
 "use client";
 
-import { Label } from "@/components/ui/label";
 import {
   Select,
   SelectContent,
@@ -10,6 +9,7 @@ import {
 } from "@/components/ui/select";
 import type { ControllerRenderProps } from "react-hook-form";
 import type { FormSchemaProperty } from "@/types/form-schema";
+import { FieldLabel } from "../FieldLabel";
 
 interface SelectWidgetProps {
   field: ControllerRenderProps;
@@ -29,10 +29,7 @@ export function SelectWidget({ field, property, fieldKey, error, required }: Sel
 
   return (
     <div className="grid gap-2">
-      <Label htmlFor={fieldKey}>
-        {property.title || fieldKey}
-        {required && <span className="text-destructive ml-1">*</span>}
-      </Label>
+      <FieldLabel fieldKey={fieldKey} property={property} required={required} />
       <Select
         value={field.value ?? ""}
         onValueChange={field.onChange}

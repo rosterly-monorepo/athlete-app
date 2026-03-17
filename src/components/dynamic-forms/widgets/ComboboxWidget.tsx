@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useRef, useEffect, useCallback } from "react";
-import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Button } from "@/components/ui/button";
@@ -9,6 +8,7 @@ import { Check, ChevronsUpDown } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { ControllerRenderProps } from "react-hook-form";
 import type { FormSchemaProperty, UIOption } from "@/types/form-schema";
+import { FieldLabel } from "../FieldLabel";
 
 interface ComboboxWidgetProps {
   field: ControllerRenderProps;
@@ -119,10 +119,7 @@ export function ComboboxWidget({
 
   return (
     <div className="grid gap-2">
-      <Label htmlFor={fieldKey}>
-        {property.title || fieldKey}
-        {required && <span className="text-destructive ml-1">*</span>}
-      </Label>
+      <FieldLabel fieldKey={fieldKey} property={property} required={required} />
       <Popover open={open} onOpenChange={setOpen}>
         <PopoverTrigger asChild>
           <Button

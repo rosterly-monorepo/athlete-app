@@ -32,7 +32,13 @@ export function DependentComboboxWidget({
   // Filter options based on parent field value
   const filteredProperty = useMemo(() => {
     if (!dependsOn || !parentValue) {
-      // No parent selected — show all options
+      // No parent selected — show default category if configured, otherwise all
+      if (dependsOn?.default_category) {
+        const defaults = allOptions.filter(
+          (opt) => opt[dependsOn.options_key as keyof UIOption] === dependsOn.default_category
+        );
+        return { ...property, "x-ui-options": defaults };
+      }
       return property;
     }
 

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Plus, Trash2, Mail, Phone } from "lucide-react";
+import { Plus, Trash2, Mail, Phone, Building } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -59,6 +59,12 @@ export function ReferenceCoachesSection({ sportId }: ReferenceCoachesSectionProp
                     {coach.first_name} {coach.last_name}
                   </p>
                   <div className="text-muted-foreground mt-1 flex flex-wrap gap-x-4 gap-y-1 text-xs">
+                    {coach.organization && (
+                      <span className="flex items-center gap-1">
+                        <Building className="h-3 w-3" />
+                        {coach.organization}
+                      </span>
+                    )}
                     {coach.email && (
                       <span className="flex items-center gap-1">
                         <Mail className="h-3 w-3" />
@@ -101,6 +107,7 @@ function AddReferenceCoachDialog({ sportId }: { sportId: number }) {
     const data: ReferenceCoachInput = {
       first_name: formData.get("first_name") as string,
       last_name: formData.get("last_name") as string,
+      organization: (formData.get("organization") as string) || null,
       email: (formData.get("email") as string) || null,
       phone: (formData.get("phone") as string) || null,
     };
@@ -129,6 +136,10 @@ function AddReferenceCoachDialog({ sportId }: { sportId: number }) {
               <Label htmlFor="last_name">Last Name</Label>
               <Input id="last_name" name="last_name" required />
             </div>
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="organization">Organization</Label>
+            <Input id="organization" name="organization" placeholder="e.g., Lincoln High School" />
           </div>
           <div className="space-y-2">
             <Label htmlFor="email">Email</Label>

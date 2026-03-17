@@ -19,7 +19,9 @@ export type UIWidgetType =
   | "language-select"
   | "image-upload"
   | "video-upload"
-  | "document-upload";
+  | "document-upload"
+  | "switch"
+  | "time-input";
 
 /** Option for select/dropdown fields */
 export interface UIOption {
@@ -61,9 +63,11 @@ export interface FormSchemaProperty {
   "x-ui-disabled"?: boolean;
   "x-ui-hidden"?: boolean;
   "x-ui-upload"?: UIUpload;
+  "x-ui-tooltip"?: string;
   "x-ui-depends-on"?: {
     field: string;
     options_key: string;
+    default_category?: string;
   };
 
   // For array types
@@ -76,6 +80,7 @@ export interface FormSchemaGroup {
   title?: string;
   description?: string;
   fields: string[];
+  inline?: boolean;
 }
 
 /** Complete form schema with properties and UI hints */
@@ -94,6 +99,10 @@ export interface FormSchema {
   // Profile key — derived from the SQLModel __tablename__ on the backend.
   // Used to extract section data from the full profile response.
   "x-profile-key"?: string;
+
+  // When set, this section should be rendered inside the named parent section
+  // instead of as its own top-level tab.
+  "x-ui-embedded-in"?: string;
 }
 
 /** Section metadata from /api/v1/forms/sections */

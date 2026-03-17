@@ -25,6 +25,7 @@ import type {
   UpdateNoteInput,
   RecruitmentStage,
 } from "@/services/types";
+import { ApiClientError } from "@/services/api-client";
 import { toast } from "sonner";
 
 // ── Query Keys ──
@@ -68,8 +69,9 @@ export function useAddRecord(programId: number) {
       });
       toast.success("Athlete added to board");
     },
-    onError: () => {
-      toast.error("Failed to add athlete");
+    onError: (error) => {
+      const message = error instanceof ApiClientError ? error.userMessage : "Something went wrong.";
+      toast.error("Failed to add athlete", { description: message });
     },
   });
 }
@@ -185,7 +187,8 @@ export function useMoveRecord(programId: number) {
       if (context?.previousBoard) {
         queryClient.setQueryData(recruitmentKeys.board(programId), context.previousBoard);
       }
-      toast.error("Failed to move athlete");
+      const message = _err instanceof ApiClientError ? _err.userMessage : "Something went wrong.";
+      toast.error("Failed to move athlete", { description: message });
     },
     onSettled: () => {
       // Refetch to ensure consistency
@@ -298,8 +301,9 @@ export function useUpdateRecord(programId: number) {
       });
       toast.success("Record updated");
     },
-    onError: () => {
-      toast.error("Failed to update record");
+    onError: (error) => {
+      const message = error instanceof ApiClientError ? error.userMessage : "Something went wrong.";
+      toast.error("Failed to update record", { description: message });
     },
   });
 }
@@ -328,8 +332,9 @@ export function useArchiveRecord(programId: number) {
       });
       toast.success("Athlete archived");
     },
-    onError: () => {
-      toast.error("Failed to archive athlete");
+    onError: (error) => {
+      const message = error instanceof ApiClientError ? error.userMessage : "Something went wrong.";
+      toast.error("Failed to archive athlete", { description: message });
     },
   });
 }
@@ -355,8 +360,9 @@ export function useAddNote(programId: number) {
       });
       toast.success("Note added");
     },
-    onError: () => {
-      toast.error("Failed to add note");
+    onError: (error) => {
+      const message = error instanceof ApiClientError ? error.userMessage : "Something went wrong.";
+      toast.error("Failed to add note", { description: message });
     },
   });
 }
@@ -379,8 +385,9 @@ export function useUpdateNote(programId: number, recordId: number) {
       });
       toast.success("Note updated");
     },
-    onError: () => {
-      toast.error("Failed to update note");
+    onError: (error) => {
+      const message = error instanceof ApiClientError ? error.userMessage : "Something went wrong.";
+      toast.error("Failed to update note", { description: message });
     },
   });
 }
@@ -403,8 +410,9 @@ export function useDeleteNote(programId: number, recordId: number) {
       });
       toast.success("Note deleted");
     },
-    onError: () => {
-      toast.error("Failed to delete note");
+    onError: (error) => {
+      const message = error instanceof ApiClientError ? error.userMessage : "Something went wrong.";
+      toast.error("Failed to delete note", { description: message });
     },
   });
 }

@@ -1,7 +1,6 @@
 "use client";
 
 import { useCallback, useRef, useState } from "react";
-import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
@@ -9,6 +8,7 @@ import { useFileUpload } from "@/hooks/use-file-upload";
 import { Upload, X, ImageIcon } from "lucide-react";
 import type { ControllerRenderProps } from "react-hook-form";
 import type { FormSchemaProperty } from "@/types/form-schema";
+import { FieldLabel } from "../FieldLabel";
 
 interface ImageUploadWidgetProps {
   field: ControllerRenderProps;
@@ -83,10 +83,7 @@ export function ImageUploadWidget({
 
   return (
     <div className="grid gap-2">
-      <Label htmlFor={fieldKey}>
-        {property.title || fieldKey}
-        {required && <span className="text-destructive ml-1">*</span>}
-      </Label>
+      <FieldLabel fieldKey={fieldKey} property={property} required={required} />
 
       <div className="flex items-start gap-4">
         {/* Preview */}

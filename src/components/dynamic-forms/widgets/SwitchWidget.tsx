@@ -1,12 +1,12 @@
 "use client";
 
-import { Checkbox } from "@/components/ui/checkbox";
+import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import type { ControllerRenderProps } from "react-hook-form";
 import type { FormSchemaProperty } from "@/types/form-schema";
 import { FieldTooltip } from "../FieldLabel";
 
-interface CheckboxWidgetProps {
+interface SwitchWidgetProps {
   field: ControllerRenderProps;
   property: FormSchemaProperty;
   fieldKey: string;
@@ -14,17 +14,11 @@ interface CheckboxWidgetProps {
   required?: boolean;
 }
 
-export function CheckboxWidget({
-  field,
-  property,
-  fieldKey,
-  error,
-  required,
-}: CheckboxWidgetProps) {
+export function SwitchWidget({ field, property, fieldKey, error, required }: SwitchWidgetProps) {
   return (
     <div className="flex flex-col gap-2">
       <div className="flex items-center space-x-2">
-        <Checkbox
+        <Switch
           id={fieldKey}
           checked={field.value ?? false}
           onCheckedChange={field.onChange}
@@ -41,9 +35,9 @@ export function CheckboxWidget({
         </Label>
       </div>
       {property.description && (
-        <p className="text-muted-foreground ml-6 text-xs">{property.description}</p>
+        <p className="text-muted-foreground ml-12 text-xs">{property.description}</p>
       )}
-      {error && <p className="text-destructive ml-6 text-xs">{error}</p>}
+      {error && <p className="text-destructive ml-12 text-xs">{error}</p>}
     </div>
   );
 }

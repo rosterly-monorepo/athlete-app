@@ -11,15 +11,47 @@
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || "";
 
+// ── Error types ──
+
+export interface FieldError {
+  field: string;
+  message: string;
+}
+
+export interface ApiErrorBody {
+  detail: string;
+  field_errors?: FieldError[];
+}
+
 export class ApiClientError extends Error {
   status: number;
+  body: ApiErrorBody | null;
 
-  constructor(message: string, status: number) {
+  constructor(message: string, status: number, body: ApiErrorBody | null) {
     super(message);
     this.name = "ApiClientError";
     this.status = status;
+    this.body = body;
+  }
+
+  /** True when the backend returned Pydantic field-level validation errors (422). */
+  get isValidationError(): boolean {
+    return this.status === 422 && Array.isArray(this.body?.field_errors);
+  }
+
+  /** Human-readable detail string for toast messages. */
+  get userMessage(): string {
+    return this.body?.detail ?? "Something went wrong. Please try again.";
+  }
+
+  /** Extract field-level errors as a Record for React Hook Form's setError. */
+  get fieldErrors(): Record<string, string> {
+    if (!this.body?.field_errors) return {};
+    return Object.fromEntries(this.body.field_errors.map((e) => [e.field, e.message]));
   }
 }
+
+// ── Fetch wrapper ──
 
 async function _fetch<T>(
   endpoint: string,
@@ -41,8 +73,15 @@ async function _fetch<T>(
   const response = await fetch(url, { ...options, headers });
 
   if (!response.ok) {
-    const body = await response.text().catch(() => "Unknown error");
-    throw new ApiClientError(`${response.status}: ${body}`, response.status);
+    let body: ApiErrorBody | null = null;
+    let rawText = "Unknown error";
+    try {
+      body = (await response.json()) as ApiErrorBody;
+      rawText = JSON.stringify(body);
+    } catch {
+      rawText = await response.text().catch(() => "Unknown error");
+    }
+    throw new ApiClientError(rawText, response.status, body);
   }
 
   if (response.status === 204) {

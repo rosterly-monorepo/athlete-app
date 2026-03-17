@@ -80,7 +80,21 @@ const phoneRule: FieldRule = {
   },
 };
 
-const FIELD_RULES: FieldRule[] = [dateOfBirthRule, phoneRule];
+const postalCodeRule: FieldRule = {
+  name: "postal-code",
+  matches: (key) => key === "postal_code",
+  refine: (schema) => {
+    return (schema as ZodString).refine(
+      (val) => {
+        if (!val) return true;
+        return /^[a-zA-Z0-9\s\-]{3,10}$/.test(val.trim());
+      },
+      { message: "Please enter a valid postal code" }
+    );
+  },
+};
+
+const FIELD_RULES: FieldRule[] = [dateOfBirthRule, phoneRule, postalCodeRule];
 
 /**
  * Apply all matching field validation rules to a Zod schema.

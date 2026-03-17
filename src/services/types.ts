@@ -370,6 +370,7 @@ export interface ReferenceCoachView {
   id: number;
   first_name: string;
   last_name: string;
+  organization: string | null;
   email: string | null;
   phone: string | null;
   display_order: number;
@@ -678,6 +679,7 @@ export interface AthleteSportDetail {
 export interface ReferenceCoachInput {
   first_name: string;
   last_name: string;
+  organization?: string | null;
   email?: string | null;
   phone?: string | null;
   display_order?: number;

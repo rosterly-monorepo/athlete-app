@@ -2,10 +2,12 @@
 
 import { useForm, FormProvider } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
+import { AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import { FormFieldRenderer } from "./FormFieldRenderer";
 import { jsonSchemaToZod, getDefaultValues } from "./utils/schema-to-zod";
 import { getOrderedFields, getUngroupedFields, hasGroups } from "./utils/field-ordering";
@@ -24,6 +26,10 @@ interface DynamicFormProps {
   submitLabel?: string;
   /** Show the form title from schema */
   showTitle?: boolean;
+  /** Backend field-level validation errors. Keys are field names, values are messages. */
+  serverErrors?: Record<string, string>;
+  /** Form-level error message (not tied to a specific field). */
+  formError?: string | null;
 }
 
 /**
@@ -37,6 +43,8 @@ export function DynamicForm({
   isSubmitting = false,
   submitLabel = "Save",
   showTitle = false,
+  serverErrors,
+  formError,
 }: DynamicFormProps) {
   const zodSchema = jsonSchemaToZod(schema);
   const defaultValues = { ...getDefaultValues(schema), ...initialData };
@@ -47,12 +55,37 @@ export function DynamicForm({
     mode: "onBlur",
   });
 
-  // Reset form when initialData changes
+  // Reset form when initialData actually changes (not just reference)
+  const prevDataRef = useRef<string | null>(null);
   useEffect(() => {
-    if (initialData) {
-      methods.reset({ ...getDefaultValues(schema), ...initialData });
-    }
+    if (!initialData) return;
+    const serialized = JSON.stringify(initialData);
+    if (serialized === prevDataRef.current) return;
+    prevDataRef.current = serialized;
+    // Don't reset if user has unsaved changes
+    if (methods.formState.isDirty) return;
+    methods.reset({ ...getDefaultValues(schema), ...initialData });
   }, [initialData, methods, schema]);
+
+  // Apply server-side field errors to the form
+  const serverErrorFieldsRef = useRef<string[]>([]);
+  useEffect(() => {
+    // Clear previously applied server errors
+    for (const field of serverErrorFieldsRef.current) {
+      methods.clearErrors(field);
+    }
+
+    if (!serverErrors || Object.keys(serverErrors).length === 0) {
+      serverErrorFieldsRef.current = [];
+      return;
+    }
+
+    const fields = Object.keys(serverErrors);
+    for (const [field, message] of Object.entries(serverErrors)) {
+      methods.setError(field, { type: "server", message });
+    }
+    serverErrorFieldsRef.current = fields;
+  }, [serverErrors, methods]);
 
   const handleSubmit = (data: Record<string, unknown>) => {
     const dirty = methods.formState.dirtyFields;
@@ -69,6 +102,13 @@ export function DynamicForm({
   const useGroupedLayout = hasGroups(schema);
   const requiredFields = new Set(schema.required || []);
 
+  const errorBanner = formError ? (
+    <Alert variant="destructive">
+      <AlertCircle className="h-4 w-4" />
+      <AlertDescription>{formError}</AlertDescription>
+    </Alert>
+  ) : null;
+
   if (useGroupedLayout && groups) {
     // Render grouped layout
     return (
@@ -83,23 +123,26 @@ export function DynamicForm({
             </div>
           )}
 
+          {errorBanner}
+
           {groups.map((group) => (
             <Card key={group.name}>
               <CardHeader className="pb-4">
                 <CardTitle className="text-base">{group.title || group.name}</CardTitle>
                 {group.description && <CardDescription>{group.description}</CardDescription>}
               </CardHeader>
-              <CardContent className="space-y-4">
+              <CardContent className={group.inline ? "flex gap-4" : "space-y-4"}>
                 {group.fields.map((fieldKey) => {
                   const property = schema.properties[fieldKey];
                   if (!property || property["x-ui-hidden"]) return null;
                   return (
-                    <FormFieldRenderer
-                      key={fieldKey}
-                      fieldKey={fieldKey}
-                      property={property}
-                      required={requiredFields.has(fieldKey)}
-                    />
+                    <div key={fieldKey} className={group.inline ? "min-w-0 flex-1" : undefined}>
+                      <FormFieldRenderer
+                        fieldKey={fieldKey}
+                        property={property}
+                        required={requiredFields.has(fieldKey)}
+                      />
+                    </div>
                   );
                 })}
               </CardContent>
@@ -147,6 +190,8 @@ export function DynamicForm({
             )}
           </div>
         )}
+
+        {errorBanner}
 
         {orderedFields.map(([fieldKey, property]) => (
           <FormFieldRenderer

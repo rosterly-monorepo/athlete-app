@@ -3,6 +3,7 @@
 import { useAuth } from "@clerk/nextjs";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { getMyProfile, updateProfile, getAthleteCoachView } from "@/services/athlete";
+import { ApiClientError } from "@/services/api-client";
 import type { UpdateProfileInput } from "@/services/types";
 import { toast } from "sonner";
 
@@ -54,10 +55,12 @@ export function useUpdateProfile() {
       queryClient.invalidateQueries({ queryKey: athleteKeys.myProfile });
       toast.success("Profile saved", { description: "Your athlete profile has been updated." });
     },
-    onError: () => {
-      toast.error("Failed to save profile", {
-        description: "Something went wrong. Please try again.",
-      });
+    onError: (error) => {
+      const message =
+        error instanceof ApiClientError
+          ? error.userMessage
+          : "Something went wrong. Please try again.";
+      toast.error("Failed to save profile", { description: message });
     },
   });
 }

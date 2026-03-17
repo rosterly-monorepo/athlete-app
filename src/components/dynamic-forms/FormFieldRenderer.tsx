@@ -9,11 +9,13 @@ import {
   DateWidget,
   SelectWidget,
   CheckboxWidget,
+  SwitchWidget,
   ImageUploadWidget,
   VideoUploadWidget,
   DocumentUploadWidget,
   ComboboxWidget,
   DependentComboboxWidget,
+  TimeInputWidget,
 } from "./widgets";
 
 interface FormFieldRendererProps {
@@ -32,12 +34,14 @@ const WIDGET_MAP = {
   date: DateWidget,
   select: SelectWidget,
   checkbox: CheckboxWidget,
+  switch: SwitchWidget,
   "country-select": ComboboxWidget,
   "state-select": DependentComboboxWidget,
   "language-select": ComboboxWidget,
   "image-upload": ImageUploadWidget,
   "video-upload": VideoUploadWidget,
   "document-upload": DocumentUploadWidget,
+  "time-input": TimeInputWidget,
 } as const;
 
 /**
