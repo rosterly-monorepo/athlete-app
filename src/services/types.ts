@@ -174,8 +174,34 @@ export interface OrganizationProgram {
   geographic_preferences: string[] | null;
   citizenship_requirements: string | null;
   roster_spots: number | null;
+  scoring_config: ScoringConfig | null;
   created_at: string;
   updated_at: string;
+}
+
+// ── Scoring / Metrics ──
+
+export interface MetricInfo {
+  field_name: string;
+  label: string;
+  unit: string | null;
+  display_format: string | null;
+  default_weight: number;
+  scorer_label: string;
+}
+
+export interface AvailableMetricsResponse {
+  metrics: MetricInfo[];
+}
+
+export interface MetricWeight {
+  field_name: string;
+  weight: number;
+  enabled: boolean;
+}
+
+export interface ScoringConfig {
+  metrics: MetricWeight[];
 }
 
 // ── Recruitment ──
@@ -422,10 +448,40 @@ export interface RowingPerformanceView {
   is_personal_record: boolean;
   is_erg_record: boolean;
   is_verified: boolean;
+  source: string;
+  drag_factor: number | null;
   place: number | null;
   margin_seconds: number | null;
   regatta_central_url: string | null;
   created_at: string;
+}
+
+export interface Concept2LogbookEntry {
+  id: number;
+  event: string;
+  event_date: string;
+  distance_meters: number | null;
+  result_seconds: number;
+  result_display: string;
+  split_seconds: number | null;
+  split_display: string | null;
+  watts_avg: number | null;
+  stroke_rate_avg: number | null;
+  heart_rate_avg: number | null;
+  drag_factor: number | null;
+  prorata_standard_distance: number | null;
+  prorata_seconds: number | null;
+  prorata_display: string | null;
+  is_best_prorata: boolean;
+  is_selected: boolean;
+  is_erg_record: boolean;
+}
+
+export interface Concept2LogbookResponse {
+  entries: Concept2LogbookEntry[];
+  config_2k_seconds: number | null;
+  config_5k_seconds: number | null;
+  config_6k_seconds: number | null;
 }
 
 export interface AthleteSportView {

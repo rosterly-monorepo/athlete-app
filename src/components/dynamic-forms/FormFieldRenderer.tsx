@@ -8,6 +8,7 @@ import {
   NumberWidget,
   DateWidget,
   SelectWidget,
+  MultiSelectWidget,
   CheckboxWidget,
   SwitchWidget,
   ImageUploadWidget,
@@ -16,6 +17,8 @@ import {
   ComboboxWidget,
   DependentComboboxWidget,
   TimeInputWidget,
+  DurationWidget,
+  APScoresWidget,
 } from "./widgets";
 
 interface FormFieldRendererProps {
@@ -33,6 +36,7 @@ const WIDGET_MAP = {
   number: NumberWidget,
   date: DateWidget,
   select: SelectWidget,
+  "multi-select": MultiSelectWidget,
   checkbox: CheckboxWidget,
   switch: SwitchWidget,
   "country-select": ComboboxWidget,
@@ -42,6 +46,8 @@ const WIDGET_MAP = {
   "video-upload": VideoUploadWidget,
   "document-upload": DocumentUploadWidget,
   "time-input": TimeInputWidget,
+  duration: DurationWidget,
+  "ap-scores": APScoresWidget,
 } as const;
 
 /**

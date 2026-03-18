@@ -55,16 +55,15 @@ export function DynamicForm({
     mode: "onBlur",
   });
 
-  // Reset form when initialData actually changes (not just reference)
+  // Reset form when initialData actually changes (not just reference).
+  // keepDirtyValues preserves fields the user has touched while updating untouched fields.
   const prevDataRef = useRef<string | null>(null);
   useEffect(() => {
     if (!initialData) return;
     const serialized = JSON.stringify(initialData);
     if (serialized === prevDataRef.current) return;
     prevDataRef.current = serialized;
-    // Don't reset if user has unsaved changes
-    if (methods.formState.isDirty) return;
-    methods.reset({ ...getDefaultValues(schema), ...initialData });
+    methods.reset({ ...getDefaultValues(schema), ...initialData }, { keepDirtyValues: true });
   }, [initialData, methods, schema]);
 
   // Apply server-side field errors to the form

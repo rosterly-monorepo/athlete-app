@@ -53,6 +53,10 @@ function propertyToZod(prop: FormSchemaProperty): ZodTypeAny {
       return z.boolean();
 
     case "array":
+      // For complex array types (e.g., AP scores), use permissive validation
+      if (prop["x-ui-widget"] === "ap-scores") {
+        return z.array(z.object({ subject: z.string(), score: z.number() })).default([]);
+      }
       // For multi-select arrays of strings
       return z.array(z.string());
 

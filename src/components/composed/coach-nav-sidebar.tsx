@@ -7,14 +7,23 @@ import { OrganizationSwitcher } from "@clerk/nextjs";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
-import { LayoutDashboard, Users, Settings, Menu, UserPlus, Search } from "lucide-react";
+import {
+  LayoutDashboard,
+  Users,
+  Settings,
+  Menu,
+  UserPlus,
+  Search,
+  SlidersHorizontal,
+} from "lucide-react";
 
 const navItems = [
   { href: "/coach/dashboard", label: "Overview", icon: LayoutDashboard },
   { href: "/coach/search", label: "Search", icon: Search },
   { href: "/coach/recruiting", label: "Recruiting", icon: UserPlus },
   { href: "/coach/roster", label: "Roster", icon: Users },
-  { href: "/coach/settings", label: "Settings", icon: Settings },
+  { href: "/coach/settings", label: "Account", icon: Settings },
+  { href: "/coach/program-settings", label: "Program", icon: SlidersHorizontal },
 ];
 
 function NavContent({ onNavigate }: { onNavigate?: () => void }) {

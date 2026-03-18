@@ -218,9 +218,16 @@ function PerformanceTable({ performances }: { performances: RowingPerformanceVie
                     {p.split_display ?? "—"}
                   </td>
                   <td className="py-2 pr-4">
-                    <Badge variant="outline" className="text-xs capitalize">
-                      {p.event_category}
-                    </Badge>
+                    <div className="flex gap-1">
+                      <Badge variant="outline" className="text-xs capitalize">
+                        {p.event_category}
+                      </Badge>
+                      {p.source === "concept2" && (
+                        <Badge variant="secondary" className="px-1 text-[10px]">
+                          C2
+                        </Badge>
+                      )}
+                    </div>
                   </td>
                   <td className="py-2">{p.place != null ? `#${p.place}` : "—"}</td>
                 </tr>

@@ -1,5 +1,5 @@
 import { apiClient } from "./api-client";
-import type { OrganizationProgram } from "./types";
+import type { OrganizationProgram, AvailableMetricsResponse, ScoringConfig } from "./types";
 
 export interface OrganizationProfile {
   id: number;
@@ -42,6 +42,7 @@ export interface CreateProgramInput {
   geographic_preferences?: string[];
   citizenship_requirements?: string;
   roster_spots?: number;
+  scoring_config?: ScoringConfig | null;
 }
 
 export async function createProgram(
@@ -63,4 +64,14 @@ export async function updateProgram(
     method: "PATCH",
     body: JSON.stringify(data),
   });
+}
+
+export async function getAvailableMetrics(
+  token: string,
+  programId: number
+): Promise<AvailableMetricsResponse> {
+  return apiClient<AvailableMetricsResponse>(
+    `/api/v1/organizations/me/programs/${programId}/available-metrics`,
+    token
+  );
 }

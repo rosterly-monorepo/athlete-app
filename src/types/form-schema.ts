@@ -21,7 +21,10 @@ export type UIWidgetType =
   | "video-upload"
   | "document-upload"
   | "switch"
-  | "time-input";
+  | "time-input"
+  | "duration"
+  | "multi-select"
+  | "ap-scores";
 
 /** Option for select/dropdown fields */
 export interface UIOption {

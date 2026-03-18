@@ -13,6 +13,12 @@ import {
   getSportConfigSchema,
   getSportConfig,
   updateSportConfig,
+  getPerformanceSchema,
+  getPerformances,
+  createPerformance,
+  updatePerformance,
+  deletePerformance,
+  getConcept2Logbook,
   getReferenceCoaches,
   addReferenceCoach,
   updateReferenceCoach,
@@ -28,7 +34,11 @@ export const sportsKeys = {
   mine: () => [...sportsKeys.all, "mine"] as const,
   configSchema: (sportCode: string) => [...sportsKeys.all, "config-schema", sportCode] as const,
   config: (sportCode: string) => [...sportsKeys.all, "config", sportCode] as const,
+  performances: (sportId: number) => [...sportsKeys.all, "performances", sportId] as const,
+  performanceSchema: (sportCode: string) =>
+    [...sportsKeys.all, "performance-schema", sportCode] as const,
   referenceCoaches: (sportId: number) => [...sportsKeys.all, "reference-coaches", sportId] as const,
+  concept2Logbook: () => [...sportsKeys.all, "concept2-logbook"] as const,
 };
 
 // ── Available Sports ──
@@ -148,6 +158,7 @@ export function useSportConfig(sportCode: string) {
       return getSportConfig(token!, sportCode);
     },
     enabled: !!sportCode,
+    staleTime: 30 * 1000,
   });
 }
 
@@ -168,6 +179,116 @@ export function useSaveSportConfig(sportCode: string) {
     onError: (error) => {
       const message = error instanceof ApiClientError ? error.userMessage : "Something went wrong.";
       toast.error("Failed to save sport profile", { description: message });
+    },
+  });
+}
+
+// ── Performances ──
+
+export function usePerformanceSchema(sportCode: string) {
+  const { getToken } = useAuth();
+
+  return useQuery({
+    queryKey: sportsKeys.performanceSchema(sportCode),
+    queryFn: async () => {
+      const token = await getToken();
+      const res = await getPerformanceSchema(token!, sportCode);
+      return res.schema;
+    },
+    enabled: !!sportCode,
+    staleTime: 5 * 60 * 1000,
+  });
+}
+
+export function usePerformances(sportId: number) {
+  const { getToken } = useAuth();
+
+  return useQuery({
+    queryKey: sportsKeys.performances(sportId),
+    queryFn: async () => {
+      const token = await getToken();
+      return getPerformances(token!, sportId);
+    },
+    enabled: !!sportId,
+  });
+}
+
+export function useCreatePerformance(sportId: number) {
+  const { getToken } = useAuth();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (data: Record<string, unknown>) => {
+      const token = await getToken();
+      return createPerformance(token!, sportId, data);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: sportsKeys.performances(sportId) });
+      queryClient.invalidateQueries({ queryKey: sportsKeys.concept2Logbook() });
+      queryClient.invalidateQueries({ queryKey: sportsKeys.mine() });
+      toast.success("Performance added");
+    },
+    onError: (error) => {
+      const message = error instanceof ApiClientError ? error.userMessage : "Something went wrong.";
+      toast.error("Failed to add performance", { description: message });
+    },
+  });
+}
+
+export function useUpdatePerformance(sportId: number) {
+  const { getToken } = useAuth();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({ perfId, data }: { perfId: number; data: Record<string, unknown> }) => {
+      const token = await getToken();
+      return updatePerformance(token!, sportId, perfId, data);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: sportsKeys.performances(sportId) });
+      queryClient.invalidateQueries({ queryKey: sportsKeys.concept2Logbook() });
+      queryClient.invalidateQueries({ queryKey: sportsKeys.mine() });
+      toast.success("Performance updated");
+    },
+    onError: (error) => {
+      const message = error instanceof ApiClientError ? error.userMessage : "Something went wrong.";
+      toast.error("Failed to update performance", { description: message });
+    },
+  });
+}
+
+export function useDeletePerformance(sportId: number) {
+  const { getToken } = useAuth();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (perfId: number) => {
+      const token = await getToken();
+      return deletePerformance(token!, sportId, perfId);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: sportsKeys.performances(sportId) });
+      queryClient.invalidateQueries({ queryKey: sportsKeys.concept2Logbook() });
+      queryClient.invalidateQueries({ queryKey: sportsKeys.mine() });
+      toast.success("Performance removed");
+    },
+    onError: (error) => {
+      const message = error instanceof ApiClientError ? error.userMessage : "Something went wrong.";
+      toast.error("Failed to remove performance", { description: message });
+    },
+  });
+}
+
+// ── Concept2 Logbook ──
+
+export function useConcept2Logbook() {
+  const { getToken } = useAuth();
+
+  return useQuery({
+    queryKey: sportsKeys.concept2Logbook(),
+    queryFn: async () => {
+      const token = await getToken();
+      return getConcept2Logbook(token!);
     },
   });
 }

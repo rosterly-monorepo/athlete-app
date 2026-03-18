@@ -21,6 +21,14 @@ export function formatErgTimeDetailed(seconds: number): string {
   return `${mins}:${wholeSeconds.toString().padStart(2, "0")}.${tenths}`;
 }
 
+/** Format distance in meters for display (e.g. 2000 → "2K", 1500 → "1,500m"). */
+export function formatDistance(meters: number): string {
+  if (meters >= 1000 && meters % 1000 === 0) {
+    return `${meters / 1000}K`;
+  }
+  return `${meters.toLocaleString()}m`;
+}
+
 /** Capitalize and replace underscores with spaces. */
 export function formatSportCode(code: string): string {
   return code.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());

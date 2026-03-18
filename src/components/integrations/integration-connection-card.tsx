@@ -47,7 +47,10 @@ function ProviderCard({
   const disconnect = useDisconnect(provider.code);
 
   const isConnected = connection?.status === "active";
-  const isExpired = connection?.status === "expired";
+  const needsReconnect =
+    connection?.status === "expired" ||
+    connection?.status === "error" ||
+    connection?.status === "revoked";
 
   const handleDisconnect = () => {
     if (confirm(`Disconnect ${provider.name}? Imported performances will not be deleted.`)) {
@@ -76,9 +79,9 @@ function ProviderCard({
                 Connected
               </Badge>
             )}
-            {isExpired && (
+            {needsReconnect && (
               <Badge variant="destructive" className="text-xs">
-                Expired
+                Disconnected
               </Badge>
             )}
           </div>
@@ -88,6 +91,10 @@ function ProviderCard({
               {connection.last_sync_at
                 ? `Last synced ${formatSyncTime(connection.last_sync_at)}`
                 : "Not synced yet"}
+            </p>
+          ) : needsReconnect ? (
+            <p className="text-muted-foreground mt-0.5 text-xs">
+              Connection lost. Reconnect to sync new performances.
             </p>
           ) : (
             <p className="text-muted-foreground mt-0.5 text-xs">{provider.description}</p>
@@ -123,7 +130,7 @@ function ProviderCard({
             </>
           ) : (
             <Button
-              variant="outline"
+              variant={needsReconnect ? "default" : "outline"}
               size="sm"
               onClick={() => connect.mutate(provider.code)}
               disabled={connect.isPending}
@@ -133,7 +140,7 @@ function ProviderCard({
               ) : (
                 <Plug className="mr-1.5 h-3.5 w-3.5" />
               )}
-              {isExpired ? "Reconnect" : "Connect"}
+              {needsReconnect ? "Reconnect" : "Connect"}
             </Button>
           )}
         </div>

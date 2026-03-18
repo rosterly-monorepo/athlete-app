@@ -47,6 +47,7 @@ const sectionIcons: Record<string, LucideIcon> = {
   testing: ClipboardCheck,
   family: Heart,
   writing: PenLine,
+  college_preferences: GraduationCap,
   language: Globe,
   activity: Activity,
 };

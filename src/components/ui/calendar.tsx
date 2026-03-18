@@ -6,6 +6,7 @@ import { ChevronLeftIcon, ChevronRightIcon } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 import { buttonVariants } from "@/components/ui/button";
+import { CalendarDropdown } from "@/components/ui/calendar-dropdown";
 
 function Calendar({
   className,
@@ -24,18 +25,17 @@ function Calendar({
         caption_label: "text-sm font-medium has-[+.rdp-dropdowns]:hidden",
         dropdowns: "flex items-center gap-2",
         dropdown: "rdp-dropdown",
-        dropdown_root:
-          "border-border/50 bg-input/50 hover:bg-input/70 relative inline-flex h-8 items-center rounded-md border px-2 text-sm shadow-xs",
-        months_dropdown: "appearance-none absolute inset-0 cursor-pointer opacity-0",
-        years_dropdown: "appearance-none absolute inset-0 cursor-pointer opacity-0",
+        dropdown_root: "relative inline-flex items-center",
+        months_dropdown: "",
+        years_dropdown: "",
         nav: "flex items-center gap-1",
         button_previous: cn(
           buttonVariants({ variant: "outline" }),
-          "absolute left-1 top-0 size-7 bg-transparent p-0 opacity-50 hover:opacity-100"
+          "absolute left-1 top-0 size-7 bg-transparent p-0 opacity-80 hover:opacity-100"
         ),
         button_next: cn(
           buttonVariants({ variant: "outline" }),
-          "absolute right-1 top-0 size-7 bg-transparent p-0 opacity-50 hover:opacity-100"
+          "absolute right-1 top-0 size-7 bg-transparent p-0 opacity-80 hover:opacity-100"
         ),
         month_grid: "w-full border-collapse space-x-1",
         weekdays: "flex",
@@ -67,6 +67,7 @@ function Calendar({
           const Icon = orientation === "left" ? ChevronLeftIcon : ChevronRightIcon;
           return <Icon className="size-4" />;
         },
+        Dropdown: CalendarDropdown,
       }}
       {...props}
     />

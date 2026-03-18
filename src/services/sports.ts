@@ -6,8 +6,10 @@ import { apiClient } from "./api-client";
 import type {
   SportInfo,
   AthleteSportDetail,
+  RowingPerformanceView,
   ReferenceCoachView,
   ReferenceCoachInput,
+  Concept2LogbookResponse,
 } from "./types";
 import type { FormSchema } from "@/types/form-schema";
 
@@ -75,6 +77,66 @@ export async function updateSportConfig(
     method: "PATCH",
     body: JSON.stringify(data),
   });
+}
+
+// ── Performances ──
+
+export async function getPerformanceSchema(
+  token: string,
+  sportCode: string
+): Promise<{ sport: string; type: string; schema: FormSchema }> {
+  return apiClient(`/api/v1/forms/sports/${sportCode}/performance`, token);
+}
+
+export async function getPerformances(
+  token: string,
+  sportId: number
+): Promise<RowingPerformanceView[]> {
+  return apiClient<RowingPerformanceView[]>(
+    `/api/v1/athletes/me/sports/${sportId}/performances`,
+    token
+  );
+}
+
+export async function createPerformance(
+  token: string,
+  sportId: number,
+  data: Record<string, unknown>
+): Promise<RowingPerformanceView> {
+  return apiClient<RowingPerformanceView>(
+    `/api/v1/athletes/me/sports/${sportId}/performances`,
+    token,
+    { method: "POST", body: JSON.stringify(data) }
+  );
+}
+
+export async function updatePerformance(
+  token: string,
+  sportId: number,
+  perfId: number,
+  data: Record<string, unknown>
+): Promise<RowingPerformanceView> {
+  return apiClient<RowingPerformanceView>(
+    `/api/v1/athletes/me/sports/${sportId}/performances/${perfId}`,
+    token,
+    { method: "PATCH", body: JSON.stringify(data) }
+  );
+}
+
+export async function deletePerformance(
+  token: string,
+  sportId: number,
+  perfId: number
+): Promise<void> {
+  return apiClient<void>(`/api/v1/athletes/me/sports/${sportId}/performances/${perfId}`, token, {
+    method: "DELETE",
+  });
+}
+
+// ── Concept2 Logbook ──
+
+export async function getConcept2Logbook(token: string): Promise<Concept2LogbookResponse> {
+  return apiClient<Concept2LogbookResponse>("/api/v1/sports/rowing/me/concept2-logbook", token);
 }
 
 // ── Reference Coaches ──

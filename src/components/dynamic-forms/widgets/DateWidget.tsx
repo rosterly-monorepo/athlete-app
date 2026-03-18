@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { CalendarIcon } from "lucide-react";
-import { format, parse, isValid, subYears } from "date-fns";
+import { format, parse, isValid, subYears, addYears } from "date-fns";
 import type { ControllerRenderProps } from "react-hook-form";
 import type { FormSchemaProperty } from "@/types/form-schema";
 import { cn } from "@/lib/utils";
@@ -27,8 +27,10 @@ export function DateWidget({ field, property, fieldKey, error, required }: DateW
   const selectedDate = field.value ? parse(field.value, "yyyy-MM-dd", new Date()) : undefined;
   const validDate = selectedDate && isValid(selectedDate) ? selectedDate : undefined;
 
-  // Get calendar bounds from field validation rules
+  // Get calendar bounds from field validation rules, with sensible defaults
   const constraints = getDateConstraints(fieldKey, property);
+  const startMonth = constraints?.fromDate ?? subYears(new Date(), 20);
+  const endMonth = constraints?.toDate ?? addYears(new Date(), 2);
 
   // Default to ~16 years ago for date_of_birth so the calendar opens to a useful month
   const defaultMonth = validDate ?? (constraints ? subYears(new Date(), 16) : undefined);
@@ -67,9 +69,10 @@ export function DateWidget({ field, property, fieldKey, error, required }: DateW
               setOpen(false);
             }}
             defaultMonth={defaultMonth}
-            captionLayout={constraints ? "dropdown" : undefined}
-            startMonth={constraints?.fromDate}
-            endMonth={constraints?.toDate}
+            captionLayout="dropdown"
+            reverseYears
+            startMonth={startMonth}
+            endMonth={endMonth}
             disabled={
               constraints
                 ? { before: constraints.fromDate!, after: constraints.toDate! }
