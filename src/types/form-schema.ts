@@ -37,6 +37,8 @@ export interface UIOption {
 export interface UIValidation {
   min?: number;
   max?: number;
+  exclusiveMin?: number;
+  exclusiveMax?: number;
   maxLength?: number;
   minLength?: number;
   pattern?: string;
@@ -84,6 +86,7 @@ export interface FormSchemaGroup {
   description?: string;
   fields: string[];
   inline?: boolean;
+  collapsed?: boolean;
 }
 
 /** Complete form schema with properties and UI hints */

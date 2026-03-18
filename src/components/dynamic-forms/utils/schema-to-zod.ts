@@ -122,14 +122,24 @@ function numberPropertyToZod(
 ): ZodTypeAny {
   let schema = z.number();
 
-  // Apply min value
+  // Apply min value (inclusive)
   if (validation.min !== undefined) {
     schema = schema.min(validation.min, `Minimum value is ${validation.min}`);
   }
 
-  // Apply max value
+  // Apply exclusive min (gt)
+  if (validation.exclusiveMin !== undefined) {
+    schema = schema.gt(validation.exclusiveMin, `Must be greater than ${validation.exclusiveMin}`);
+  }
+
+  // Apply max value (inclusive)
   if (validation.max !== undefined) {
     schema = schema.max(validation.max, `Maximum value is ${validation.max}`);
+  }
+
+  // Apply exclusive max (lt)
+  if (validation.exclusiveMax !== undefined) {
+    schema = schema.lt(validation.exclusiveMax, `Must be less than ${validation.exclusiveMax}`);
   }
 
   // Integer validation

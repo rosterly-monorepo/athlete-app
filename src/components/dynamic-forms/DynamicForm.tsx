@@ -3,24 +3,27 @@
 import { useForm, FormProvider } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useEffect, useRef } from "react";
-import { AlertCircle } from "lucide-react";
+import { AlertCircle, Check, ChevronRight, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { FormFieldRenderer } from "./FormFieldRenderer";
 import { jsonSchemaToZod, getDefaultValues } from "./utils/schema-to-zod";
 import { getOrderedFields, getUngroupedFields, hasGroups } from "./utils/field-ordering";
-import type { FormSchema } from "@/types/form-schema";
+import { useAutoSave } from "@/hooks/use-auto-save";
+import type { AutoSaveStatus } from "@/hooks/use-auto-save";
+import type { FormSchema, FormSchemaGroup } from "@/types/form-schema";
 
 interface DynamicFormProps {
   /** The JSON Schema defining the form */
   schema: FormSchema;
   /** Initial values to populate the form */
   initialData?: Record<string, unknown>;
-  /** Called when form is submitted with valid data */
+  /** Called when form is submitted with valid data (manual save) */
   onSubmit: (data: Record<string, unknown>) => void;
-  /** Whether form is currently submitting */
+  /** Whether form is currently submitting (manual save) */
   isSubmitting?: boolean;
   /** Label for the submit button */
   submitLabel?: string;
@@ -30,6 +33,39 @@ interface DynamicFormProps {
   serverErrors?: Record<string, string>;
   /** Form-level error message (not tied to a specific field). */
   formError?: string | null;
+  /** Compact mode: lightweight group rendering without Card wrappers (for dialogs). */
+  compact?: boolean;
+  /** Enable debounced auto-save. Pass true for default (3s) or { delay: ms }. */
+  autoSave?: boolean | { delay: number };
+  /** Called with dirty field data on auto-save (should be a silent mutation). */
+  onAutoSave?: (data: Record<string, unknown>) => void;
+  /** Whether the auto-save mutation is in flight. */
+  isAutoSaving?: boolean;
+  /** Ref that will be populated with a flush function to trigger immediate save. */
+  flushRef?: React.MutableRefObject<(() => void) | null>;
+}
+
+/**
+ * Inline auto-save status indicator shown next to the save button.
+ */
+function AutoSaveIndicator({ status }: { status: AutoSaveStatus }) {
+  if (status === "pending") {
+    return (
+      <span className="text-muted-foreground flex items-center gap-1.5 text-sm">
+        <Loader2 className="h-3.5 w-3.5 animate-spin" />
+        Saving...
+      </span>
+    );
+  }
+  if (status === "saved") {
+    return (
+      <span className="text-muted-foreground animate-in fade-in flex items-center gap-1.5 text-sm">
+        <Check className="h-3.5 w-3.5 text-emerald-500" />
+        All changes saved
+      </span>
+    );
+  }
+  return null;
 }
 
 /**
@@ -45,6 +81,11 @@ export function DynamicForm({
   showTitle = false,
   serverErrors,
   formError,
+  compact = false,
+  autoSave,
+  onAutoSave,
+  isAutoSaving = false,
+  flushRef,
 }: DynamicFormProps) {
   const zodSchema = jsonSchemaToZod(schema);
   const defaultValues = { ...getDefaultValues(schema), ...initialData };
@@ -54,6 +95,28 @@ export function DynamicForm({
     defaultValues,
     mode: "onBlur",
   });
+
+  // Auto-save integration
+  const autoSaveEnabled = !!autoSave && !!onAutoSave;
+  const autoSaveDelay = typeof autoSave === "object" ? autoSave.delay : 3000;
+
+  const { flush, status: autoSaveStatus } = useAutoSave({
+    formMethods: methods,
+    onSave: onAutoSave ?? (() => {}),
+    delay: autoSaveDelay,
+    enabled: autoSaveEnabled,
+    isSaving: isAutoSaving || isSubmitting,
+  });
+
+  // Expose flush function to parent via ref
+  useEffect(() => {
+    if (flushRef) {
+      flushRef.current = autoSaveEnabled ? flush : null;
+    }
+    return () => {
+      if (flushRef) flushRef.current = null;
+    };
+  }, [flushRef, flush, autoSaveEnabled]);
 
   // Reset form when initialData actually changes (not just reference).
   // keepDirtyValues preserves fields the user has touched while updating untouched fields.
@@ -108,11 +171,44 @@ export function DynamicForm({
     </Alert>
   ) : null;
 
+  const submitButton = (
+    <div className="flex items-center gap-3">
+      <Button type="submit" disabled={isSubmitting}>
+        {isSubmitting ? "Saving..." : submitLabel}
+      </Button>
+      {autoSaveEnabled && <AutoSaveIndicator status={autoSaveStatus} />}
+    </div>
+  );
+
   if (useGroupedLayout && groups) {
     // Render grouped layout
+    const renderGroupFields = (group: FormSchemaGroup) => {
+      const visibleFields = group.fields.filter(
+        (fk) => schema.properties[fk] && !schema.properties[fk]["x-ui-hidden"]
+      );
+      if (visibleFields.length === 0) return null;
+
+      return (
+        <div className={group.inline ? "flex gap-3" : "space-y-4"}>
+          {visibleFields.map((fieldKey) => (
+            <div key={fieldKey} className={group.inline ? "min-w-0 flex-1" : undefined}>
+              <FormFieldRenderer
+                fieldKey={fieldKey}
+                property={schema.properties[fieldKey]}
+                required={requiredFields.has(fieldKey)}
+              />
+            </div>
+          ))}
+        </div>
+      );
+    };
+
     return (
       <FormProvider {...methods}>
-        <form onSubmit={methods.handleSubmit(handleSubmit)} className="space-y-6">
+        <form
+          onSubmit={methods.handleSubmit(handleSubmit)}
+          className={compact ? "space-y-4" : "space-y-6"}
+        >
           {showTitle && schema.title && (
             <div className="mb-4">
               <h2 className="text-lg font-semibold">{schema.title}</h2>
@@ -124,37 +220,63 @@ export function DynamicForm({
 
           {errorBanner}
 
-          {groups.map((group) => (
-            <Card key={group.name}>
-              <CardHeader className="pb-4">
-                <CardTitle className="text-base">{group.title || group.name}</CardTitle>
-                {group.description && <CardDescription>{group.description}</CardDescription>}
-              </CardHeader>
-              <CardContent className={group.inline ? "flex gap-4" : "space-y-4"}>
-                {group.fields.map((fieldKey) => {
-                  const property = schema.properties[fieldKey];
-                  if (!property || property["x-ui-hidden"]) return null;
-                  return (
-                    <div key={fieldKey} className={group.inline ? "min-w-0 flex-1" : undefined}>
-                      <FormFieldRenderer
-                        fieldKey={fieldKey}
-                        property={property}
-                        required={requiredFields.has(fieldKey)}
-                      />
-                    </div>
-                  );
-                })}
-              </CardContent>
-            </Card>
-          ))}
+          {groups.map((group) => {
+            const fields = renderGroupFields(group);
+            if (!fields) return null;
+
+            if (compact) {
+              // Compact mode: lightweight divs, collapsible for collapsed groups
+              if (group.collapsed) {
+                return (
+                  <Collapsible key={group.name}>
+                    <CollapsibleTrigger className="text-muted-foreground hover:text-foreground flex items-center gap-1 text-sm font-medium transition-colors [&[data-state=open]>svg]:rotate-90">
+                      <ChevronRight className="h-4 w-4 transition-transform" />
+                      {group.title || group.name}
+                    </CollapsibleTrigger>
+                    <CollapsibleContent className="pt-3">{fields}</CollapsibleContent>
+                  </Collapsible>
+                );
+              }
+              return (
+                <div key={group.name}>
+                  {group.title && (
+                    <p className="text-muted-foreground mb-2 text-sm font-medium">{group.title}</p>
+                  )}
+                  {fields}
+                </div>
+              );
+            }
+
+            // Default mode: Card-wrapped groups
+            return (
+              <Card key={group.name}>
+                <CardHeader className="pb-4">
+                  <CardTitle className="text-base">{group.title || group.name}</CardTitle>
+                  {group.description && <CardDescription>{group.description}</CardDescription>}
+                </CardHeader>
+                <CardContent className={group.inline ? "flex gap-4" : "space-y-4"}>
+                  {group.fields.map((fieldKey) => {
+                    const property = schema.properties[fieldKey];
+                    if (!property || property["x-ui-hidden"]) return null;
+                    return (
+                      <div key={fieldKey} className={group.inline ? "min-w-0 flex-1" : undefined}>
+                        <FormFieldRenderer
+                          fieldKey={fieldKey}
+                          property={property}
+                          required={requiredFields.has(fieldKey)}
+                        />
+                      </div>
+                    );
+                  })}
+                </CardContent>
+              </Card>
+            );
+          })}
 
           {/* Render any ungrouped fields */}
-          {getUngroupedFields(schema).length > 0 && (
-            <Card>
-              <CardHeader className="pb-4">
-                <CardTitle className="text-base">Other</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
+          {getUngroupedFields(schema).length > 0 &&
+            (compact ? (
+              <div className="space-y-4">
                 {getUngroupedFields(schema).map(([fieldKey, property]) => (
                   <FormFieldRenderer
                     key={fieldKey}
@@ -163,13 +285,26 @@ export function DynamicForm({
                     required={requiredFields.has(fieldKey)}
                   />
                 ))}
-              </CardContent>
-            </Card>
-          )}
+              </div>
+            ) : (
+              <Card>
+                <CardHeader className="pb-4">
+                  <CardTitle className="text-base">Other</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  {getUngroupedFields(schema).map(([fieldKey, property]) => (
+                    <FormFieldRenderer
+                      key={fieldKey}
+                      fieldKey={fieldKey}
+                      property={property}
+                      required={requiredFields.has(fieldKey)}
+                    />
+                  ))}
+                </CardContent>
+              </Card>
+            ))}
 
-          <Button type="submit" disabled={isSubmitting}>
-            {isSubmitting ? "Saving..." : submitLabel}
-          </Button>
+          {submitButton}
         </form>
       </FormProvider>
     );
@@ -201,9 +336,7 @@ export function DynamicForm({
           />
         ))}
 
-        <Button type="submit" disabled={isSubmitting}>
-          {isSubmitting ? "Saving..." : submitLabel}
-        </Button>
+        {submitButton}
       </form>
     </FormProvider>
   );

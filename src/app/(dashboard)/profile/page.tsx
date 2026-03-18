@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   ArrowRight,
   Check,
@@ -78,12 +78,22 @@ export default function ProfilePage() {
   // Keep activeTab in sync when data loads for the first time
   const resolvedTab = activeTab || initialSection;
 
+  // Ref for flushing auto-save when switching sections
+  const flushRef = useRef<(() => void) | null>(null);
+
+  const handleTabChange = useCallback((newTab: string) => {
+    // Flush any pending auto-save from the current section before switching
+    flushRef.current?.();
+    setActiveTab(newTab);
+  }, []);
+
   const nextUnfilled = schemas
     ? getFirstUnfilledField(schemas, profileData, extractSectionData)
     : null;
 
   const handleContinue = useCallback(() => {
     if (!nextUnfilled) return;
+    flushRef.current?.();
     setActiveTab(nextUnfilled.sectionId);
     // Wait for content to render, then focus the field
     requestAnimationFrame(() => {
@@ -149,7 +159,7 @@ export default function ProfilePage() {
               return (
                 <button
                   key={sectionId}
-                  onClick={() => setActiveTab(sectionId)}
+                  onClick={() => handleTabChange(sectionId)}
                   className={cn(
                     "flex shrink-0 items-center gap-1.5 rounded-md px-3 py-1.5 text-sm transition-colors",
                     isActive
@@ -187,7 +197,7 @@ export default function ProfilePage() {
                   return (
                     <button
                       key={sectionId}
-                      onClick={() => setActiveTab(sectionId)}
+                      onClick={() => handleTabChange(sectionId)}
                       className={cn(
                         "flex w-full items-center gap-2.5 rounded-md px-3 py-2 text-left text-sm transition-colors",
                         isActive
@@ -224,6 +234,7 @@ export default function ProfilePage() {
                     schema={schema}
                     initialData={extractSectionData(schema, profileData)}
                     embeddedSchemas={embeddedSchemas}
+                    flushRef={flushRef}
                   />
                 ) : null
               )}
@@ -240,6 +251,7 @@ export default function ProfilePage() {
                   schema={schema}
                   initialData={extractSectionData(schema, profileData)}
                   embeddedSchemas={embeddedSchemas}
+                  flushRef={flushRef}
                 />
               ) : null
             )}
@@ -255,9 +267,16 @@ interface ProfileSectionProps {
   schema: FormSchema;
   initialData?: Record<string, unknown>;
   embeddedSchemas?: Record<string, FormSchema>;
+  flushRef?: React.MutableRefObject<(() => void) | null>;
 }
 
-function ProfileSection({ sectionId, schema, initialData, embeddedSchemas }: ProfileSectionProps) {
+function ProfileSection({
+  sectionId,
+  schema,
+  initialData,
+  embeddedSchemas,
+  flushRef,
+}: ProfileSectionProps) {
   // Collection sections get their own dedicated components
   if (sectionId === "language") {
     return <LanguageCollection schema={schema} />;
@@ -277,11 +296,19 @@ function ProfileSection({ sectionId, schema, initialData, embeddedSchemas }: Pro
         schema={schema}
         initialData={initialData}
         embeddedSections={embedded}
+        flushRef={flushRef}
       />
     );
   }
 
-  return <StandardProfileSection sectionId={sectionId} schema={schema} initialData={initialData} />;
+  return (
+    <StandardProfileSection
+      sectionId={sectionId}
+      schema={schema}
+      initialData={initialData}
+      flushRef={flushRef}
+    />
+  );
 }
 
 interface SectionWithEmbeddedProps {
@@ -289,6 +316,7 @@ interface SectionWithEmbeddedProps {
   schema: FormSchema;
   initialData?: Record<string, unknown>;
   embeddedSections: [string, FormSchema][];
+  flushRef?: React.MutableRefObject<(() => void) | null>;
 }
 
 function SectionWithEmbedded({
@@ -296,17 +324,23 @@ function SectionWithEmbedded({
   schema,
   initialData,
   embeddedSections,
+  flushRef,
 }: SectionWithEmbeddedProps) {
   const mutation = useSaveProfileSection(sectionId, {
     successMessage: `${schema.title || sectionId} saved`,
   });
+  const autoSaveMutation = useSaveProfileSection(sectionId, {
+    silent: true,
+  });
 
   const { fieldErrors, formError } = useMemo(() => {
-    if (!mutation.error || !(mutation.error instanceof ApiClientError)) {
+    // Show errors from whichever mutation errored most recently
+    const err = mutation.error || autoSaveMutation.error;
+    if (!err || !(err instanceof ApiClientError)) {
       return { fieldErrors: {} as Record<string, string>, formError: null as string | null };
     }
-    return { fieldErrors: mutation.error.fieldErrors, formError: mutation.error.userMessage };
-  }, [mutation.error]);
+    return { fieldErrors: err.fieldErrors, formError: err.userMessage };
+  }, [mutation.error, autoSaveMutation.error]);
 
   const { data: profile } = useMyProfile();
   const profileData = profile as Record<string, unknown> | undefined;
@@ -321,6 +355,10 @@ function SectionWithEmbedded({
         submitLabel={`Save ${schema.title || sectionId}`}
         serverErrors={Object.keys(fieldErrors).length > 0 ? fieldErrors : undefined}
         formError={mutation.error ? formError : null}
+        autoSave
+        onAutoSave={(data) => autoSaveMutation.mutate(data)}
+        isAutoSaving={autoSaveMutation.isPending}
+        flushRef={flushRef}
       />
 
       {embeddedSections.map(([embeddedId, embeddedSchema]) => (
@@ -348,13 +386,17 @@ function EmbeddedCollapsibleSection({
   const mutation = useSaveProfileSection(sectionId, {
     successMessage: `${schema.title || sectionId} saved`,
   });
+  const autoSaveMutation = useSaveProfileSection(sectionId, {
+    silent: true,
+  });
 
   const { fieldErrors, formError } = useMemo(() => {
-    if (!mutation.error || !(mutation.error instanceof ApiClientError)) {
+    const err = mutation.error || autoSaveMutation.error;
+    if (!err || !(err instanceof ApiClientError)) {
       return { fieldErrors: {} as Record<string, string>, formError: null as string | null };
     }
-    return { fieldErrors: mutation.error.fieldErrors, formError: mutation.error.userMessage };
-  }, [mutation.error]);
+    return { fieldErrors: err.fieldErrors, formError: err.userMessage };
+  }, [mutation.error, autoSaveMutation.error]);
 
   return (
     <Collapsible open={open} onOpenChange={setOpen}>
@@ -374,6 +416,9 @@ function EmbeddedCollapsibleSection({
             submitLabel={`Save ${schema.title || sectionId}`}
             serverErrors={Object.keys(fieldErrors).length > 0 ? fieldErrors : undefined}
             formError={mutation.error ? formError : null}
+            autoSave
+            onAutoSave={(data) => autoSaveMutation.mutate(data)}
+            isAutoSaving={autoSaveMutation.isPending}
           />
         </div>
       </CollapsibleContent>
@@ -381,17 +426,21 @@ function EmbeddedCollapsibleSection({
   );
 }
 
-function StandardProfileSection({ sectionId, schema, initialData }: ProfileSectionProps) {
+function StandardProfileSection({ sectionId, schema, initialData, flushRef }: ProfileSectionProps) {
   const mutation = useSaveProfileSection(sectionId, {
     successMessage: `${schema.title || sectionId} saved`,
   });
+  const autoSaveMutation = useSaveProfileSection(sectionId, {
+    silent: true,
+  });
 
   const { fieldErrors, formError } = useMemo(() => {
-    if (!mutation.error || !(mutation.error instanceof ApiClientError)) {
+    const err = mutation.error || autoSaveMutation.error;
+    if (!err || !(err instanceof ApiClientError)) {
       return { fieldErrors: {} as Record<string, string>, formError: null as string | null };
     }
-    return { fieldErrors: mutation.error.fieldErrors, formError: mutation.error.userMessage };
-  }, [mutation.error]);
+    return { fieldErrors: err.fieldErrors, formError: err.userMessage };
+  }, [mutation.error, autoSaveMutation.error]);
 
   return (
     <DynamicForm
@@ -402,6 +451,10 @@ function StandardProfileSection({ sectionId, schema, initialData }: ProfileSecti
       submitLabel={`Save ${schema.title || sectionId}`}
       serverErrors={Object.keys(fieldErrors).length > 0 ? fieldErrors : undefined}
       formError={mutation.error ? formError : null}
+      autoSave
+      onAutoSave={(data) => autoSaveMutation.mutate(data)}
+      isAutoSaving={autoSaveMutation.isPending}
+      flushRef={flushRef}
     />
   );
 }

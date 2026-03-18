@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { Plus, Pencil, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -13,6 +13,7 @@ import {
   useUpdateLanguage,
   useDeleteLanguage,
 } from "@/hooks/use-languages";
+import { ApiClientError } from "@/services/api-client";
 import type { LanguageEntry } from "@/services/languages";
 import type { FormSchema } from "@/types/form-schema";
 
@@ -56,9 +57,33 @@ export function LanguageCollection({ schema }: LanguageCollectionProps) {
     }
   };
 
+  // Extract server-side field errors from the active mutation
+  const activeMutation = editingItem ? updateMutation : createMutation;
+  const { fieldErrors, formError } = useMemo(() => {
+    const err = activeMutation.error;
+    if (!err || !(err instanceof ApiClientError)) {
+      return { fieldErrors: {} as Record<string, string>, formError: null as string | null };
+    }
+    return { fieldErrors: err.fieldErrors, formError: err.userMessage };
+  }, [activeMutation.error]);
+
   // Resolve option labels for display
   const languageOptions = schema.properties?.language?.["x-ui-options"];
   const proficiencyOptions = schema.properties?.proficiency?.["x-ui-options"];
+
+  // When adding a new language, filter out already-added languages from the dropdown
+  const filteredSchema = useMemo(() => {
+    if (editingItem || !languages?.length) return schema;
+    const usedCodes = new Set(languages.map((l) => l.language));
+    const filtered = languageOptions?.filter((o) => !usedCodes.has(o.value));
+    return {
+      ...schema,
+      properties: {
+        ...schema.properties,
+        language: { ...schema.properties.language, "x-ui-options": filtered },
+      },
+    };
+  }, [schema, languages, editingItem, languageOptions]);
 
   const getLabel = (options: typeof languageOptions, value: string) =>
     options?.find((o) => o.value === value)?.label || value;
@@ -133,7 +158,7 @@ export function LanguageCollection({ schema }: LanguageCollectionProps) {
             <DialogTitle>{editingItem ? "Edit Language" : "Add Language"}</DialogTitle>
           </DialogHeader>
           <DynamicForm
-            schema={schema}
+            schema={filteredSchema}
             initialData={
               editingItem
                 ? { language: editingItem.language, proficiency: editingItem.proficiency }
@@ -142,6 +167,8 @@ export function LanguageCollection({ schema }: LanguageCollectionProps) {
             onSubmit={handleSubmit}
             isSubmitting={createMutation.isPending || updateMutation.isPending}
             submitLabel={editingItem ? "Save Changes" : "Add Language"}
+            serverErrors={Object.keys(fieldErrors).length > 0 ? fieldErrors : undefined}
+            formError={activeMutation.error ? formError : null}
           />
         </DialogContent>
       </Dialog>

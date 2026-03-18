@@ -158,7 +158,7 @@ export function PerformanceCollection({ sportId, sportCode }: PerformanceCollect
 
       {schema && (
         <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-          <DialogContent>
+          <DialogContent className="max-h-[85vh] overflow-y-auto sm:max-w-2xl">
             <DialogHeader>
               <DialogTitle>{editingItem ? "Edit Performance" : "Add Performance"}</DialogTitle>
             </DialogHeader>
@@ -177,12 +177,18 @@ export function PerformanceCollection({ sportId, sportCode }: PerformanceCollect
                       heart_rate_avg: editingItem.heart_rate_avg,
                       drag_factor: editingItem.drag_factor,
                       place: editingItem.place,
+                      margin_seconds: editingItem.margin_seconds,
+                      seat_position: editingItem.seat_position,
+                      is_coxswain: editingItem.is_coxswain,
+                      water_conditions: editingItem.water_conditions,
+                      regatta_central_url: editingItem.regatta_central_url,
                     }
                   : undefined
               }
               onSubmit={handleSubmit}
               isSubmitting={createMutation.isPending || updateMutation.isPending}
               submitLabel={editingItem ? "Save Changes" : "Add Performance"}
+              compact
             />
           </DialogContent>
         </Dialog>

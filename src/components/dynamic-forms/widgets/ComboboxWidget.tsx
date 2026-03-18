@@ -151,7 +151,12 @@ export function ComboboxWidget({
                 className="h-8 border-0 p-0 shadow-none focus-visible:ring-0"
               />
             </div>
-            <div ref={listRef} className="max-h-60 overflow-y-auto p-1" role="listbox">
+            <div
+              ref={listRef}
+              className="max-h-60 overflow-y-auto p-1"
+              role="listbox"
+              onWheel={(e) => e.stopPropagation()}
+            >
               {flatFiltered.length === 0 ? (
                 <div className="text-muted-foreground py-6 text-center text-sm">
                   {isSearching ? "No results found." : "Type to search..."}

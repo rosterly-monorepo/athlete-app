@@ -85,6 +85,8 @@ interface UseSaveProfileSectionOptions {
   errorMessage?: string;
   /** Callback on success */
   onSuccess?: () => void;
+  /** Suppress success toast (for auto-save). Error toasts still show. */
+  silent?: boolean;
 }
 
 /**
@@ -98,7 +100,12 @@ export function useSaveProfileSection<T extends Record<string, unknown>>(
   const { getToken } = useAuth();
   const queryClient = useQueryClient();
 
-  const { successMessage = "Section saved", errorMessage = "Failed to save", onSuccess } = options;
+  const {
+    successMessage = "Section saved",
+    errorMessage = "Failed to save",
+    onSuccess,
+    silent = false,
+  } = options;
 
   return useMutation({
     mutationFn: async (data: T) => {
@@ -108,9 +115,11 @@ export function useSaveProfileSection<T extends Record<string, unknown>>(
     onSuccess: () => {
       // Invalidate profile cache so updated data is fetched
       queryClient.invalidateQueries({ queryKey: athleteKeys.myProfile });
-      toast.success(successMessage, {
-        description: `Your ${section.replace(/_/g, " ")} information has been updated.`,
-      });
+      if (!silent) {
+        toast.success(successMessage, {
+          description: `Your ${section.replace(/_/g, " ")} information has been updated.`,
+        });
+      }
       onSuccess?.();
     },
     onError: (error) => {
