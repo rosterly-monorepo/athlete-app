@@ -38,7 +38,7 @@ export function HeroSection() {
                 <div className="mx-auto mt-8 flex justify-center lg:mt-16">
                   {/* Light theme: dark logo */}
                   <Image
-                    src="/branding/logo-light.png"
+                    src="/branding/logo-dark.png"
                     alt="Rosterly"
                     width={400}
                     height={100}
@@ -47,7 +47,7 @@ export function HeroSection() {
                   />
                   {/* Dark theme: light logo */}
                   <Image
-                    src="/branding/logo-dark.png"
+                    src="/branding/logo-light.png"
                     alt="Rosterly"
                     width={400}
                     height={100}

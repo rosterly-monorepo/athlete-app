@@ -21,6 +21,7 @@ interface SearchResultsPanelProps {
   error: Error | null;
   pipelineAthleteIds?: Set<number>;
   addingAthleteId?: number | null;
+  hasActiveWeights?: boolean;
   onQueryChange: (q: string) => void;
   onSortChange: (sort: string) => void;
   onPageChange: (page: number) => void;
@@ -39,6 +40,7 @@ export function SearchResultsPanel({
   error,
   pipelineAthleteIds,
   addingAthleteId,
+  hasActiveWeights,
   onQueryChange,
   onSortChange,
   onPageChange,
@@ -124,7 +126,13 @@ export function SearchResultsPanel({
             "Enter search criteria"
           )}
         </p>
-        <SearchSortSelect value={sortBy} options={sortOptions} onChange={onSortChange} />
+        {hasActiveWeights ? (
+          <span className="bg-muted text-muted-foreground rounded-md px-3 py-1 text-xs font-medium">
+            Performance Ranking
+          </span>
+        ) : (
+          <SearchSortSelect value={sortBy} options={sortOptions} onChange={onSortChange} />
+        )}
       </div>
 
       {/* Results list */}

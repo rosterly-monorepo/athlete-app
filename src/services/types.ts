@@ -376,16 +376,27 @@ export interface SortOption {
   sport_code: string | null;
 }
 
+export interface OrderingMetric {
+  field: string;
+  label: string;
+  sport_code: string;
+  default_weight: number;
+  unit: string | null;
+  display_format: string | null;
+}
+
 export interface SearchFiltersResponse {
   filters: SearchFilterSchema[];
   groups: FilterGroup[];
   sort_options: SortOption[];
+  ordering_metrics: OrderingMetric[];
 }
 
 export interface AthleteSearchRequest {
   query?: string;
   filters: Record<string, unknown>;
   sort_by: string;
+  metric_weights?: Record<string, number>;
   offset: number;
   limit: number;
 }

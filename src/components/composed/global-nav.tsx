@@ -23,7 +23,7 @@ export function GlobalNav() {
       <Link href="/" className="flex items-center">
         {/* Light theme: dark logo */}
         <Image
-          src="/branding/logo-light.png"
+          src="/branding/logo-dark.png"
           alt="Rosterly"
           width={160}
           height={40}
@@ -32,7 +32,7 @@ export function GlobalNav() {
         />
         {/* Dark theme: light logo */}
         <Image
-          src="/branding/logo-dark.png"
+          src="/branding/logo-light.png"
           alt="Rosterly"
           width={160}
           height={40}

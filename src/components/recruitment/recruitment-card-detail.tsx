@@ -138,7 +138,7 @@ function RecruitmentCardDetail({
     onOpenChange(false);
   };
 
-  const initials = `${record.athlete_first_name[0]}${record.athlete_last_name[0]}`;
+  const initials = `${record.athlete_first_name?.[0] ?? ""}${record.athlete_last_name?.[0] ?? ""}`;
   const displayRecord = (fullRecord ?? record) as RecruitmentRecordDetail;
 
   return (

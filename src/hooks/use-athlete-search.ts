@@ -55,19 +55,27 @@ export function useAthleteSearch(params: AthleteSearchRequest | null) {
 // ── URL Serialization ──
 
 type FilterValues = Record<string, unknown>;
+type MetricWeights = Record<string, number>;
 
 function serializeFiltersToParams(
   filters: FilterValues,
   schemas: SearchFilterSchema[],
   query: string,
   sortBy: string,
-  page: number
+  page: number,
+  metricWeights: MetricWeights
 ): URLSearchParams {
   const params = new URLSearchParams();
 
   if (query) params.set("q", query);
   if (sortBy !== "_score") params.set("sort", sortBy);
   if (page > 1) params.set("page", String(page));
+
+  // Serialize metric weights: "field1:60,field2:40"
+  const weightEntries = Object.entries(metricWeights).filter(([, w]) => w > 0);
+  if (weightEntries.length > 0) {
+    params.set("weights", weightEntries.map(([f, w]) => `${f}:${w}`).join(","));
+  }
 
   const schemaMap = new Map(schemas.map((s) => [s.field, s]));
 
@@ -104,11 +112,28 @@ function parseParamsToFilters(
   query: string;
   sortBy: string;
   page: number;
+  metricWeights: MetricWeights;
 } {
   const filters: FilterValues = {};
   const query = searchParams.get("q") || "";
   const sortBy = searchParams.get("sort") || "_score";
   const page = Number(searchParams.get("page")) || 1;
+
+  // Parse metric weights: "field1:60,field2:40"
+  const metricWeights: MetricWeights = {};
+  const weightsRaw = searchParams.get("weights");
+  if (weightsRaw) {
+    for (const pair of weightsRaw.split(",")) {
+      const colonIdx = pair.lastIndexOf(":");
+      if (colonIdx > 0) {
+        const field = pair.slice(0, colonIdx);
+        const weight = Number(pair.slice(colonIdx + 1));
+        if (!isNaN(weight) && weight > 0) {
+          metricWeights[field] = weight;
+        }
+      }
+    }
+  }
 
   for (const schema of filterSchemas) {
     const raw = searchParams.get(schema.field);
@@ -131,7 +156,7 @@ function parseParamsToFilters(
     }
   }
 
-  return { filters, query, sortBy, page };
+  return { filters, query, sortBy, page, metricWeights };
 }
 
 // ── Search State Hook ──
@@ -157,9 +182,16 @@ export function useSearchState(filterSchemas: SearchFilterSchema[]) {
   const [query, setQuery] = useState(initial.query);
   const [sortBy, setSortBy] = useState(initial.sortBy);
   const [page, setPage] = useState(initial.page);
+  const [metricWeights, setMetricWeightsState] = useState<MetricWeights>(initial.metricWeights);
 
   // Debounce query only (text search still auto-fires)
   const [debouncedQuery] = useDebounce(query, 300);
+
+  // Whether any metric weights are active
+  const hasActiveWeights = useMemo(
+    () => Object.values(metricWeights).some((w) => w > 0),
+    [metricWeights]
+  );
 
   // Track whether draft differs from applied
   const hasUnappliedChanges = useMemo(() => {
@@ -175,21 +207,30 @@ export function useSearchState(filterSchemas: SearchFilterSchema[]) {
   }, [filterValues, appliedFilters]);
 
   // Build the API request params from APPLIED filters
-  const searchParams_ = useMemo<AthleteSearchRequest>(
-    () => ({
+  const searchParams_ = useMemo<AthleteSearchRequest>(() => {
+    // Convert UI weights (0-100) to API weights (0-1) and filter out zeros
+    const apiWeights: Record<string, number> = {};
+    for (const [field, weight] of Object.entries(metricWeights)) {
+      if (weight > 0) {
+        apiWeights[field] = weight / 100;
+      }
+    }
+    const hasWeights = Object.keys(apiWeights).length > 0;
+
+    return {
       query: debouncedQuery || undefined,
       filters: appliedFilters,
-      sort_by: sortBy,
+      sort_by: hasWeights ? "_score" : sortBy,
+      metric_weights: hasWeights ? apiWeights : undefined,
       offset: (page - 1) * PAGE_SIZE,
       limit: PAGE_SIZE,
-    }),
-    [appliedFilters, debouncedQuery, sortBy, page]
-  );
+    };
+  }, [appliedFilters, debouncedQuery, sortBy, page, metricWeights]);
 
   // Sync to URL
   const syncUrl = useCallback(
-    (filters: FilterValues, q: string, sort: string, p: number) => {
-      const params = serializeFiltersToParams(filters, filterSchemas, q, sort, p);
+    (filters: FilterValues, q: string, sort: string, p: number, weights: MetricWeights) => {
+      const params = serializeFiltersToParams(filters, filterSchemas, q, sort, p, weights);
       const paramString = params.toString();
       const newUrl = paramString ? `?${paramString}` : window.location.pathname;
       router.replace(newUrl, { scroll: false });
@@ -214,8 +255,8 @@ export function useSearchState(filterSchemas: SearchFilterSchema[]) {
     setFilterValues({});
     setAppliedFilters({});
     setPage(1);
-    syncUrl({}, query, sortBy, 1);
-  }, [query, sortBy, syncUrl]);
+    syncUrl({}, query, sortBy, 1, metricWeights);
+  }, [query, sortBy, metricWeights, syncUrl]);
 
   const clearGroupFilters = useCallback(
     (groupKey: string) => {
@@ -236,34 +277,58 @@ export function useSearchState(filterSchemas: SearchFilterSchema[]) {
   const applyFilters = useCallback(() => {
     setAppliedFilters(filterValues);
     setPage(1);
-    syncUrl(filterValues, query, sortBy, 1);
-  }, [filterValues, query, sortBy, syncUrl]);
+    syncUrl(filterValues, query, sortBy, 1, metricWeights);
+  }, [filterValues, query, sortBy, metricWeights, syncUrl]);
 
   const handleSetQuery = useCallback(
     (q: string) => {
       setQuery(q);
       setPage(1);
-      syncUrl(appliedFilters, q, sortBy, 1);
+      syncUrl(appliedFilters, q, sortBy, 1, metricWeights);
     },
-    [appliedFilters, sortBy, syncUrl]
+    [appliedFilters, sortBy, metricWeights, syncUrl]
   );
 
   const handleSetSortBy = useCallback(
     (sort: string) => {
       setSortBy(sort);
       setPage(1);
-      syncUrl(appliedFilters, query, sort, 1);
+      syncUrl(appliedFilters, query, sort, 1, metricWeights);
     },
-    [appliedFilters, query, syncUrl]
+    [appliedFilters, query, metricWeights, syncUrl]
   );
 
   const handleSetPage = useCallback(
     (p: number) => {
       setPage(p);
-      syncUrl(appliedFilters, query, sortBy, p);
+      syncUrl(appliedFilters, query, sortBy, p, metricWeights);
+    },
+    [appliedFilters, query, sortBy, metricWeights, syncUrl]
+  );
+
+  // Metric weight handlers — fire immediately (like sort)
+  const setMetricWeight = useCallback(
+    (field: string, weight: number) => {
+      setMetricWeightsState((prev) => {
+        const next = { ...prev };
+        if (weight <= 0) {
+          delete next[field];
+        } else {
+          next[field] = weight;
+        }
+        setPage(1);
+        syncUrl(appliedFilters, query, sortBy, 1, next);
+        return next;
+      });
     },
     [appliedFilters, query, sortBy, syncUrl]
   );
+
+  const clearMetricWeights = useCallback(() => {
+    setMetricWeightsState({});
+    setPage(1);
+    syncUrl(appliedFilters, query, sortBy, 1, {});
+  }, [appliedFilters, query, sortBy, syncUrl]);
 
   // Compute active filter counts from draft values
   const activeFilterCount = useMemo(() => {
@@ -290,6 +355,8 @@ export function useSearchState(filterSchemas: SearchFilterSchema[]) {
     searchParams: searchParams_,
     activeFilterCount,
     hasUnappliedChanges,
+    metricWeights,
+    hasActiveWeights,
     setFilter,
     clearFilter,
     clearAllFilters,
@@ -298,5 +365,7 @@ export function useSearchState(filterSchemas: SearchFilterSchema[]) {
     setQuery: handleSetQuery,
     setSortBy: handleSetSortBy,
     setPage: handleSetPage,
+    setMetricWeight,
+    clearMetricWeights,
   };
 }

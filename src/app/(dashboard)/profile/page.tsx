@@ -31,7 +31,6 @@ import { cn } from "@/lib/utils";
 import {
   getSectionCompletion,
   getFirstIncompleteSection,
-  getFirstUnfilledField,
   getOverallCompletion,
 } from "@/lib/profile-completion";
 import type { FormSchema } from "@/types/form-schema";
@@ -68,10 +67,11 @@ export default function ProfilePage() {
     allSchemaEntries.filter(([, schema]) => schema["x-ui-embedded-in"])
   );
   const sectionEntries = allSchemaEntries.filter(([, schema]) => !schema["x-ui-embedded-in"]);
+  const sectionIds = sectionEntries.map(([id]) => id);
   const profileData = profile as Record<string, unknown> | undefined;
 
   const initialSection = schemas
-    ? getFirstIncompleteSection(schemas, profileData, extractSectionData) || sectionEntries[0]?.[0]
+    ? getFirstIncompleteSection(sectionIds, profileData) || sectionEntries[0]?.[0]
     : undefined;
   const [activeTab, setActiveTab] = useState<string | undefined>(initialSection);
 
@@ -87,23 +87,17 @@ export default function ProfilePage() {
     setActiveTab(newTab);
   }, []);
 
-  const nextUnfilled = schemas
-    ? getFirstUnfilledField(schemas, profileData, extractSectionData)
-    : null;
+  const nextIncompleteSection = schemas
+    ? getFirstIncompleteSection(sectionIds, profileData)
+    : undefined;
+  // Only show "Continue" when there's an incomplete section that isn't the current one
+  const showContinue = nextIncompleteSection && nextIncompleteSection !== resolvedTab;
 
-  const handleContinue = useCallback(() => {
-    if (!nextUnfilled) return;
+  const handleContinue = () => {
+    if (!nextIncompleteSection) return;
     flushRef.current?.();
-    setActiveTab(nextUnfilled.sectionId);
-    // Wait for content to render, then focus the field
-    requestAnimationFrame(() => {
-      const el = document.getElementById(nextUnfilled.fieldKey);
-      if (el) {
-        el.scrollIntoView({ behavior: "smooth", block: "center" });
-        el.focus();
-      }
-    });
-  }, [nextUnfilled]);
+    setActiveTab(nextIncompleteSection);
+  };
 
   if (profileLoading || schemasLoading) {
     return <ProfileSkeleton />;
@@ -124,7 +118,7 @@ export default function ProfilePage() {
     );
   }
 
-  const overallPct = getOverallCompletion(schemas, profileData, extractSectionData);
+  const overallPct = getOverallCompletion(sectionIds, profileData);
 
   return (
     <div>
@@ -138,7 +132,7 @@ export default function ProfilePage() {
         <p className="text-muted-foreground">
           This information will appear on your public athlete profile page.
         </p>
-        {nextUnfilled && (
+        {showContinue && (
           <Button size="sm" className="ml-4 shrink-0 gap-1.5" onClick={handleContinue}>
             Continue
             <ArrowRight className="h-4 w-4" />
@@ -151,10 +145,7 @@ export default function ProfilePage() {
           {/* Mobile: horizontal scrollable section nav */}
           <div className="mb-4 flex gap-1.5 overflow-x-auto pb-2 md:hidden">
             {sectionEntries.map(([sectionId, schema]) => {
-              const completion = getSectionCompletion(
-                schema,
-                extractSectionData(schema, profileData)
-              );
+              const completion = getSectionCompletion(sectionId, profileData);
               const isActive = resolvedTab === sectionId;
               return (
                 <button
@@ -187,10 +178,7 @@ export default function ProfilePage() {
             <nav className="sticky top-20 w-52 shrink-0 self-start">
               <div className="flex flex-col gap-0.5">
                 {sectionEntries.map(([sectionId, schema]) => {
-                  const completion = getSectionCompletion(
-                    schema,
-                    extractSectionData(schema, profileData)
-                  );
+                  const completion = getSectionCompletion(sectionId, profileData);
                   const isActive = resolvedTab === sectionId;
                   const Icon = sectionIcons[sectionId];
 

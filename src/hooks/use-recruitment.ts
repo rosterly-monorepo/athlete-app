@@ -284,9 +284,43 @@ export function useUpdateRecord(programId: number) {
       return updateRecord(token!, recordId, data);
     },
     onSuccess: (updatedRecord) => {
-      // Update in board cache
+      // Update in board cache — handle stage moves between columns
       queryClient.setQueryData<RecruitmentBoard>(recruitmentKeys.board(programId), (old) => {
         if (!old) return old;
+
+        // Check if the record moved to a different column
+        const oldColumn = old.columns.find((col) =>
+          col.records.some((r) => r.id === updatedRecord.id)
+        );
+        const stageChanged = oldColumn && oldColumn.stage !== updatedRecord.stage;
+
+        if (stageChanged) {
+          // Move record between columns
+          return {
+            ...old,
+            columns: old.columns.map((col) => {
+              if (col.stage === oldColumn.stage) {
+                // Remove from source column
+                return {
+                  ...col,
+                  records: col.records.filter((r) => r.id !== updatedRecord.id),
+                  count: col.count - 1,
+                };
+              }
+              if (col.stage === updatedRecord.stage) {
+                // Add to destination column
+                return {
+                  ...col,
+                  records: [...col.records, updatedRecord],
+                  count: col.count + 1,
+                };
+              }
+              return col;
+            }),
+          };
+        }
+
+        // Same column — just update in place
         return {
           ...old,
           columns: old.columns.map((col) => ({

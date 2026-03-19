@@ -11,6 +11,7 @@ import { useSearchFilters, useAthleteSearch, useSearchState } from "@/hooks/use-
 import { useMyPrograms } from "@/hooks/use-programs";
 import { useAddRecord, usePipelineAthleteIds } from "@/hooks/use-recruitment";
 import { SearchFilterPanel } from "./search-filter-panel";
+import { OrderingPanel } from "./ordering-panel";
 import { SearchResultsPanel } from "./search-results-panel";
 
 function SearchPageContent() {
@@ -37,6 +38,8 @@ function SearchPageContent() {
     searchParams,
     activeFilterCount,
     hasUnappliedChanges,
+    metricWeights,
+    hasActiveWeights,
     setFilter,
     clearFilter,
     clearAllFilters,
@@ -45,7 +48,11 @@ function SearchPageContent() {
     setQuery,
     setSortBy,
     setPage,
+    setMetricWeight,
+    clearMetricWeights,
   } = useSearchState(filterSchemas);
+
+  const orderingMetrics = useMemo(() => filterData?.ordering_metrics ?? [], [filterData]);
 
   const {
     data: searchData,
@@ -159,11 +166,22 @@ function SearchPageContent() {
     />
   );
 
+  const orderingPanel = (
+    <OrderingPanel
+      metrics={orderingMetrics}
+      selectedSports={selectedSports}
+      metricWeights={metricWeights}
+      onWeightChange={setMetricWeight}
+      onClear={clearMetricWeights}
+    />
+  );
+
   return (
     <div className="flex h-full gap-6">
-      {/* Desktop filter sidebar */}
-      <aside className="hidden w-72 shrink-0 overflow-y-auto border-r pr-4 md:block">
+      {/* Desktop sidebar — Filters and Ordering as distinct cards */}
+      <aside className="hidden w-72 shrink-0 space-y-4 overflow-y-auto pr-4 md:block">
         {filterPanel}
+        {orderingPanel}
       </aside>
 
       {/* Mobile filter trigger */}
@@ -182,9 +200,12 @@ function SearchPageContent() {
           </SheetTrigger>
           <SheetContent side="left" className="w-80 overflow-y-auto">
             <SheetHeader>
-              <SheetTitle>Filters</SheetTitle>
+              <SheetTitle>Filters & Ordering</SheetTitle>
             </SheetHeader>
-            <div className="mt-4">{filterPanel}</div>
+            <div className="mt-4 space-y-4">
+              {filterPanel}
+              {orderingPanel}
+            </div>
           </SheetContent>
         </Sheet>
       </div>
@@ -202,6 +223,7 @@ function SearchPageContent() {
         error={searchError}
         pipelineAthleteIds={pipelineAthleteIds}
         addingAthleteId={addingAthleteId}
+        hasActiveWeights={hasActiveWeights}
         onQueryChange={setQuery}
         onSortChange={setSortBy}
         onPageChange={setPage}
