@@ -1,10 +1,10 @@
 "use client";
 
 import React from "react";
-import Image from "next/image";
 import Link from "next/link";
 import { SignInButton, Show } from "@clerk/nextjs";
 import { Button } from "@/components/ui/button";
+import { BrandImage } from "@/components/composed/brand-image";
 import { AnimatedGroup } from "@/components/ui/animated-group";
 
 const transitionVariants = {
@@ -36,24 +36,7 @@ export function HeroSection() {
             <div className="text-center sm:mx-auto lg:mt-0 lg:mr-auto">
               <AnimatedGroup variants={transitionVariants}>
                 <div className="mx-auto mt-8 flex justify-center lg:mt-16">
-                  {/* Light theme: use logo-light (dark colored, for light backgrounds) */}
-                  <Image
-                    src="/branding/logo-light.png"
-                    alt="Rosterly"
-                    width={400}
-                    height={100}
-                    className="h-16 w-auto md:h-20 dark:hidden"
-                    priority
-                  />
-                  {/* Dark theme: use logo-dark (light colored, for dark backgrounds) */}
-                  <Image
-                    src="/branding/logo-dark.png"
-                    alt="Rosterly"
-                    width={400}
-                    height={100}
-                    className="hidden h-16 w-auto md:h-20 dark:block"
-                    priority
-                  />
+                  <BrandImage className="h-16 w-auto md:h-20" priority />
                 </div>
 
                 <div className="mt-12 flex justify-center">

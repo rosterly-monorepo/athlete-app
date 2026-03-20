@@ -1,10 +1,10 @@
 "use client";
 
-import Image from "next/image";
 import Link from "next/link";
 import { SignInButton, SignUpButton, UserButton, useAuth } from "@clerk/nextjs";
 import { Button } from "@/components/ui/button";
 import { useUserRole } from "@/hooks/use-user-role";
+import { BrandImage } from "./brand-image";
 import { ThemeToggle } from "./theme-toggle";
 
 /**
@@ -21,24 +21,7 @@ export function GlobalNav() {
   return (
     <nav className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
       <Link href="/" className="flex items-center">
-        {/* Light theme: use logo-light (dark colored, for light backgrounds) */}
-        <Image
-          src="/branding/logo-light.png"
-          alt="Rosterly"
-          width={160}
-          height={40}
-          className="h-8 w-auto dark:hidden"
-          priority
-        />
-        {/* Dark theme: use logo-dark (light colored, for dark backgrounds) */}
-        <Image
-          src="/branding/logo-dark.png"
-          alt="Rosterly"
-          width={160}
-          height={40}
-          className="hidden h-8 w-auto dark:block"
-          priority
-        />
+        <BrandImage className="h-8 w-auto" width={160} height={40} priority />
       </Link>
 
       <div className="flex items-center gap-3">

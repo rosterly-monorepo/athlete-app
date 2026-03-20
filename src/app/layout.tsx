@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
-import Image from "next/image";
 import { Inter } from "next/font/google";
+import { BrandImage } from "@/components/composed/brand-image";
 import { Providers } from "@/components/providers";
 import { GlobalNav } from "@/components/composed/global-nav";
 import { CookieConsent } from "@/components/composed/cookie-consent";
@@ -46,20 +46,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           {/* ── Footer ── */}
           <footer className="border-border/50 border-t py-8">
             <div className="text-muted-foreground mx-auto flex max-w-7xl flex-col items-center gap-3 px-4 text-center text-sm sm:px-6 lg:px-8">
-              <Image
-                src="/branding/icon-light.png"
-                alt="Rosterly"
-                width={32}
-                height={32}
-                className="h-6 w-6 dark:hidden"
-              />
-              <Image
-                src="/branding/icon-dark.png"
-                alt="Rosterly"
-                width={32}
-                height={32}
-                className="hidden h-6 w-6 dark:block"
-              />
+              <BrandImage asset="icon" className="h-6 w-6" width={32} height={32} />
               <span>&copy; {new Date().getFullYear()} Rosterly. All rights reserved.</span>
             </div>
           </footer>
