@@ -21,18 +21,18 @@ export function GlobalNav() {
   return (
     <nav className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
       <Link href="/" className="flex items-center">
-        {/* Light theme: dark logo */}
+        {/* Light theme: use logo-light (dark colored, for light backgrounds) */}
         <Image
-          src="/branding/logo-dark.png"
+          src="/branding/logo-light.png"
           alt="Rosterly"
           width={160}
           height={40}
           className="h-8 w-auto dark:hidden"
           priority
         />
-        {/* Dark theme: light logo */}
+        {/* Dark theme: use logo-dark (light colored, for dark backgrounds) */}
         <Image
-          src="/branding/logo-light.png"
+          src="/branding/logo-dark.png"
           alt="Rosterly"
           width={160}
           height={40}

@@ -1,5 +1,8 @@
 @import "tailwindcss";
 
+/* ── Dark variant: match next-themes class, not media query ── */
+@custom-variant dark (&:where(.dark, .dark *));
+
 /* ── Register shadcn tokens with Tailwind v4 ──
    Rosterly "Pitch + Ember" brand theme */
 @theme inline {

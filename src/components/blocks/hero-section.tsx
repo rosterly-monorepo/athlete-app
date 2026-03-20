@@ -36,18 +36,18 @@ export function HeroSection() {
             <div className="text-center sm:mx-auto lg:mt-0 lg:mr-auto">
               <AnimatedGroup variants={transitionVariants}>
                 <div className="mx-auto mt-8 flex justify-center lg:mt-16">
-                  {/* Light theme: dark logo */}
+                  {/* Light theme: use logo-light (dark colored, for light backgrounds) */}
                   <Image
-                    src="/branding/logo-dark.png"
+                    src="/branding/logo-light.png"
                     alt="Rosterly"
                     width={400}
                     height={100}
                     className="h-16 w-auto md:h-20 dark:hidden"
                     priority
                   />
-                  {/* Dark theme: light logo */}
+                  {/* Dark theme: use logo-dark (light colored, for dark backgrounds) */}
                   <Image
-                    src="/branding/logo-light.png"
+                    src="/branding/logo-dark.png"
                     alt="Rosterly"
                     width={400}
                     height={100}
