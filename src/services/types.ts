@@ -784,3 +784,75 @@ export interface IntegrationSyncLog {
   started_at: string;
   completed_at: string | null;
 }
+
+// ── Nylas ──
+
+export interface NylasConnection {
+  id: number;
+  email_address: string;
+  provider: string;
+  status: string;
+  last_message_sync_at: string | null;
+  last_event_sync_at: string | null;
+  sync_error_count: number;
+  created_at: string;
+}
+
+export interface NylasSyncLog {
+  id: number;
+  sync_type: string;
+  trigger: string;
+  status: string;
+  messages_fetched: number;
+  messages_created: number;
+  messages_skipped: number;
+  events_fetched: number;
+  events_created: number;
+  events_skipped: number;
+  athletes_matched: number;
+  error_message: string | null;
+  started_at: string;
+  completed_at: string | null;
+}
+
+export interface MatchedAthleteRef {
+  athlete_id: number;
+  first_name: string;
+  last_name: string;
+  match_source: string;
+}
+
+export interface CoachEmailRead {
+  id: number;
+  nylas_message_id: string;
+  thread_id: string | null;
+  subject: string | null;
+  snippet: string | null;
+  from_email: string;
+  from_name: string | null;
+  to_emails: string[];
+  cc_emails: string[];
+  date: string;
+  direction: string;
+  folders: string[];
+  matched_athletes: MatchedAthleteRef[];
+}
+
+export interface CoachCalendarEventRead {
+  id: number;
+  title: string | null;
+  description: string | null;
+  location: string | null;
+  start_time: string;
+  end_time: string;
+  is_all_day: boolean;
+  participants: Record<string, unknown>[];
+  event_status: string | null;
+  matched_athletes: MatchedAthleteRef[];
+}
+
+export interface AthleteCommunications {
+  athlete_id: number;
+  emails: CoachEmailRead[];
+  events: CoachCalendarEventRead[];
+}

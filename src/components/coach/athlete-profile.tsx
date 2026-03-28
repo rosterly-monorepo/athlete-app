@@ -496,19 +496,33 @@ function PersonalTab({ athlete }: { athlete: AthleteCoachView }) {
 
 // ── Main Component ──
 
+export interface AdditionalTab {
+  value: string;
+  label: string;
+  content: React.ReactNode;
+}
+
 export function AthleteCoachProfile({
   athlete,
   inPipeline,
   isAdding,
   onAddToPipeline,
+  beforeTabs,
+  additionalTabs,
+  defaultTab = "overview",
+  className,
 }: {
   athlete: AthleteCoachView;
   inPipeline?: boolean;
   isAdding?: boolean;
   onAddToPipeline?: () => void;
+  beforeTabs?: React.ReactNode;
+  additionalTabs?: AdditionalTab[];
+  defaultTab?: string;
+  className?: string;
 }) {
   return (
-    <div className="max-w-4xl">
+    <div className={className ?? "max-w-4xl"}>
       <ProfileHeader
         athlete={athlete}
         inPipeline={inPipeline}
@@ -516,14 +530,26 @@ export function AthleteCoachProfile({
         onAddToPipeline={onAddToPipeline}
       />
 
-      <Tabs defaultValue="overview">
+      {beforeTabs}
+
+      <Tabs defaultValue={defaultTab}>
         <TabsList>
+          {additionalTabs?.map((tab) => (
+            <TabsTrigger key={tab.value} value={tab.value}>
+              {tab.label}
+            </TabsTrigger>
+          ))}
           <TabsTrigger value="overview">Overview</TabsTrigger>
           <TabsTrigger value="academics">Academics</TabsTrigger>
           <TabsTrigger value="athletic">Athletic</TabsTrigger>
           <TabsTrigger value="personal">Personal</TabsTrigger>
         </TabsList>
         <div className="mt-4">
+          {additionalTabs?.map((tab) => (
+            <TabsContent key={tab.value} value={tab.value}>
+              {tab.content}
+            </TabsContent>
+          ))}
           <TabsContent value="overview">
             <OverviewTab athlete={athlete} />
           </TabsContent>

@@ -75,5 +75,8 @@ export { NoteForm, NOTE_TYPES, type NoteFormProps } from "./note-form";
 // Skeletons
 export { BoardSkeleton, CardSkeleton, type BoardSkeletonProps } from "./board-skeleton";
 
+// Communications
+export { CommunicationsTab } from "./communications-tab";
+
 // Program Selector
 export { ProgramSelector, formatSportCode, type ProgramSelectorProps } from "./program-selector";
