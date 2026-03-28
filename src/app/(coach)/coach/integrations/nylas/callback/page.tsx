@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { Suspense, useEffect } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { Loader2, AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -8,6 +8,21 @@ import { Card, CardContent } from "@/components/ui/card";
 import { useExchangeNylasCode, useReportNylasOAuthError } from "@/hooks/use-nylas";
 
 export default function NylasCallbackPage() {
+  return (
+    <Suspense
+      fallback={
+        <CallbackLayout>
+          <Loader2 className="text-muted-foreground mx-auto mb-4 h-8 w-8 animate-spin" />
+          <h2 className="mb-2 text-lg font-semibold">Loading...</h2>
+        </CallbackLayout>
+      }
+    >
+      <NylasCallbackContent />
+    </Suspense>
+  );
+}
+
+function NylasCallbackContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const exchange = useExchangeNylasCode();
