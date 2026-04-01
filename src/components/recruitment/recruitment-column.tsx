@@ -30,7 +30,7 @@ const STAGE_LABELS: Record<RecruitmentStage, string> = {
   admitted: "Admitted",
 };
 
-const EMBER_HEADER_STAGES: Set<RecruitmentStage> = new Set(["pre_read"]);
+const ACCENT_HEADER_STAGES: Set<RecruitmentStage> = new Set(["pre_read"]);
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Variants
@@ -114,7 +114,7 @@ const RecruitmentColumn = React.forwardRef<HTMLDivElement, RecruitmentColumnProp
     );
 
     const stageLabel = STAGE_LABELS[column.stage] ?? column.stage_label;
-    const isEmberHeader = EMBER_HEADER_STAGES.has(column.stage);
+    const isAccentHeader = ACCENT_HEADER_STAGES.has(column.stage);
 
     return (
       <Card
@@ -135,7 +135,7 @@ const RecruitmentColumn = React.forwardRef<HTMLDivElement, RecruitmentColumnProp
               <CardTitle
                 className={cn(
                   "text-xs font-semibold tracking-widest uppercase",
-                  isEmberHeader && "text-ember"
+                  isAccentHeader && "font-bold"
                 )}
               >
                 {stageLabel}
@@ -176,7 +176,7 @@ const RecruitmentColumn = React.forwardRef<HTMLDivElement, RecruitmentColumnProp
             <button
               type="button"
               onClick={() => onAddClick(column.stage)}
-              className="border-border/50 text-muted-foreground hover:border-ember hover:text-ember w-full rounded-lg border border-dashed py-2 text-xs transition-colors"
+              className="border-border/50 text-muted-foreground hover:border-primary hover:text-primary w-full rounded-lg border border-dashed py-2 text-xs transition-colors"
             >
               + Add
             </button>

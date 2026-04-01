@@ -22,7 +22,7 @@ export function AuthProvider(props: ComponentProps<typeof ClerkProvider>) {
       appearance={{
         baseTheme: resolvedTheme === "dark" ? dark : undefined,
         variables: {
-          colorPrimary: "#E8614A",
+          colorPrimary: resolvedTheme === "dark" ? "#e8e8e8" : "#1a1a1a",
         },
       }}
     />

@@ -10,7 +10,7 @@ const priorityBadgeVariants = cva(
   {
     variants: {
       priority: {
-        high: "border-ember/50 bg-ember/10 text-ember",
+        high: "bg-foreground text-background",
         medium: "border-amber-600/50 bg-amber-600/10 text-amber-500",
         low: "border-verified/50 bg-verified/10 text-verified",
       },

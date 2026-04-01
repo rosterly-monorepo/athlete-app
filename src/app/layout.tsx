@@ -1,14 +1,22 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
+import { DM_Sans, Syne } from "next/font/google";
 import { BrandImage } from "@/components/composed/brand-image";
 import { Providers } from "@/components/providers";
 import { GlobalNav } from "@/components/composed/global-nav";
 import { CookieConsent } from "@/components/composed/cookie-consent";
 import "./globals.css";
 
-const inter = Inter({
+const dmSans = DM_Sans({
   subsets: ["latin"],
+  weight: ["300", "400", "500", "600"],
   variable: "--font-sans",
+  display: "swap",
+});
+
+const syne = Syne({
+  subsets: ["latin"],
+  weight: ["700", "800"],
+  variable: "--font-display",
   display: "swap",
 });
 
@@ -33,7 +41,7 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className={`${inter.variable} flex min-h-screen flex-col`}>
+      <body className={`${dmSans.variable} ${syne.variable} flex min-h-screen flex-col`}>
         <Providers>
           {/* ── Global Navigation (role-aware) ── */}
           <header className="border-border/50 bg-background/80 sticky top-0 z-40 border-b backdrop-blur-md">

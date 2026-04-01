@@ -31,7 +31,7 @@ export function HeroSection() {
   return (
     <main className="overflow-hidden">
       <section>
-        <div className="relative pt-24 md:pt-36">
+        <div className="hero-texture relative pt-24 md:pt-36">
           <div className="mx-auto max-w-7xl px-6">
             <div className="text-center sm:mx-auto lg:mt-0 lg:mr-auto">
               <AnimatedGroup variants={transitionVariants}>

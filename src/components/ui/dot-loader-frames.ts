@@ -75,8 +75,8 @@ function randomIndices(rng: () => number, count: number, max: number): number[] 
   return indices;
 }
 
-/** Fill empty grid positions with random ember accent dots (the "ember field" background) */
-function addEmberField(rng: () => number, frame: DotFrame, density = 0.3): DotFrame {
+/** Fill empty grid positions with random accent dots (the background scatter) */
+function addAccentField(rng: () => number, frame: DotFrame, density = 0.3): DotFrame {
   for (let i = 0; i < GRID_SIZE; i++) {
     if (!(i in frame) && rng() < density) {
       frame[i] = "accent";
@@ -99,7 +99,7 @@ export function generateRosterlyFrames(seed = 42): DotFrame[] {
   const frames: DotFrame[] = [];
 
   // ── Phase 1: Scatter (12 frames) ──
-  // Random dots flickering across the grid, with occasional ember accents
+  // Random dots flickering across the grid, with occasional accent dots
   for (let i = 0; i < 12; i++) {
     const count = 5 + Math.floor(rng() * 6); // 5-10 dots
     const indices = randomIndices(rng, count, GRID_SIZE);
@@ -217,8 +217,8 @@ export function generateRosterlyFrames(seed = 42): DotFrame[] {
     frames.push(scatterFrame(indices));
   }
 
-  // ── Apply ember field with fading density ──
-  // Embers burn bright during scatter, fade as the R forms, go dark
+  // ── Apply accent field with fading density ──
+  // Accents are visible during scatter, fade as the R forms, go dark
   // during hold, then reignite as the R dissolves back out.
   const totalFrames = frames.length;
   const scatterEnd = 12;
@@ -233,26 +233,26 @@ export function generateRosterlyFrames(seed = 42): DotFrame[] {
     let density: number;
 
     if (i < scatterEnd) {
-      // Scatter: full embers
+      // Scatter: full accents
       density = MAX_DENSITY;
     } else if (i < coalesceEnd) {
       // Coalesce: fade out as R forms (1.0 → 0.0)
       const progress = (i - scatterEnd) / (coalesceEnd - scatterEnd);
       density = MAX_DENSITY * (1 - progress);
     } else if (i < holdEnd) {
-      // R hold: no embers — clean R
+      // R hold: no accents — clean R
       density = 0;
     } else if (i < dissolveEnd) {
-      // Dissolve out: embers reignite (0.0 → 1.0)
+      // Dissolve out: accents reignite (0.0 → 1.0)
       const progress = (i - holdEnd) / (dissolveEnd - holdEnd);
       density = MAX_DENSITY * progress;
     } else {
-      // Back to scatter: full embers
+      // Back to scatter: full accents
       density = MAX_DENSITY;
     }
 
     if (density > 0) {
-      addEmberField(rng, frames[i], density);
+      addAccentField(rng, frames[i], density);
     }
   }
 

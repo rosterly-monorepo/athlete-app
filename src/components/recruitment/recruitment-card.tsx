@@ -27,7 +27,7 @@ function formatShortDate(dateString: string | null): string | null {
 const recruitmentCardVariants = cva("cursor-pointer transition-all duration-200", {
   variants: {
     variant: {
-      default: "hover:border-ember/30",
+      default: "hover:border-primary/30",
       dragging: "opacity-50",
       overlay: "rotate-3 shadow-lg",
     },
@@ -94,7 +94,7 @@ const RecruitmentCard = React.forwardRef<HTMLDivElement, RecruitmentCardProps>(
         <div className="flex items-start gap-3">
           <Avatar className="h-8 w-8 flex-shrink-0">
             <AvatarImage src={record.athlete_avatar_url ?? undefined} />
-            <AvatarFallback className="bg-ember text-xs font-semibold text-white">
+            <AvatarFallback className="bg-primary text-primary-foreground text-xs font-semibold">
               {initials}
             </AvatarFallback>
           </Avatar>
@@ -117,7 +117,9 @@ const RecruitmentCard = React.forwardRef<HTMLDivElement, RecruitmentCardProps>(
             {(showGpa || showDate) && (
               <div className="mt-1 flex items-center justify-between">
                 {showGpa && record.athlete_gpa != null ? (
-                  <span className="text-ember text-xs font-medium">{record.athlete_gpa} GPA</span>
+                  <span className="text-foreground text-xs font-semibold">
+                    {record.athlete_gpa} GPA
+                  </span>
                 ) : (
                   <span />
                 )}

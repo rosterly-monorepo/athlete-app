@@ -85,7 +85,7 @@ Override default colors using Tailwind classes:
 
 ### 6. Column Styling
 
-The Pre-Read column header uses the `text-ember` accent color via `EMBER_HEADER_STAGES` in `recruitment-column.tsx`. Override per-column with `className`:
+The Pre-Read column header uses bold font weight via `ACCENT_HEADER_STAGES` in `recruitment-column.tsx`. Override per-column with `className`:
 
 ```tsx
 <RecruitmentColumn
