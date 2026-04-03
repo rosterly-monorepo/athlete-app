@@ -74,14 +74,19 @@ export function useConnectNylas() {
   return useMutation({
     mutationFn: async () => {
       const token = await getToken();
-      const { auth_url } = await getAuthUrl(token!);
+      if (!token) {
+        throw new Error("No authentication token available. Please sign out and back in.");
+      }
+      const { auth_url } = await getAuthUrl(token);
       return auth_url;
     },
     onSuccess: (authUrl) => {
       window.location.href = authUrl;
     },
     onError: (error) => {
-      const message = error instanceof ApiClientError ? error.userMessage : "Something went wrong.";
+      const message = error instanceof ApiClientError ? error.userMessage : error.message;
+      const status = error instanceof ApiClientError ? error.status : "unknown";
+      console.error("[useConnectNylas] getAuthUrl failed", { status, message });
       toast.error("Failed to connect email", { description: message });
     },
   });
