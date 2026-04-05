@@ -25,6 +25,7 @@ interface FormFieldRendererProps {
   fieldKey: string;
   property: FormSchemaProperty;
   required?: boolean;
+  sectionId?: string;
 }
 
 const WIDGET_MAP = {
@@ -77,7 +78,12 @@ function inferWidgetType(property: FormSchemaProperty): string {
  * Renders a single form field based on the JSON Schema property definition.
  * Maps x-ui-widget to the appropriate widget component.
  */
-export function FormFieldRenderer({ fieldKey, property, required }: FormFieldRendererProps) {
+export function FormFieldRenderer({
+  fieldKey,
+  property,
+  required,
+  sectionId,
+}: FormFieldRendererProps) {
   const {
     control,
     formState: { errors },
@@ -88,6 +94,14 @@ export function FormFieldRenderer({ fieldKey, property, required }: FormFieldRen
   const Widget = WIDGET_MAP[widgetType as keyof typeof WIDGET_MAP] || TextWidget;
 
   const error = errors[fieldKey]?.message as string | undefined;
+
+  // Upload widgets need the section context for document upload routing
+  const extraProps =
+    widgetType === "document-upload" ||
+    widgetType === "image-upload" ||
+    widgetType === "video-upload"
+      ? { section: sectionId }
+      : {};
 
   return (
     <Controller
@@ -100,6 +114,7 @@ export function FormFieldRenderer({ fieldKey, property, required }: FormFieldRen
           fieldKey={fieldKey}
           error={error}
           required={required}
+          {...extraProps}
         />
       )}
     />

@@ -10,8 +10,10 @@ import type { UIUpload } from "@/types/form-schema";
 export type UploadStatus = "idle" | "uploading" | "success" | "error";
 
 export interface UseFileUploadOptions {
-  /** Field name (e.g., "avatar", "transcript") */
+  /** Field name (e.g., "avatar", "transcript_url") */
   field: string;
+  /** Profile section name for document uploads (e.g., "academics") */
+  section?: string;
   /** Upload configuration from schema */
   uploadConfig?: UIUpload;
   /** Callback on successful upload */
@@ -34,6 +36,7 @@ export interface UseFileUploadReturn {
  */
 export function useFileUpload({
   field,
+  section,
   uploadConfig,
   onSuccess,
   onError,
@@ -106,7 +109,7 @@ export function useFileUpload({
           throw new Error("Not authenticated");
         }
 
-        const url = await uploadFile(token, field, file, setProgress);
+        const url = await uploadFile(token, field, file, setProgress, section);
 
         setStatus("success");
         setProgress(100);
@@ -124,7 +127,7 @@ export function useFileUpload({
         return null;
       }
     },
-    [field, getToken, queryClient, validateFile, onSuccess, onError]
+    [field, section, getToken, queryClient, validateFile, onSuccess, onError]
   );
 
   /**
@@ -137,7 +140,7 @@ export function useFileUpload({
         throw new Error("Not authenticated");
       }
 
-      await deleteFile(token, field);
+      await deleteFile(token, field, section);
 
       setStatus("idle");
       setProgress(0);
@@ -153,7 +156,7 @@ export function useFileUpload({
       setStatus("error");
       return false;
     }
-  }, [field, getToken, queryClient]);
+  }, [field, section, getToken, queryClient]);
 
   return { status, progress, error, upload, remove, validateFile };
 }

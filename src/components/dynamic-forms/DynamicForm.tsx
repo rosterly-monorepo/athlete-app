@@ -43,6 +43,8 @@ interface DynamicFormProps {
   isAutoSaving?: boolean;
   /** Ref that will be populated with a flush function to trigger immediate save. */
   flushRef?: React.MutableRefObject<(() => void) | null>;
+  /** Section ID for document upload routing (e.g., "academics"). */
+  sectionId?: string;
 }
 
 /**
@@ -86,6 +88,7 @@ export function DynamicForm({
   onAutoSave,
   isAutoSaving = false,
   flushRef,
+  sectionId,
 }: DynamicFormProps) {
   const zodSchema = jsonSchemaToZod(schema);
   const defaultValues = { ...getDefaultValues(schema), ...initialData };
@@ -196,6 +199,7 @@ export function DynamicForm({
                 fieldKey={fieldKey}
                 property={schema.properties[fieldKey]}
                 required={requiredFields.has(fieldKey)}
+                sectionId={sectionId}
               />
             </div>
           ))}

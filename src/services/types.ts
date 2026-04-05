@@ -60,8 +60,9 @@ export interface Demographics {
   ethnicity: string[] | null;
 }
 
-export interface Education {
+export interface Academics {
   id: number;
+  // Education fields
   highSchoolName: string | null;
   highSchoolCity: string | null;
   highSchoolState: string | null;
@@ -73,12 +74,7 @@ export interface Education {
   classRank: number | null;
   classSize: number | null;
   ncaaCoreGpa: number | null;
-  transcriptUrl: string | null;
-  transcriptUploadedAt: string | null;
-}
-
-export interface Testing {
-  id: number;
+  // Testing fields
   satTotal: number | null;
   satReadingWriting: number | null;
   satMath: number | null;
@@ -92,6 +88,19 @@ export interface Testing {
   actDate: string | null;
   apScores: Record<string, unknown>[] | null;
   isTestOptional: boolean;
+  // Document fields
+  transcriptUrl: string | null;
+  transcriptUploadedAt: string | null;
+  satScoreUrl: string | null;
+  satScoreUploadedAt: string | null;
+  actScoreUrl: string | null;
+  actScoreUploadedAt: string | null;
+  // Academic Index (computed)
+  cgs: number | null;
+  raiCgs: number | null;
+  raiSat: number | null;
+  raiAct: number | null;
+  academicIndex: number | null;
 }
 
 export interface FamilyInfo {
@@ -125,8 +134,7 @@ export interface AthleteProfile extends Athlete {
   address: Address | null;
   contactDetails: ContactDetails | null;
   demographics: Demographics | null;
-  education: Education | null;
-  testing: Testing | null;
+  academics: Academics | null;
   familyInfo: FamilyInfo | null;
   writing: Writing | null;
 }
@@ -560,8 +568,9 @@ export interface CoachViewDemographics {
   ethnicity: string[] | null;
 }
 
-export interface CoachViewEducation {
+export interface CoachViewAcademics {
   id: number;
+  // Education fields
   high_school_name: string | null;
   high_school_city: string | null;
   high_school_state: string | null;
@@ -577,12 +586,7 @@ export interface CoachViewEducation {
   ncaa_core_gpa: number | null;
   ncaa_registered: boolean | null;
   ncaa_id: string | null;
-  transcript_url: string | null;
-  transcript_uploaded_at: string | null;
-}
-
-export interface CoachViewTesting {
-  id: number;
+  // Testing fields
   sat_total: number | null;
   sat_reading_writing: number | null;
   sat_math: number | null;
@@ -595,9 +599,20 @@ export interface CoachViewTesting {
   act_writing: number | null;
   act_date: string | null;
   ap_scores: Record<string, unknown>[] | null;
-  sat_score_url: string | null;
-  act_score_url: string | null;
   is_test_optional: boolean;
+  // Document fields
+  transcript_url: string | null;
+  transcript_uploaded_at: string | null;
+  sat_score_url: string | null;
+  sat_score_uploaded_at: string | null;
+  act_score_url: string | null;
+  act_score_uploaded_at: string | null;
+  // Academic Index (computed)
+  cgs: number | null;
+  rai_cgs: number | null;
+  rai_sat: number | null;
+  rai_act: number | null;
+  academic_index: number | null;
 }
 
 export interface CoachViewFamilyInfo {
@@ -672,8 +687,7 @@ export interface AthleteCoachView {
   address: CoachViewAddress | null;
   contact_details: CoachViewContactDetails | null;
   demographics: CoachViewDemographics | null;
-  education: CoachViewEducation | null;
-  testing: CoachViewTesting | null;
+  academics: CoachViewAcademics | null;
   family_info: CoachViewFamilyInfo | null;
   writing: CoachViewWriting | null;
   // 1:many

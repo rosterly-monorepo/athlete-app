@@ -10,7 +10,6 @@ import {
   Phone,
   Users,
   GraduationCap,
-  ClipboardCheck,
   Heart,
   PenLine,
   Globe,
@@ -42,8 +41,7 @@ const sectionIcons: Record<string, LucideIcon> = {
   address: MapPin,
   contact: Phone,
   demographics: Users,
-  education: GraduationCap,
-  testing: ClipboardCheck,
+  academics: GraduationCap,
   family: Heart,
   writing: PenLine,
   college_preferences: GraduationCap,
@@ -347,6 +345,7 @@ function SectionWithEmbedded({
         onAutoSave={(data) => autoSaveMutation.mutate(data)}
         isAutoSaving={autoSaveMutation.isPending}
         flushRef={flushRef}
+        sectionId={sectionId}
       />
 
       {embeddedSections.map(([embeddedId, embeddedSchema]) => (
@@ -407,6 +406,7 @@ function EmbeddedCollapsibleSection({
             autoSave
             onAutoSave={(data) => autoSaveMutation.mutate(data)}
             isAutoSaving={autoSaveMutation.isPending}
+            sectionId={sectionId}
           />
         </div>
       </CollapsibleContent>
@@ -443,6 +443,7 @@ function StandardProfileSection({ sectionId, schema, initialData, flushRef }: Pr
       onAutoSave={(data) => autoSaveMutation.mutate(data)}
       isAutoSaving={autoSaveMutation.isPending}
       flushRef={flushRef}
+      sectionId={sectionId}
     />
   );
 }

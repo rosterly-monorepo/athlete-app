@@ -14,18 +14,16 @@ interface NumberWidgetProps {
 }
 
 export function NumberWidget({ field, property, fieldKey, error, required }: NumberWidgetProps) {
-  const validation = property["x-ui-validation"] || {};
   const isInteger = property.type === "integer";
+  const numericPattern = isInteger ? /^-?\d*$/ : /^-?\d*\.?\d*$/;
 
   return (
     <div className="grid gap-2">
       <FieldLabel fieldKey={fieldKey} property={property} required={required} />
       <Input
         id={fieldKey}
-        type="number"
-        min={validation.min}
-        max={validation.max}
-        step={isInteger ? 1 : 0.01}
+        type="text"
+        inputMode={isInteger ? "numeric" : "decimal"}
         placeholder={property["x-ui-placeholder"]}
         disabled={property["x-ui-disabled"]}
         aria-invalid={!!error}
@@ -35,8 +33,20 @@ export function NumberWidget({ field, property, fieldKey, error, required }: Num
           const value = e.target.value;
           if (value === "") {
             field.onChange(undefined);
-          } else {
-            field.onChange(isInteger ? parseInt(value, 10) : parseFloat(value));
+          } else if (numericPattern.test(value)) {
+            // Store the parsed number when complete, or the raw string for
+            // intermediate states (e.g. "4." while typing "4.0").
+            // Zod preprocess in schema-to-zod.ts handles string→number on submit.
+            const parsed = isInteger ? parseInt(value, 10) : parseFloat(value);
+            if (!isNaN(parsed)) {
+              // Keep the raw string when it would display differently after
+              // round-tripping through Number (e.g. "4.0" → 4 → "4"), or
+              // for incomplete input like "-" or "3.".
+              field.onChange(String(parsed) !== value ? value : parsed);
+            } else {
+              // Incomplete but valid partial input (e.g. "-", ".")
+              field.onChange(value);
+            }
           }
         }}
       />

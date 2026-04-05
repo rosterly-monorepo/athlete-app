@@ -115,8 +115,8 @@ function ProfileHeader({
       ? formatSportCode(athlete.sport)
       : null;
 
-  const school = athlete.education?.high_school_name ?? athlete.school ?? null;
-  const gradYear = athlete.education?.graduation_year ?? athlete.graduation_year ?? null;
+  const school = athlete.academics?.high_school_name ?? athlete.school ?? null;
+  const gradYear = athlete.academics?.graduation_year ?? athlete.graduation_year ?? null;
 
   return (
     <div className="mb-6 flex items-start gap-5">
@@ -166,8 +166,8 @@ function ProfileHeader({
 // ── Overview Tab ──
 
 function OverviewTab({ athlete }: { athlete: AthleteCoachView }) {
-  const edu = athlete.education;
-  const test = athlete.testing;
+  const edu = athlete.academics;
+  const test = athlete.academics;
   const pi = athlete.personal_info;
 
   const heightInches =
@@ -179,7 +179,12 @@ function OverviewTab({ athlete }: { athlete: AthleteCoachView }) {
 
   return (
     <div className="space-y-4">
-      <div className="grid gap-3 sm:grid-cols-2 md:grid-cols-4">
+      <div className="grid gap-3 sm:grid-cols-2 md:grid-cols-5">
+        <StatCard
+          label="Academic Index"
+          value={edu?.academic_index?.toFixed(1)}
+          icon={GraduationCap}
+        />
         <StatCard label="GPA" value={edu?.gpa_unweighted?.toFixed(2)} icon={GraduationCap} />
         <StatCard label="SAT" value={test?.sat_total} icon={BookOpen} />
         <StatCard label="ACT" value={test?.act_composite} icon={BookOpen} />
@@ -215,11 +220,29 @@ function OverviewTab({ athlete }: { athlete: AthleteCoachView }) {
 // ── Academics Tab ──
 
 function AcademicsTab({ athlete }: { athlete: AthleteCoachView }) {
-  const edu = athlete.education;
-  const test = athlete.testing;
+  const edu = athlete.academics;
+  const test = athlete.academics;
 
   return (
     <div className="space-y-4">
+      {edu?.academic_index != null && (
+        <Section title="Academic Index" icon={GraduationCap}>
+          <div className="divide-y">
+            <DataRow label="Academic Index" value={edu.academic_index.toFixed(1)} />
+            <DataRow label="CGS" value={edu.cgs} />
+            {edu.rai_cgs != null && (
+              <DataRow label="RAI (GPA Only)" value={edu.rai_cgs.toFixed(1)} />
+            )}
+            {edu.rai_sat != null && (
+              <DataRow label="RAI (with SAT)" value={edu.rai_sat.toFixed(1)} />
+            )}
+            {edu.rai_act != null && (
+              <DataRow label="RAI (with ACT)" value={edu.rai_act.toFixed(1)} />
+            )}
+          </div>
+        </Section>
+      )}
+
       <Section title="Education" icon={GraduationCap}>
         <div className="divide-y">
           <DataRow label="High School" value={edu?.high_school_name} />

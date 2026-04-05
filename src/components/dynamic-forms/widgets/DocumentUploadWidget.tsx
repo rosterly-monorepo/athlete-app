@@ -15,6 +15,7 @@ interface DocumentUploadWidgetProps {
   fieldKey: string;
   error?: string;
   required?: boolean;
+  section?: string;
 }
 
 export function DocumentUploadWidget({
@@ -23,6 +24,7 @@ export function DocumentUploadWidget({
   fieldKey,
   error,
   required,
+  section,
 }: DocumentUploadWidgetProps) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [fileName, setFileName] = useState<string | null>(null);
@@ -37,6 +39,7 @@ export function DocumentUploadWidget({
     remove,
   } = useFileUpload({
     field: fieldKey,
+    section,
     uploadConfig,
     onSuccess: (url) => {
       field.onChange(url);
