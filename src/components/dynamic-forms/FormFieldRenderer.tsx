@@ -1,6 +1,8 @@
 "use client";
 
+import { useRef, useEffect } from "react";
 import { Controller, useFormContext } from "react-hook-form";
+import { useExtractionHighlight } from "@/contexts/extraction-highlight-context";
 import type { FormSchemaProperty } from "@/types/form-schema";
 import {
   TextWidget,
@@ -94,6 +96,16 @@ export function FormFieldRenderer({
   const Widget = WIDGET_MAP[widgetType as keyof typeof WIDGET_MAP] || TextWidget;
 
   const error = errors[fieldKey]?.message as string | undefined;
+  const highlightedFields = useExtractionHighlight();
+  const isHighlighted = highlightedFields.has(fieldKey);
+  const highlightRef = useRef<HTMLDivElement>(null);
+
+  // Scroll the first highlighted field into view
+  useEffect(() => {
+    if (isHighlighted && highlightRef.current) {
+      highlightRef.current.scrollIntoView({ behavior: "smooth", block: "nearest" });
+    }
+  }, [isHighlighted]);
 
   // Upload widgets need the section context for document upload routing
   const extraProps =
@@ -104,19 +116,24 @@ export function FormFieldRenderer({
       : {};
 
   return (
-    <Controller
-      name={fieldKey}
-      control={control}
-      render={({ field }) => (
-        <Widget
-          field={field}
-          property={property}
-          fieldKey={fieldKey}
-          error={error}
-          required={required}
-          {...extraProps}
-        />
-      )}
-    />
+    <div
+      ref={isHighlighted ? highlightRef : undefined}
+      className={isHighlighted ? "animate-extraction-glow rounded-lg" : undefined}
+    >
+      <Controller
+        name={fieldKey}
+        control={control}
+        render={({ field }) => (
+          <Widget
+            field={field}
+            property={property}
+            fieldKey={fieldKey}
+            error={error}
+            required={required}
+            {...extraProps}
+          />
+        )}
+      />
+    </div>
   );
 }

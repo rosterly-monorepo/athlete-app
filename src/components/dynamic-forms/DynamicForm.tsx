@@ -13,8 +13,11 @@ import { FormFieldRenderer } from "./FormFieldRenderer";
 import { jsonSchemaToZod, getDefaultValues } from "./utils/schema-to-zod";
 import { getOrderedFields, getUngroupedFields, hasGroups } from "./utils/field-ordering";
 import { useAutoSave } from "@/hooks/use-auto-save";
+import { ExtractionHighlightProvider } from "@/contexts/extraction-highlight-context";
 import type { AutoSaveStatus } from "@/hooks/use-auto-save";
 import type { FormSchema, FormSchemaGroup } from "@/types/form-schema";
+
+const EMPTY_HIGHLIGHT_SET = new Set<string>();
 
 interface DynamicFormProps {
   /** The JSON Schema defining the form */
@@ -45,6 +48,10 @@ interface DynamicFormProps {
   flushRef?: React.MutableRefObject<(() => void) | null>;
   /** Section ID for document upload routing (e.g., "academics"). */
   sectionId?: string;
+  /** Element rendered above the form groups (e.g. upload hero). */
+  heroElement?: React.ReactNode;
+  /** Field keys to highlight with extraction glow animation. */
+  highlightedFields?: Set<string>;
 }
 
 /**
@@ -89,6 +96,8 @@ export function DynamicForm({
   isAutoSaving = false,
   flushRef,
   sectionId,
+  heroElement,
+  highlightedFields,
 }: DynamicFormProps) {
   const zodSchema = jsonSchemaToZod(schema);
   const defaultValues = { ...getDefaultValues(schema), ...initialData };
@@ -208,94 +217,87 @@ export function DynamicForm({
     };
 
     return (
-      <FormProvider {...methods}>
-        <form
-          onSubmit={methods.handleSubmit(handleSubmit)}
-          className={compact ? "space-y-4" : "space-y-6"}
-        >
-          {showTitle && schema.title && (
-            <div className="mb-4">
-              <h2 className="text-lg font-semibold">{schema.title}</h2>
-              {schema.description && (
-                <p className="text-muted-foreground text-sm">{schema.description}</p>
-              )}
-            </div>
-          )}
+      <ExtractionHighlightProvider value={highlightedFields ?? EMPTY_HIGHLIGHT_SET}>
+        <FormProvider {...methods}>
+          <form
+            onSubmit={methods.handleSubmit(handleSubmit)}
+            className={compact ? "space-y-4" : "space-y-6"}
+          >
+            {showTitle && schema.title && (
+              <div className="mb-4">
+                <h2 className="text-lg font-semibold">{schema.title}</h2>
+                {schema.description && (
+                  <p className="text-muted-foreground text-sm">{schema.description}</p>
+                )}
+              </div>
+            )}
 
-          {errorBanner}
+            {heroElement}
 
-          {groups.map((group) => {
-            const fields = renderGroupFields(group);
-            if (!fields) return null;
+            {errorBanner}
 
-            if (compact) {
-              // Compact mode: lightweight divs, collapsible for collapsed groups
-              if (group.collapsed) {
+            {groups.map((group) => {
+              // Hide the Documents group when the hero handles document management
+              if (heroElement && group.name === "Documents") return null;
+
+              const fields = renderGroupFields(group);
+              if (!fields) return null;
+
+              if (compact) {
+                // Compact mode: lightweight divs, collapsible for collapsed groups
+                if (group.collapsed) {
+                  return (
+                    <Collapsible key={group.name}>
+                      <CollapsibleTrigger className="text-muted-foreground hover:text-foreground flex items-center gap-1 text-sm font-medium transition-colors [&[data-state=open]>svg]:rotate-90">
+                        <ChevronRight className="h-4 w-4 transition-transform" />
+                        {group.title || group.name}
+                      </CollapsibleTrigger>
+                      <CollapsibleContent className="pt-3">{fields}</CollapsibleContent>
+                    </Collapsible>
+                  );
+                }
                 return (
-                  <Collapsible key={group.name}>
-                    <CollapsibleTrigger className="text-muted-foreground hover:text-foreground flex items-center gap-1 text-sm font-medium transition-colors [&[data-state=open]>svg]:rotate-90">
-                      <ChevronRight className="h-4 w-4 transition-transform" />
-                      {group.title || group.name}
-                    </CollapsibleTrigger>
-                    <CollapsibleContent className="pt-3">{fields}</CollapsibleContent>
-                  </Collapsible>
+                  <div key={group.name}>
+                    {group.title && (
+                      <p className="text-muted-foreground mb-2 text-sm font-medium">
+                        {group.title}
+                      </p>
+                    )}
+                    {fields}
+                  </div>
                 );
               }
+
+              // Default mode: Card-wrapped groups
               return (
-                <div key={group.name}>
-                  {group.title && (
-                    <p className="text-muted-foreground mb-2 text-sm font-medium">{group.title}</p>
-                  )}
-                  {fields}
-                </div>
+                <Card key={group.name}>
+                  <CardHeader className="pb-4">
+                    <CardTitle className="text-base">{group.title || group.name}</CardTitle>
+                    {group.description && <CardDescription>{group.description}</CardDescription>}
+                  </CardHeader>
+                  <CardContent className={group.inline ? "flex gap-4" : "space-y-4"}>
+                    {group.fields.map((fieldKey) => {
+                      const property = schema.properties[fieldKey];
+                      if (!property || property["x-ui-hidden"]) return null;
+                      return (
+                        <div key={fieldKey} className={group.inline ? "min-w-0 flex-1" : undefined}>
+                          <FormFieldRenderer
+                            fieldKey={fieldKey}
+                            property={property}
+                            required={requiredFields.has(fieldKey)}
+                          />
+                        </div>
+                      );
+                    })}
+                  </CardContent>
+                </Card>
               );
-            }
+            })}
 
-            // Default mode: Card-wrapped groups
-            return (
-              <Card key={group.name}>
-                <CardHeader className="pb-4">
-                  <CardTitle className="text-base">{group.title || group.name}</CardTitle>
-                  {group.description && <CardDescription>{group.description}</CardDescription>}
-                </CardHeader>
-                <CardContent className={group.inline ? "flex gap-4" : "space-y-4"}>
-                  {group.fields.map((fieldKey) => {
-                    const property = schema.properties[fieldKey];
-                    if (!property || property["x-ui-hidden"]) return null;
-                    return (
-                      <div key={fieldKey} className={group.inline ? "min-w-0 flex-1" : undefined}>
-                        <FormFieldRenderer
-                          fieldKey={fieldKey}
-                          property={property}
-                          required={requiredFields.has(fieldKey)}
-                        />
-                      </div>
-                    );
-                  })}
-                </CardContent>
-              </Card>
-            );
-          })}
-
-          {/* Render any ungrouped fields */}
-          {getUngroupedFields(schema).length > 0 &&
-            (compact ? (
-              <div className="space-y-4">
-                {getUngroupedFields(schema).map(([fieldKey, property]) => (
-                  <FormFieldRenderer
-                    key={fieldKey}
-                    fieldKey={fieldKey}
-                    property={property}
-                    required={requiredFields.has(fieldKey)}
-                  />
-                ))}
-              </div>
-            ) : (
-              <Card>
-                <CardHeader className="pb-4">
-                  <CardTitle className="text-base">Other</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
+            {/* Render any ungrouped fields */}
+            {getUngroupedFields(schema).length > 0 &&
+              (compact ? (
+                <div className="space-y-4">
                   {getUngroupedFields(schema).map(([fieldKey, property]) => (
                     <FormFieldRenderer
                       key={fieldKey}
@@ -304,13 +306,29 @@ export function DynamicForm({
                       required={requiredFields.has(fieldKey)}
                     />
                   ))}
-                </CardContent>
-              </Card>
-            ))}
+                </div>
+              ) : (
+                <Card>
+                  <CardHeader className="pb-4">
+                    <CardTitle className="text-base">Other</CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    {getUngroupedFields(schema).map(([fieldKey, property]) => (
+                      <FormFieldRenderer
+                        key={fieldKey}
+                        fieldKey={fieldKey}
+                        property={property}
+                        required={requiredFields.has(fieldKey)}
+                      />
+                    ))}
+                  </CardContent>
+                </Card>
+              ))}
 
-          {submitButton}
-        </form>
-      </FormProvider>
+            {submitButton}
+          </form>
+        </FormProvider>
+      </ExtractionHighlightProvider>
     );
   }
 

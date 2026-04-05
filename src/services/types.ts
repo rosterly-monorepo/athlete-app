@@ -101,6 +101,11 @@ export interface Academics {
   raiSat: number | null;
   raiAct: number | null;
   academicIndex: number | null;
+  // Document extraction status
+  extractionStatus: string | null;
+  extractionFields: string[] | null;
+  extractionError: string | null;
+  extractionCompletedAt: string | null;
 }
 
 export interface FamilyInfo {
@@ -613,6 +618,11 @@ export interface CoachViewAcademics {
   rai_sat: number | null;
   rai_act: number | null;
   academic_index: number | null;
+  // Document extraction status
+  extraction_status: string | null;
+  extraction_fields: string[] | null;
+  extraction_error: string | null;
+  extraction_completed_at: string | null;
 }
 
 export interface CoachViewFamilyInfo {

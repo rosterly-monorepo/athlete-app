@@ -251,3 +251,28 @@ body {
   pointer-events: none;
   opacity: 0.4;
 }
+
+/* ── Extraction glow animation ──
+   Applied to form fields auto-populated by document parsing.
+   Emerald ring pulses twice then fades. */
+@keyframes extraction-glow {
+  0% {
+    box-shadow: 0 0 0 0 rgba(76, 175, 125, 0);
+  }
+  15% {
+    box-shadow: 0 0 0 3px rgba(76, 175, 125, 0.4);
+  }
+  40% {
+    box-shadow: 0 0 0 1px rgba(76, 175, 125, 0.1);
+  }
+  55% {
+    box-shadow: 0 0 0 3px rgba(76, 175, 125, 0.3);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(76, 175, 125, 0);
+  }
+}
+
+.animate-extraction-glow {
+  animation: extraction-glow 2.5s ease-in-out forwards;
+}

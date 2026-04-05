@@ -20,9 +20,12 @@ import { useAllFormSchemas, useSaveProfileSection } from "@/hooks/use-form-schem
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
+import { toast } from "sonner";
 import { DynamicForm, DynamicFormSkeleton } from "@/components/dynamic-forms";
+import { AcademicUploadHero } from "@/components/dynamic-forms/AcademicUploadHero";
 import { ActivityCollection } from "@/components/forms/ActivityCollection";
 import { LanguageCollection } from "@/components/forms/LanguageCollection";
+import { useExtractionPolling } from "@/hooks/use-extraction-polling";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { Progress } from "@/components/ui/progress";
 import { useSidebar } from "@/components/providers/sidebar-provider";
@@ -287,6 +290,17 @@ function ProfileSection({
     );
   }
 
+  if (sectionId === "academics") {
+    return (
+      <AcademicsProfileSection
+        sectionId={sectionId}
+        schema={schema}
+        initialData={initialData}
+        flushRef={flushRef}
+      />
+    );
+  }
+
   return (
     <StandardProfileSection
       sectionId={sectionId}
@@ -434,6 +448,101 @@ function StandardProfileSection({ sectionId, schema, initialData, flushRef }: Pr
     <DynamicForm
       schema={schema}
       initialData={initialData}
+      onSubmit={(data) => mutation.mutate(data)}
+      isSubmitting={mutation.isPending}
+      submitLabel={`Save ${schema.title || sectionId}`}
+      serverErrors={Object.keys(fieldErrors).length > 0 ? fieldErrors : undefined}
+      formError={mutation.error ? formError : null}
+      autoSave
+      onAutoSave={(data) => autoSaveMutation.mutate(data)}
+      isAutoSaving={autoSaveMutation.isPending}
+      flushRef={flushRef}
+      sectionId={sectionId}
+    />
+  );
+}
+
+function AcademicsProfileSection({
+  sectionId,
+  schema,
+  initialData,
+  flushRef,
+}: Omit<ProfileSectionProps, "embeddedSchemas">) {
+  const mutation = useSaveProfileSection(sectionId, {
+    successMessage: `${schema.title || sectionId} saved`,
+  });
+  const autoSaveMutation = useSaveProfileSection(sectionId, {
+    silent: true,
+  });
+
+  const { fieldErrors, formError } = useMemo(() => {
+    const err = mutation.error || autoSaveMutation.error;
+    if (!err || !(err instanceof ApiClientError)) {
+      return { fieldErrors: {} as Record<string, string>, formError: null as string | null };
+    }
+    return { fieldErrors: err.fieldErrors, formError: err.userMessage };
+  }, [mutation.error, autoSaveMutation.error]);
+
+  // ── Extraction orchestration ──
+  const [pollingEnabled, setPollingEnabled] = useState(false);
+  const [highlightedFields, setHighlightedFields] = useState<Set<string>>(new Set());
+
+  const {
+    status: pollStatus,
+    extractedFields,
+    extractionError,
+  } = useExtractionPolling({
+    enabled: pollingEnabled,
+    profileKey: "academics",
+  });
+
+  // React to extraction polling status changes
+  useEffect(() => {
+    if (pollStatus === "complete" && extractedFields.length > 0) {
+      const handleComplete = () => {
+        setHighlightedFields(new Set(extractedFields));
+        setPollingEnabled(false);
+        toast.success(
+          `Extracted ${extractedFields.length} ${extractedFields.length === 1 ? "field" : "fields"} from your document`
+        );
+      };
+      handleComplete();
+      const timer = setTimeout(() => setHighlightedFields(new Set()), 3000);
+      return () => clearTimeout(timer);
+    }
+    if (pollStatus === "failed") {
+      const handleFailed = () => {
+        setPollingEnabled(false);
+        toast.error(extractionError || "Document extraction failed");
+      };
+      handleFailed();
+    }
+    if (pollStatus === "empty") {
+      const handleEmpty = () => setPollingEnabled(false);
+      handleEmpty();
+    }
+  }, [pollStatus, extractedFields, extractionError]);
+
+  const handleExtractionStart = useCallback(() => {
+    setPollingEnabled(true);
+  }, []);
+
+  const heroElement = (
+    <AcademicUploadHero
+      initialData={initialData}
+      onExtractionStart={handleExtractionStart}
+      extractionStatus={pollStatus}
+      extractedCount={extractedFields.length}
+      extractionError={extractionError}
+    />
+  );
+
+  return (
+    <DynamicForm
+      schema={schema}
+      initialData={initialData}
+      heroElement={heroElement}
+      highlightedFields={highlightedFields}
       onSubmit={(data) => mutation.mutate(data)}
       isSubmitting={mutation.isPending}
       submitLabel={`Save ${schema.title || sectionId}`}

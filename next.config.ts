@@ -3,6 +3,11 @@ import type { NextConfig } from "next";
 // Backend API URL for proxying requests (avoids CORS issues in development)
 const BACKEND_URL = process.env.EXTERNAL_API_URL || "http://localhost:8765";
 
+// S3/DO Spaces origin for presigned uploads (e.g. "https://nyc3.digitaloceanspaces.com")
+// Needed in connect-src so the browser can PUT files directly to the presigned URL.
+const S3_UPLOAD_ORIGIN =
+  process.env.NEXT_PUBLIC_S3_UPLOAD_ORIGIN || "https://*.digitaloceanspaces.com";
+
 // Environment-aware CSP - relaxed for local development
 const isDev = process.env.NODE_ENV === "development";
 const CSP_DIRECTIVES = [
@@ -11,7 +16,7 @@ const CSP_DIRECTIVES = [
   "style-src 'self' 'unsafe-inline'",
   "img-src 'self' data: https: blob:",
   "font-src 'self' data:",
-  `connect-src 'self' https://*.clerk.com https://*.clerk.accounts.dev https://clerk.joinrosterly.com${isDev ? " http://localhost:* ws://localhost:*" : ""}`,
+  `connect-src 'self' ${S3_UPLOAD_ORIGIN} https://*.clerk.com https://*.clerk.accounts.dev https://clerk.joinrosterly.com${isDev ? " http://localhost:* ws://localhost:*" : ""}`,
   "frame-src https://*.clerk.accounts.dev https://clerk.joinrosterly.com https://challenges.cloudflare.com",
   "worker-src 'self' blob:",
 ].join("; ");
