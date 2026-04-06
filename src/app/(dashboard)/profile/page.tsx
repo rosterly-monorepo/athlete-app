@@ -519,6 +519,12 @@ function AcademicsProfileSection({
       const handleEmpty = () => setPollingEnabled(false);
       handleEmpty();
     }
+    if (pollStatus === "pending") {
+      // Polling timed out but extraction is still running — stop polling,
+      // the hero will show the pending state from persisted data.
+      const handlePending = () => setPollingEnabled(false);
+      handlePending();
+    }
   }, [pollStatus, extractedFields, extractionError]);
 
   const handleExtractionStart = useCallback(() => {

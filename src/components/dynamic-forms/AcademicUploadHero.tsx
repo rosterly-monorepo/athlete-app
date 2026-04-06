@@ -344,6 +344,15 @@ function DocumentSlot({
               {extractionResult.error || "Extraction failed"}
             </div>
           )}
+
+          {extractionResult?.status === "pending" && (
+            <div className="flex items-center gap-2">
+              <RosterlyLoader className="min-h-[60px] w-16" dotCount={25} columns={5} />
+              <span className="text-muted-foreground text-xs">
+                Still analyzing — this may take a moment for larger documents
+              </span>
+            </div>
+          )}
         </div>
       )}
 
@@ -388,7 +397,8 @@ export function AcademicUploadHero({
   const isDone =
     extractionStatus === "complete" ||
     extractionStatus === "failed" ||
-    extractionStatus === "empty";
+    extractionStatus === "empty" ||
+    extractionStatus === "pending";
 
   const getUrlForDoc = (docType: DocType): string | null => {
     if (!initialData) return null;
@@ -430,6 +440,13 @@ export function AcademicUploadHero({
         status: "failed",
         fields: [],
         error: (initialData.extraction_error as string | null) ?? "Extraction failed",
+      };
+    }
+    if (persistedStatus === "pending") {
+      return {
+        status: "pending",
+        fields: [],
+        error: null,
       };
     }
 

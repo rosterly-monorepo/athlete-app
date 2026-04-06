@@ -4,7 +4,13 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { athleteKeys } from "./use-athlete";
 
-export type ExtractionPollingStatus = "idle" | "polling" | "complete" | "failed" | "empty";
+export type ExtractionPollingStatus =
+  | "idle"
+  | "polling"
+  | "complete"
+  | "failed"
+  | "empty"
+  | "pending";
 
 const POLL_INTERVAL_MS = 2000;
 const POLL_TIMEOUT_MS = 30000;
@@ -72,7 +78,8 @@ export function useExtractionPolling({
   const poll = useCallback(async () => {
     if (Date.now() - startTimeRef.current > POLL_TIMEOUT_MS) {
       stopPolling();
-      setStatus("empty");
+      // Extraction is still running on the backend — don't mislead the user
+      setStatus("pending");
       return;
     }
 
