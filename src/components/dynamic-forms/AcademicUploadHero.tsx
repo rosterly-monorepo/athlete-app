@@ -24,25 +24,25 @@ type DocType = "transcript" | "sat" | "act";
 
 const DOC_CONFIG: Record<
   DocType,
-  { label: string; field: string; icon: LucideIcon; urlKey: string }
+  { label: string; field: string; icon: LucideIcon; timestampKey: string }
 > = {
   transcript: {
     label: "Transcript",
     field: "transcript_url",
     icon: GraduationCap,
-    urlKey: "transcriptUrl",
+    timestampKey: "transcript_uploaded_at",
   },
   sat: {
     label: "SAT Score Report",
     field: "sat_score_url",
     icon: BookOpen,
-    urlKey: "satScoreUrl",
+    timestampKey: "sat_score_uploaded_at",
   },
   act: {
     label: "ACT Score Report",
     field: "act_score_url",
     icon: BookOpen,
-    urlKey: "actScoreUrl",
+    timestampKey: "act_score_uploaded_at",
   },
 };
 
@@ -55,6 +55,7 @@ const DOC_TYPES: DocType[] = ["transcript", "sat", "act"];
 interface DocumentSlotProps {
   docType: DocType;
   currentUrl: string | null;
+  uploadedAt: string | null;
   isExtracting: boolean;
   extractionResult: {
     status: ExtractionPollingStatus;
@@ -68,6 +69,7 @@ interface DocumentSlotProps {
 function DocumentSlot({
   docType,
   currentUrl,
+  uploadedAt,
   isExtracting,
   extractionResult,
   onExtractionStart,
@@ -131,7 +133,14 @@ function DocumentSlot({
 
   const isUploading = uploadStatus === "uploading";
   const hasFile = currentUrl || fileName;
-  const displayName = fileName || (currentUrl ? currentUrl.split("/").pop() : null);
+  const displayName = fileName || (currentUrl ? `${config.label}.pdf` : null);
+  const formattedDate = uploadedAt
+    ? new Date(uploadedAt).toLocaleDateString(undefined, {
+        month: "short",
+        day: "numeric",
+        year: "numeric",
+      })
+    : null;
 
   return (
     <div
@@ -198,7 +207,12 @@ function DocumentSlot({
           {/* File info row */}
           <div className="flex items-center gap-2">
             <FileText className="text-muted-foreground h-4 w-4 flex-shrink-0" />
-            <span className="flex-1 truncate text-sm">{displayName}</span>
+            <div className="flex flex-1 flex-col truncate">
+              <span className="truncate text-sm">{displayName}</span>
+              {formattedDate && !fileName && (
+                <span className="text-muted-foreground text-xs">Uploaded {formattedDate}</span>
+              )}
+            </div>
             {currentUrl && (
               <a
                 href={currentUrl}
@@ -305,17 +319,47 @@ export function AcademicUploadHero({
 
   const getUrlForDoc = (docType: DocType): string | null => {
     if (!initialData) return null;
-    return (initialData[DOC_CONFIG[docType].urlKey] as string | null) ?? null;
+    return (initialData[DOC_CONFIG[docType].field] as string | null) ?? null;
+  };
+
+  const getUploadedAt = (docType: DocType): string | null => {
+    if (!initialData) return null;
+    return (initialData[DOC_CONFIG[docType].timestampKey] as string | null) ?? null;
   };
 
   const getExtractionResult = (docType: DocType): DocumentSlotProps["extractionResult"] => {
-    if (activeExtractionDoc !== docType) return null;
-    if (!isDone) return null;
-    return {
-      status: extractionStatus,
-      fieldsCount: extractedCount,
-      error: extractionError,
-    };
+    // Active polling result takes priority
+    if (activeExtractionDoc === docType && isDone) {
+      return {
+        status: extractionStatus,
+        fieldsCount: extractedCount,
+        error: extractionError,
+      };
+    }
+
+    // Show persisted extraction status for documents with a stored URL
+    if (!initialData || activeExtractionDoc === docType) return null;
+    const hasUrl = getUrlForDoc(docType);
+    if (!hasUrl) return null;
+
+    const persistedStatus = initialData.extraction_status as string | null;
+    if (persistedStatus === "complete") {
+      const fields = (initialData.extraction_fields as string[] | null) ?? [];
+      return {
+        status: fields.length > 0 ? "complete" : "empty",
+        fieldsCount: fields.length,
+        error: null,
+      };
+    }
+    if (persistedStatus === "failed") {
+      return {
+        status: "failed",
+        fieldsCount: 0,
+        error: (initialData.extraction_error as string | null) ?? "Extraction failed",
+      };
+    }
+
+    return null;
   };
 
   return (
@@ -337,6 +381,7 @@ export function AcademicUploadHero({
               key={docType}
               docType={docType}
               currentUrl={getUrlForDoc(docType)}
+              uploadedAt={getUploadedAt(docType)}
               isExtracting={activeExtractionDoc === docType && isPolling}
               extractionResult={getExtractionResult(docType)}
               onExtractionStart={() => handleExtractionStart(docType)}
