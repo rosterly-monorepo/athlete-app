@@ -122,6 +122,21 @@ export async function confirmFileUpload(
 }
 
 /**
+ * Get a short-lived presigned URL for viewing a document.
+ */
+export async function getDocumentViewUrl(
+  token: string,
+  field: string,
+  section: string
+): Promise<string> {
+  const response = await apiClient<{ view_url: string }>(
+    `${uploadPath(field, section)}/view`,
+    token
+  );
+  return response.view_url;
+}
+
+/**
  * Delete an uploaded file.
  */
 export async function deleteFile(token: string, field: string, section?: string): Promise<void> {

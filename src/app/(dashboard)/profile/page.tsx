@@ -502,9 +502,7 @@ function AcademicsProfileSection({
       const handleComplete = () => {
         setHighlightedFields(new Set(extractedFields));
         setPollingEnabled(false);
-        toast.success(
-          `Extracted ${extractedFields.length} ${extractedFields.length === 1 ? "field" : "fields"} from your document`
-        );
+        toast.success("Successfully extracted data from your document");
       };
       handleComplete();
       const timer = setTimeout(() => setHighlightedFields(new Set()), 3000);
@@ -532,7 +530,7 @@ function AcademicsProfileSection({
       initialData={initialData}
       onExtractionStart={handleExtractionStart}
       extractionStatus={pollStatus}
-      extractedCount={extractedFields.length}
+      extractedFields={extractedFields}
       extractionError={extractionError}
     />
   );

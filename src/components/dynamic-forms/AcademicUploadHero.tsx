@@ -1,11 +1,13 @@
 "use client";
 
 import { useCallback, useRef, useState } from "react";
+import { useAuth } from "@clerk/nextjs";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { RosterlyLoader } from "@/components/ui/dot-loader";
 import { useFileUpload } from "@/hooks/use-file-upload";
+import { getDocumentViewUrl } from "@/services/upload";
 import {
   Sparkles,
   GraduationCap,
@@ -48,6 +50,55 @@ const DOC_CONFIG: Record<
 
 const DOC_TYPES: DocType[] = ["transcript", "sat", "act"];
 
+/** Human-readable labels for extracted field names (snake_case API keys). */
+const FIELD_LABELS: Record<string, string> = {
+  high_school_name: "High School Name",
+  high_school_city: "High School City",
+  high_school_state: "High School State",
+  high_school_ceeb: "High School CEEB",
+  graduation_year: "Graduation Year",
+  gpa_unweighted: "GPA Unweighted",
+  gpa_weighted: "GPA Weighted",
+  gpa_scale: "GPA Scale",
+  academic_honors: "Academic Honors",
+  class_rank: "Class Rank",
+  class_size: "Class Size",
+  sat_total: "SAT Total",
+  sat_reading_writing: "SAT Reading & Writing",
+  sat_math: "SAT Math",
+  sat_date: "SAT Date",
+  act_composite: "ACT Composite",
+  act_english: "ACT English",
+  act_math: "ACT Math",
+  act_reading: "ACT Reading",
+  act_science: "ACT Science",
+  act_writing: "ACT Writing",
+  act_date: "ACT Date",
+  ap_scores: "AP Scores",
+};
+
+/** Reverse map: camelCase form keys → snake_case API keys. */
+const FORM_KEY_TO_API: Record<string, string> = {
+  highSchoolName: "high_school_name",
+  highSchoolCity: "high_school_city",
+  highSchoolState: "high_school_state",
+  graduationYear: "graduation_year",
+  gpaUnweighted: "gpa_unweighted",
+  gpaWeighted: "gpa_weighted",
+  gpaScale: "gpa_scale",
+  classRank: "class_rank",
+  classSize: "class_size",
+  satTotal: "sat_total",
+  satReadingWriting: "sat_reading_writing",
+  satMath: "sat_math",
+  actComposite: "act_composite",
+  actEnglish: "act_english",
+  actMath: "act_math",
+  actReading: "act_reading",
+  actScience: "act_science",
+  apScores: "ap_scores",
+};
+
 // ---------------------------------------------------------------------------
 // DocumentSlot — manages a single document type
 // ---------------------------------------------------------------------------
@@ -59,7 +110,7 @@ interface DocumentSlotProps {
   isExtracting: boolean;
   extractionResult: {
     status: ExtractionPollingStatus;
-    fieldsCount: number;
+    fields: string[];
     error: string | null;
   } | null;
   onExtractionStart: () => void;
@@ -77,9 +128,11 @@ function DocumentSlot({
 }: DocumentSlotProps) {
   const config = DOC_CONFIG[docType];
   const Icon = config.icon;
+  const { getToken } = useAuth();
   const inputRef = useRef<HTMLInputElement>(null);
   const [fileName, setFileName] = useState<string | null>(null);
   const [isDragOver, setIsDragOver] = useState(false);
+  const [isLoadingView, setIsLoadingView] = useState(false);
 
   const {
     status: uploadStatus,
@@ -116,6 +169,20 @@ function DocumentSlot({
       if (inputRef.current) inputRef.current.value = "";
     }
   }, [remove, onFileChange]);
+
+  const handleView = useCallback(async () => {
+    try {
+      setIsLoadingView(true);
+      const token = await getToken();
+      if (!token) return;
+      const viewUrl = await getDocumentViewUrl(token, config.field, "academics");
+      window.open(viewUrl, "_blank", "noopener,noreferrer");
+    } catch {
+      // Silently fail — the file may have been deleted
+    } finally {
+      setIsLoadingView(false);
+    }
+  }, [getToken, config.field]);
 
   const handleDrop = useCallback(
     (e: React.DragEvent) => {
@@ -214,14 +281,16 @@ function DocumentSlot({
               )}
             </div>
             {currentUrl && (
-              <a
-                href={currentUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-muted-foreground hover:text-foreground"
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                className="text-muted-foreground hover:text-foreground h-6 w-6 p-0"
+                onClick={handleView}
+                disabled={isLoadingView}
               >
                 <ExternalLink className="h-3.5 w-3.5" />
-              </a>
+              </Button>
             )}
             <Button
               type="button"
@@ -251,11 +320,15 @@ function DocumentSlot({
             </div>
           )}
 
-          {extractionResult?.status === "complete" && extractionResult.fieldsCount > 0 && (
-            <div className="flex items-center gap-1.5 text-xs text-emerald-600 dark:text-emerald-400">
-              <Check className="h-3.5 w-3.5" />
-              Extracted {extractionResult.fieldsCount}{" "}
-              {extractionResult.fieldsCount === 1 ? "field" : "fields"}
+          {extractionResult?.status === "complete" && extractionResult.fields.length > 0 && (
+            <div className="space-y-1">
+              <div className="flex items-center gap-1.5 text-xs text-emerald-600 dark:text-emerald-400">
+                <Check className="h-3.5 w-3.5" />
+                Successfully extracted
+              </div>
+              <p className="text-muted-foreground text-xs">
+                {extractionResult.fields.map((f) => FIELD_LABELS[f] ?? f).join(", ")}
+              </p>
             </div>
           )}
 
@@ -288,7 +361,7 @@ interface AcademicUploadHeroProps {
   initialData?: Record<string, unknown>;
   onExtractionStart: () => void;
   extractionStatus: ExtractionPollingStatus;
-  extractedCount: number;
+  extractedFields: string[];
   extractionError: string | null;
 }
 
@@ -296,7 +369,7 @@ export function AcademicUploadHero({
   initialData,
   onExtractionStart,
   extractionStatus,
-  extractedCount,
+  extractedFields,
   extractionError,
 }: AcademicUploadHeroProps) {
   // Track which doc type triggered the current extraction
@@ -328,11 +401,12 @@ export function AcademicUploadHero({
   };
 
   const getExtractionResult = (docType: DocType): DocumentSlotProps["extractionResult"] => {
-    // Active polling result takes priority
+    // Active polling result takes priority — convert camelCase form keys to snake_case
     if (activeExtractionDoc === docType && isDone) {
+      const apiFields = extractedFields.map((f) => FORM_KEY_TO_API[f] ?? f);
       return {
         status: extractionStatus,
-        fieldsCount: extractedCount,
+        fields: apiFields,
         error: extractionError,
       };
     }
@@ -347,14 +421,14 @@ export function AcademicUploadHero({
       const fields = (initialData.extraction_fields as string[] | null) ?? [];
       return {
         status: fields.length > 0 ? "complete" : "empty",
-        fieldsCount: fields.length,
+        fields,
         error: null,
       };
     }
     if (persistedStatus === "failed") {
       return {
         status: "failed",
-        fieldsCount: 0,
+        fields: [],
         error: (initialData.extraction_error as string | null) ?? "Extraction failed",
       };
     }
