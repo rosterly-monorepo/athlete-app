@@ -22,11 +22,11 @@ export function AthleteCard({ athlete, variant = "compact" }: AthleteCardProps) 
           <h3 className="truncate font-semibold">
             {athlete.firstName} {athlete.lastName}
           </h3>
-          <p className="text-muted-foreground truncate text-sm">
-            {athlete.school} &middot; Class of {athlete.graduationYear}
-          </p>
+          {athlete.position && (
+            <p className="text-muted-foreground truncate text-sm">{athlete.position}</p>
+          )}
         </div>
-        <Badge variant="secondary">{athlete.sport}</Badge>
+        {athlete.position && <Badge variant="secondary">{athlete.position}</Badge>}
       </CardHeader>
       {variant === "full" && athlete.bio && (
         <CardContent>

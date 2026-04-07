@@ -6,10 +6,7 @@ export interface Athlete {
   firstName: string;
   lastName: string;
   avatarUrl: string | null;
-  sport: string;
   position: string;
-  school: string;
-  graduationYear: number;
   bio: string;
   isPublic: boolean;
 }
@@ -681,14 +678,7 @@ export interface AthleteCoachView {
   avatar_url: string | null;
   profile_completion_pct: number;
   is_verified: boolean;
-  // Legacy fields from AthleteBase
-  sport: string | null;
   position: string | null;
-  school: string | null;
-  graduation_year: number | null;
-  height_feet: number | null;
-  height_inches: number | null;
-  weight: number | null;
   bio: string | null;
   is_public: boolean;
   created_at: string;

@@ -68,10 +68,10 @@ export const SearchResultCard = React.memo(function SearchResultCard({
           )}
 
           <div className="text-muted-foreground mt-1 flex flex-wrap items-center gap-x-3 gap-y-0.5 text-xs">
-            {(hit.high_school_name || hit.school) && (
+            {hit.high_school_name && (
               <span className="flex items-center gap-1">
                 <GraduationCap className="h-3 w-3" />
-                {hit.high_school_name || hit.school}
+                {hit.high_school_name}
               </span>
             )}
             {hit.high_school_state && (

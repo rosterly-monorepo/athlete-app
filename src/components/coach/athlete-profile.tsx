@@ -109,14 +109,10 @@ function ProfileHeader({
   const initials = (athlete.first_name?.[0] ?? "") + (athlete.last_name?.[0] ?? "");
 
   const primarySport = athlete.sports?.find((s) => s.is_primary);
-  const sportLabel = primarySport?.sport_code
-    ? formatSportCode(primarySport.sport_code)
-    : athlete.sport
-      ? formatSportCode(athlete.sport)
-      : null;
+  const sportLabel = primarySport?.sport_code ? formatSportCode(primarySport.sport_code) : null;
 
-  const school = athlete.academics?.high_school_name ?? athlete.school ?? null;
-  const gradYear = athlete.academics?.graduation_year ?? athlete.graduation_year ?? null;
+  const school = athlete.academics?.high_school_name ?? null;
+  const gradYear = athlete.academics?.graduation_year ?? null;
 
   return (
     <div className="mb-6 flex items-start gap-5">
@@ -173,9 +169,7 @@ function OverviewTab({ athlete }: { athlete: AthleteCoachView }) {
   const heightInches =
     pi?.height_feet != null && pi?.height_inches != null
       ? pi.height_feet * 12 + pi.height_inches
-      : athlete.height_feet != null && athlete.height_inches != null
-        ? athlete.height_feet * 12 + athlete.height_inches
-        : null;
+      : null;
 
   return (
     <div className="space-y-4">
@@ -401,10 +395,10 @@ function PersonalTab({ athlete }: { athlete: AthleteCoachView }) {
         </div>
       </Section>
 
-      {(pi || athlete.height_feet != null) && (
+      {pi && (
         <Section title="Physical" icon={Ruler}>
           <div className="divide-y">
-            {pi?.date_of_birth && (
+            {pi.date_of_birth && (
               <DataRow
                 label="Date of Birth"
                 value={new Date(pi.date_of_birth).toLocaleDateString()}
@@ -413,22 +407,12 @@ function PersonalTab({ athlete }: { athlete: AthleteCoachView }) {
             <DataRow
               label="Height"
               value={
-                (pi?.height_feet ?? athlete.height_feet) != null
-                  ? formatHeight(
-                      ((pi?.height_feet ?? athlete.height_feet) || 0) * 12 +
-                        ((pi?.height_inches ?? athlete.height_inches) || 0)
-                    )
+                pi.height_feet != null
+                  ? formatHeight(pi.height_feet * 12 + (pi.height_inches || 0))
                   : null
               }
             />
-            <DataRow
-              label="Weight"
-              value={
-                (pi?.weight_lbs ?? athlete.weight)
-                  ? `${pi?.weight_lbs ?? athlete.weight} lbs`
-                  : null
-              }
-            />
+            <DataRow label="Weight" value={pi.weight_lbs ? `${pi.weight_lbs} lbs` : null} />
           </div>
         </Section>
       )}
