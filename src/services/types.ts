@@ -282,7 +282,10 @@ export interface RecruitmentRecordWithAthlete {
   athlete_avatar_url: string | null;
   athlete_school: string | null;
   athlete_graduation_year: number | null;
-  athlete_gpa: number | null;
+  athlete_academic_index: number | null;
+
+  // Communication tracking
+  last_communication_at: string | null;
 
   // Note summary
   note_count: number;

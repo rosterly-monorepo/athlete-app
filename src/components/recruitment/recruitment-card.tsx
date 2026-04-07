@@ -53,7 +53,6 @@ export interface RecruitmentCardProps
     VariantProps<typeof recruitmentCardVariants> {
   record: RecruitmentRecordWithAthlete;
   onClick?: (record: RecruitmentRecordWithAthlete) => void;
-  showGpa?: boolean;
   showDate?: boolean;
   showPriority?: boolean;
 }
@@ -68,21 +67,12 @@ export interface SortableRecruitmentCardProps extends Omit<RecruitmentCardProps,
 
 const RecruitmentCard = React.forwardRef<HTMLDivElement, RecruitmentCardProps>(
   (
-    {
-      record,
-      variant,
-      size,
-      onClick,
-      showGpa = true,
-      showDate = true,
-      showPriority = true,
-      className,
-      ...props
-    },
+    { record, variant, size, onClick, showDate = true, showPriority = true, className, ...props },
     ref
   ) => {
     const initials = `${record.athlete_first_name?.[0] ?? ""}${record.athlete_last_name?.[0] ?? ""}`;
     const shortDate = showDate ? formatShortDate(record.stage_changed_at) : null;
+    const lastContact = formatShortDate(record.last_communication_at);
 
     return (
       <Card
@@ -91,7 +81,14 @@ const RecruitmentCard = React.forwardRef<HTMLDivElement, RecruitmentCardProps>(
         onClick={() => onClick?.(record)}
         {...props}
       >
-        <div className="flex items-start gap-3">
+        <div className="relative flex items-start gap-3">
+          {/* Academic Index — top-right badge */}
+          {record.athlete_academic_index != null && (
+            <span className="text-muted-foreground absolute top-0 right-0 text-[10px] font-semibold">
+              RAI {Math.round(record.athlete_academic_index)}
+            </span>
+          )}
+
           <Avatar className="h-8 w-8 flex-shrink-0">
             <AvatarImage src={record.athlete_avatar_url ?? undefined} />
             <AvatarFallback className="bg-primary text-primary-foreground text-xs font-semibold">
@@ -101,29 +98,27 @@ const RecruitmentCard = React.forwardRef<HTMLDivElement, RecruitmentCardProps>(
 
           <div className="min-w-0 flex-1">
             {/* Name & Priority */}
-            <div className="flex items-center justify-between gap-2">
+            <div className="flex items-center justify-between gap-2 pr-8">
               <h4 className="truncate text-sm font-medium">
                 {record.athlete_first_name} {record.athlete_last_name}
               </h4>
               {showPriority && <PriorityBadge priority={record.priority} size="sm" />}
             </div>
 
-            {/* Position & Year */}
+            {/* Last Communication */}
+            {lastContact && <p className="text-foreground text-xs">Last contact {lastContact}</p>}
+
+            {/* Position · Grad Year · School */}
             <p className="text-muted-foreground truncate text-xs">
-              {[record.position, record.athlete_graduation_year].filter(Boolean).join(" · ")}
+              {[record.position, record.athlete_graduation_year, record.athlete_school]
+                .filter(Boolean)
+                .join(" · ")}
             </p>
 
-            {/* GPA & Date */}
-            {(showGpa || showDate) && (
-              <div className="mt-1 flex items-center justify-between">
-                {showGpa && record.athlete_gpa != null ? (
-                  <span className="text-foreground text-xs font-semibold">
-                    {record.athlete_gpa} GPA
-                  </span>
-                ) : (
-                  <span />
-                )}
-                {shortDate && <span className="text-muted-foreground text-xs">{shortDate}</span>}
+            {/* Stage changed date */}
+            {shortDate && (
+              <div className="mt-0.5 flex items-center justify-end">
+                <span className="text-muted-foreground text-xs">{shortDate}</span>
               </div>
             )}
           </div>

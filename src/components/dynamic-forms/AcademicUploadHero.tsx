@@ -314,9 +314,15 @@ function DocumentSlot({
 
           {/* Extraction status */}
           {isExtracting && (
-            <div className="flex items-center gap-2">
-              <RosterlyLoader className="min-h-[60px] w-16" dotCount={25} columns={5} />
-              <span className="text-muted-foreground text-xs">Analyzing document...</span>
+            <div className="flex items-center gap-3">
+              <RosterlyLoader
+                className="min-h-0 w-14 flex-shrink-0"
+                dotClassName="size-1 rounded-px"
+              />
+              <p className="text-muted-foreground text-xs">
+                We&apos;ll read your document and fill in the forms for you. This can take up to a
+                minute — feel free to fill in other parts of the form while we work on it.
+              </p>
             </div>
           )}
 
@@ -346,11 +352,15 @@ function DocumentSlot({
           )}
 
           {extractionResult?.status === "pending" && (
-            <div className="flex items-center gap-2">
-              <RosterlyLoader className="min-h-[60px] w-16" dotCount={25} columns={5} />
-              <span className="text-muted-foreground text-xs">
-                Still analyzing — this may take a moment for larger documents
-              </span>
+            <div className="flex items-center gap-3">
+              <RosterlyLoader
+                className="min-h-0 w-14 flex-shrink-0"
+                dotClassName="size-1 rounded-px"
+              />
+              <p className="text-muted-foreground text-xs">
+                Still reading your document — this can take up to a minute. Feel free to fill in
+                other parts of the form while we work on it.
+              </p>
             </div>
           )}
         </div>
