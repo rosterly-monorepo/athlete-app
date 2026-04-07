@@ -11,9 +11,17 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Trash2 } from "lucide-react";
-import { useRecord, useUpdateRecord, useArchiveRecord, useAddNote } from "@/hooks/use-recruitment";
+import { UserMinus } from "lucide-react";
+import { useRecord, useUpdateRecord, useRemoveRecord, useAddNote } from "@/hooks/use-recruitment";
 import { useAthleteCoachView } from "@/hooks/use-athlete";
 import { AthleteCoachProfile, type AdditionalTab } from "@/components/coach/athlete-profile";
 import { CommunicationsTab } from "./communications-tab";
@@ -60,7 +68,7 @@ export interface RecruitmentCardDetailProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   side?: "left" | "right";
-  showArchiveButton?: boolean;
+  showRemoveButton?: boolean;
   renderActions?: (record: RecruitmentRecordDetail) => React.ReactNode;
   renderNotes?: (record: RecruitmentRecordDetail) => React.ReactNode;
   renderFooter?: (record: RecruitmentRecordDetail) => React.ReactNode;
@@ -94,17 +102,17 @@ function RecruitmentToolbar({
   onStageChange,
   onPriorityChange,
   onRatingChange,
-  onArchive,
-  isArchiving,
-  showArchive,
+  onRemove,
+  isRemoving,
+  showRemove,
 }: {
   record: RecruitmentRecordDetail;
   onStageChange: (stage: RecruitmentStage) => void;
   onPriorityChange: (priority: Priority) => void;
   onRatingChange: (rating: number) => void;
-  onArchive: () => void;
-  isArchiving: boolean;
-  showArchive: boolean;
+  onRemove: () => void;
+  isRemoving: boolean;
+  showRemove: boolean;
 }) {
   return (
     <div className="mb-4 flex flex-wrap items-center gap-3 border-b pb-4">
@@ -155,16 +163,16 @@ function RecruitmentToolbar({
         </div>
       )}
 
-      {showArchive && (
+      {showRemove && (
         <Button
           variant="ghost"
           size="icon"
           className="text-destructive hover:text-destructive ml-auto h-8 w-8"
-          onClick={onArchive}
-          disabled={isArchiving}
-          title="Archive"
+          onClick={onRemove}
+          disabled={isRemoving}
+          title="Remove from pipeline"
         >
-          <Trash2 className="h-4 w-4" />
+          <UserMinus className="h-4 w-4" />
         </Button>
       )}
     </div>
@@ -191,21 +199,81 @@ function NotesSkeleton() {
 // Component
 // ─────────────────────────────────────────────────────────────────────────────
 
+function RemoveConfirmDialog({
+  open,
+  onOpenChange,
+  record,
+  onConfirm,
+  isRemoving,
+}: {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  record: RecruitmentRecordWithAthlete;
+  onConfirm: () => void;
+  isRemoving: boolean;
+}) {
+  const deletedItems: string[] = [];
+  if (record.note_count > 0) {
+    deletedItems.push(`${record.note_count} note${record.note_count === 1 ? "" : "s"}`);
+  }
+  if (record.rating) deletedItems.push("rating");
+  if (record.priority) deletedItems.push("priority");
+  if (record.tags && record.tags.length > 0) {
+    deletedItems.push(`${record.tags.length} tag${record.tags.length === 1 ? "" : "s"}`);
+  }
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>
+            Remove {record.athlete_first_name} {record.athlete_last_name} from pipeline?
+          </DialogTitle>
+          <DialogDescription>
+            This will permanently remove this athlete from your recruitment pipeline.
+          </DialogDescription>
+        </DialogHeader>
+
+        {deletedItems.length > 0 && (
+          <div className="text-sm">
+            <p className="text-muted-foreground mb-2">The following will be deleted:</p>
+            <ul className="text-muted-foreground list-inside list-disc space-y-1">
+              {deletedItems.map((item) => (
+                <li key={item}>{item}</li>
+              ))}
+            </ul>
+          </div>
+        )}
+
+        <DialogFooter>
+          <Button variant="outline" onClick={() => onOpenChange(false)} disabled={isRemoving}>
+            Cancel
+          </Button>
+          <Button variant="destructive" onClick={onConfirm} disabled={isRemoving}>
+            {isRemoving ? "Removing…" : "Remove"}
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
 function RecruitmentCardDetail({
   programId,
   record,
   open,
   onOpenChange,
   side = "right",
-  showArchiveButton = true,
+  showRemoveButton = true,
   renderActions,
   renderNotes,
   renderFooter,
 }: RecruitmentCardDetailProps) {
+  const [removeDialogOpen, setRemoveDialogOpen] = React.useState(false);
   const { data: fullRecord, isLoading: recordLoading } = useRecord(record?.id ?? 0);
   const { data: athlete, isLoading: athleteLoading } = useAthleteCoachView(record?.athlete_id ?? 0);
   const updateRecord = useUpdateRecord(programId);
-  const archiveRecord = useArchiveRecord(programId);
+  const removeRecord = useRemoveRecord(programId);
   const addNote = useAddNote(programId);
 
   if (!record) return null;
@@ -229,8 +297,13 @@ function RecruitmentCardDetail({
     });
   };
 
-  const handleArchive = () => {
-    archiveRecord.mutate(record.id);
+  const handleRemoveClick = () => {
+    setRemoveDialogOpen(true);
+  };
+
+  const handleRemoveConfirm = () => {
+    removeRecord.mutate(record.id);
+    setRemoveDialogOpen(false);
     onOpenChange(false);
   };
 
@@ -268,52 +341,62 @@ function RecruitmentCardDetail({
       onStageChange={handleStageChange}
       onPriorityChange={handlePriorityChange}
       onRatingChange={handleRatingChange}
-      onArchive={handleArchive}
-      isArchiving={archiveRecord.isPending}
-      showArchive={showArchiveButton}
+      onRemove={handleRemoveClick}
+      isRemoving={removeRecord.isPending}
+      showRemove={showRemoveButton}
     />
   );
 
   return (
-    <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent side={side} className="flex flex-col overflow-hidden sm:max-w-3xl">
-        {/* Accessible sheet title (visually hidden, profile header shows the name) */}
-        <SheetHeader className="sr-only">
-          <SheetTitle>
-            {record.athlete_first_name} {record.athlete_last_name}
-          </SheetTitle>
-        </SheetHeader>
+    <>
+      <Sheet open={open} onOpenChange={onOpenChange}>
+        <SheetContent side={side} className="flex flex-col overflow-hidden sm:max-w-3xl">
+          {/* Accessible sheet title (visually hidden, profile header shows the name) */}
+          <SheetHeader className="sr-only">
+            <SheetTitle>
+              {record.athlete_first_name} {record.athlete_last_name}
+            </SheetTitle>
+          </SheetHeader>
 
-        {/* Scrollable content */}
-        <div className="flex-1 overflow-y-auto py-2">
-          {athleteLoading ? (
-            <LoadingSkeleton />
-          ) : athlete ? (
-            <AthleteCoachProfile
-              athlete={athlete}
-              inPipeline
-              beforeTabs={toolbar}
-              additionalTabs={additionalTabs}
-              defaultTab="notes"
-              className=""
-            />
-          ) : (
-            // Fallback if athlete data fails to load — show basic info from record
-            <div className="p-4">
-              <h2 className="text-xl font-bold">
-                {record.athlete_first_name} {record.athlete_last_name}
-              </h2>
-              <p className="text-muted-foreground text-sm">
-                {record.athlete_school} · Class of {record.athlete_graduation_year}
-              </p>
-            </div>
-          )}
-        </div>
+          {/* Scrollable content */}
+          <div className="flex-1 overflow-y-auto py-2">
+            {athleteLoading ? (
+              <LoadingSkeleton />
+            ) : athlete ? (
+              <AthleteCoachProfile
+                athlete={athlete}
+                inPipeline
+                beforeTabs={toolbar}
+                additionalTabs={additionalTabs}
+                defaultTab="notes"
+                className=""
+              />
+            ) : (
+              // Fallback if athlete data fails to load — show basic info from record
+              <div className="p-4">
+                <h2 className="text-xl font-bold">
+                  {record.athlete_first_name} {record.athlete_last_name}
+                </h2>
+                <p className="text-muted-foreground text-sm">
+                  {record.athlete_school} · Class of {record.athlete_graduation_year}
+                </p>
+              </div>
+            )}
+          </div>
 
-        {/* Footer */}
-        {renderFooter ? renderFooter(displayRecord) : null}
-      </SheetContent>
-    </Sheet>
+          {/* Footer */}
+          {renderFooter ? renderFooter(displayRecord) : null}
+        </SheetContent>
+      </Sheet>
+
+      <RemoveConfirmDialog
+        open={removeDialogOpen}
+        onOpenChange={setRemoveDialogOpen}
+        record={record}
+        onConfirm={handleRemoveConfirm}
+        isRemoving={removeRecord.isPending}
+      />
+    </>
   );
 }
 

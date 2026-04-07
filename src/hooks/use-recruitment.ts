@@ -342,7 +342,7 @@ export function useUpdateRecord(programId: number) {
   });
 }
 
-export function useArchiveRecord(programId: number) {
+export function useRemoveRecord(programId: number) {
   const { getToken } = useAuth();
   const queryClient = useQueryClient();
 
@@ -364,11 +364,11 @@ export function useArchiveRecord(programId: number) {
           total_count: old.total_count - 1,
         };
       });
-      toast.success("Athlete archived");
+      toast.success("Athlete removed from pipeline");
     },
     onError: (error) => {
       const message = error instanceof ApiClientError ? error.userMessage : "Something went wrong.";
-      toast.error("Failed to archive athlete", { description: message });
+      toast.error("Failed to remove athlete", { description: message });
     },
   });
 }

@@ -274,8 +274,6 @@ export interface RecruitmentRecordWithAthlete {
   // Timestamps
   created_at: string;
   updated_at: string;
-  archived_at: string | null;
-
   // Denormalized athlete fields
   athlete_first_name: string;
   athlete_last_name: string;

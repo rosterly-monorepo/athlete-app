@@ -321,7 +321,7 @@ function DocumentSlot({
               />
               <p className="text-muted-foreground text-xs">
                 We&apos;ll read your document and fill in the forms for you. This can take up to a
-                minute — feel free to fill in other parts of the form while we work on it.
+                minute — feel free to fill in other sections while we work on it.
               </p>
             </div>
           )}
@@ -359,7 +359,7 @@ function DocumentSlot({
               />
               <p className="text-muted-foreground text-xs">
                 Still reading your document — this can take up to a minute. Feel free to fill in
-                other parts of the form while we work on it.
+                other sections while we work on it.
               </p>
             </div>
           )}
