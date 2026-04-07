@@ -20,7 +20,18 @@ import {
   ExternalLink,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
-import type { ExtractionPollingStatus } from "@/hooks/use-extraction-polling";
+
+// ---------------------------------------------------------------------------
+// Types
+// ---------------------------------------------------------------------------
+
+/** Per-document extraction job state from the backend `extractions` JSON. */
+interface ExtractionJob {
+  status: "pending" | "complete" | "failed";
+  fields: string[];
+  error: string | null;
+  completed_at: string | null;
+}
 
 type DocType = "transcript" | "sat" | "act";
 
@@ -77,52 +88,32 @@ const FIELD_LABELS: Record<string, string> = {
   ap_scores: "AP Scores",
 };
 
-/** Reverse map: camelCase form keys → snake_case API keys. */
-const FORM_KEY_TO_API: Record<string, string> = {
-  highSchoolName: "high_school_name",
-  highSchoolCity: "high_school_city",
-  highSchoolState: "high_school_state",
-  graduationYear: "graduation_year",
-  gpaUnweighted: "gpa_unweighted",
-  gpaWeighted: "gpa_weighted",
-  gpaScale: "gpa_scale",
-  classRank: "class_rank",
-  classSize: "class_size",
-  satTotal: "sat_total",
-  satReadingWriting: "sat_reading_writing",
-  satMath: "sat_math",
-  actComposite: "act_composite",
-  actEnglish: "act_english",
-  actMath: "act_math",
-  actReading: "act_reading",
-  actScience: "act_science",
-  apScores: "ap_scores",
-};
-
 // ---------------------------------------------------------------------------
-// DocumentSlot — manages a single document type
+// DocumentSlot — self-contained: reads its own extraction state
 // ---------------------------------------------------------------------------
 
 interface DocumentSlotProps {
   docType: DocType;
   currentUrl: string | null;
   uploadedAt: string | null;
-  isExtracting: boolean;
-  extractionResult: {
-    status: ExtractionPollingStatus;
-    fields: string[];
-    error: string | null;
-  } | null;
+  /** This slot's extraction job from initialData.extractions[field]. */
+  extractionJob: ExtractionJob | null;
   onExtractionStart: () => void;
   onFileChange: () => void;
 }
 
+/**
+ * A single document upload slot with its own independent extraction state.
+ *
+ * Each slot reads its extraction status from `extractionJob`, which comes
+ * from the per-document `extractions` JSON column on the backend model.
+ * Uploading a second document never interferes with a completed first one.
+ */
 function DocumentSlot({
   docType,
   currentUrl,
   uploadedAt,
-  isExtracting,
-  extractionResult,
+  extractionJob,
   onExtractionStart,
   onFileChange,
 }: DocumentSlotProps) {
@@ -208,6 +199,14 @@ function DocumentSlot({
         year: "numeric",
       })
     : null;
+
+  // Derive extraction display state from the per-document job
+  const isPending = extractionJob?.status === "pending";
+  const isComplete = extractionJob?.status === "complete";
+  const isFailed = extractionJob?.status === "failed";
+  const extractedFields = extractionJob?.fields ?? [];
+  const hasExtractedData = isComplete && extractedFields.length > 0;
+  const isEmpty = isComplete && extractedFields.length === 0;
 
   return (
     <div
@@ -312,55 +311,42 @@ function DocumentSlot({
             </Button>
           </div>
 
-          {/* Extraction status */}
-          {isExtracting && (
+          {/* Extraction status — each slot shows its OWN state */}
+          {isPending && (
             <div className="flex items-center gap-3">
               <RosterlyLoader
                 className="min-h-0 w-14 flex-shrink-0"
                 dotClassName="size-1 rounded-px"
               />
               <p className="text-muted-foreground text-xs">
-                We&apos;ll read your document and fill in the forms for you. This can take up to a
-                minute — feel free to fill in other sections while we work on it.
+                Reading your document — this usually takes under a minute. Feel free to fill in
+                other sections while we work on it.
               </p>
             </div>
           )}
 
-          {extractionResult?.status === "complete" && extractionResult.fields.length > 0 && (
+          {hasExtractedData && (
             <div className="space-y-1">
               <div className="flex items-center gap-1.5 text-xs text-emerald-600 dark:text-emerald-400">
                 <Check className="h-3.5 w-3.5" />
                 Successfully extracted
               </div>
               <p className="text-muted-foreground text-xs">
-                {extractionResult.fields.map((f) => FIELD_LABELS[f] ?? f).join(", ")}
+                {extractedFields.map((f) => FIELD_LABELS[f] ?? f).join(", ")}
               </p>
             </div>
           )}
 
-          {extractionResult?.status === "empty" && (
+          {isEmpty && (
             <p className="text-muted-foreground text-xs">
               No data could be extracted from this document.
             </p>
           )}
 
-          {extractionResult?.status === "failed" && (
+          {isFailed && (
             <div className="flex items-center gap-1.5 text-xs text-red-600 dark:text-red-400">
               <AlertCircle className="h-3.5 w-3.5" />
-              {extractionResult.error || "Extraction failed"}
-            </div>
-          )}
-
-          {extractionResult?.status === "pending" && (
-            <div className="flex items-center gap-3">
-              <RosterlyLoader
-                className="min-h-0 w-14 flex-shrink-0"
-                dotClassName="size-1 rounded-px"
-              />
-              <p className="text-muted-foreground text-xs">
-                Still reading your document — this can take up to a minute. Feel free to fill in
-                other sections while we work on it.
-              </p>
+              {extractionJob?.error || "Extraction failed"}
             </div>
           )}
         </div>
@@ -379,89 +365,10 @@ function DocumentSlot({
 interface AcademicUploadHeroProps {
   initialData?: Record<string, unknown>;
   onExtractionStart: () => void;
-  extractionStatus: ExtractionPollingStatus;
-  extractedFields: string[];
-  extractionError: string | null;
 }
 
-export function AcademicUploadHero({
-  initialData,
-  onExtractionStart,
-  extractionStatus,
-  extractedFields,
-  extractionError,
-}: AcademicUploadHeroProps) {
-  // Track which doc type triggered the current extraction
-  const [activeExtractionDoc, setActiveExtractionDoc] = useState<DocType | null>(null);
-
-  const handleExtractionStart = useCallback(
-    (docType: DocType) => {
-      setActiveExtractionDoc(docType);
-      onExtractionStart();
-    },
-    [onExtractionStart]
-  );
-
-  // Reset active doc when extraction finishes
-  const isPolling = extractionStatus === "polling";
-  const isDone =
-    extractionStatus === "complete" ||
-    extractionStatus === "failed" ||
-    extractionStatus === "empty" ||
-    extractionStatus === "pending";
-
-  const getUrlForDoc = (docType: DocType): string | null => {
-    if (!initialData) return null;
-    return (initialData[DOC_CONFIG[docType].field] as string | null) ?? null;
-  };
-
-  const getUploadedAt = (docType: DocType): string | null => {
-    if (!initialData) return null;
-    return (initialData[DOC_CONFIG[docType].timestampKey] as string | null) ?? null;
-  };
-
-  const getExtractionResult = (docType: DocType): DocumentSlotProps["extractionResult"] => {
-    // Active polling result takes priority — convert camelCase form keys to snake_case
-    if (activeExtractionDoc === docType && isDone) {
-      const apiFields = extractedFields.map((f) => FORM_KEY_TO_API[f] ?? f);
-      return {
-        status: extractionStatus,
-        fields: apiFields,
-        error: extractionError,
-      };
-    }
-
-    // Show persisted extraction status for documents with a stored URL
-    if (!initialData || activeExtractionDoc === docType) return null;
-    const hasUrl = getUrlForDoc(docType);
-    if (!hasUrl) return null;
-
-    const persistedStatus = initialData.extraction_status as string | null;
-    if (persistedStatus === "complete") {
-      const fields = (initialData.extraction_fields as string[] | null) ?? [];
-      return {
-        status: fields.length > 0 ? "complete" : "empty",
-        fields,
-        error: null,
-      };
-    }
-    if (persistedStatus === "failed") {
-      return {
-        status: "failed",
-        fields: [],
-        error: (initialData.extraction_error as string | null) ?? "Extraction failed",
-      };
-    }
-    if (persistedStatus === "pending") {
-      return {
-        status: "pending",
-        fields: [],
-        error: null,
-      };
-    }
-
-    return null;
-  };
+export function AcademicUploadHero({ initialData, onExtractionStart }: AcademicUploadHeroProps) {
+  const extractions = (initialData?.extractions ?? {}) as Record<string, ExtractionJob>;
 
   return (
     <Card>
@@ -477,18 +384,24 @@ export function AcademicUploadHero({
         </div>
 
         <div className="space-y-2">
-          {DOC_TYPES.map((docType) => (
-            <DocumentSlot
-              key={docType}
-              docType={docType}
-              currentUrl={getUrlForDoc(docType)}
-              uploadedAt={getUploadedAt(docType)}
-              isExtracting={activeExtractionDoc === docType && isPolling}
-              extractionResult={getExtractionResult(docType)}
-              onExtractionStart={() => handleExtractionStart(docType)}
-              onFileChange={() => {}}
-            />
-          ))}
+          {DOC_TYPES.map((docType) => {
+            const config = DOC_CONFIG[docType];
+            const currentUrl = (initialData?.[config.field] as string | null) ?? null;
+            const uploadedAt = (initialData?.[config.timestampKey] as string | null) ?? null;
+            const extractionJob = extractions[config.field] ?? null;
+
+            return (
+              <DocumentSlot
+                key={docType}
+                docType={docType}
+                currentUrl={currentUrl}
+                uploadedAt={uploadedAt}
+                extractionJob={extractionJob}
+                onExtractionStart={onExtractionStart}
+                onFileChange={() => {}}
+              />
+            );
+          })}
         </div>
       </CardContent>
     </Card>

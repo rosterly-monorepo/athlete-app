@@ -25,7 +25,7 @@ import { DynamicForm, DynamicFormSkeleton } from "@/components/dynamic-forms";
 import { AcademicUploadHero } from "@/components/dynamic-forms/AcademicUploadHero";
 import { ActivityCollection } from "@/components/forms/ActivityCollection";
 import { LanguageCollection } from "@/components/forms/LanguageCollection";
-import { useExtractionPolling } from "@/hooks/use-extraction-polling";
+import { hasAnyPendingExtraction, useExtractionPolling } from "@/hooks/use-extraction-polling";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { Progress } from "@/components/ui/progress";
 import { useSidebar } from "@/components/providers/sidebar-provider";
@@ -484,7 +484,8 @@ function AcademicsProfileSection({
   }, [mutation.error, autoSaveMutation.error]);
 
   // ── Extraction orchestration ──
-  const [pollingEnabled, setPollingEnabled] = useState(false);
+  // Auto-resume polling if we mount with any pending extraction (navigate away and back)
+  const [pollingEnabled, setPollingEnabled] = useState(() => hasAnyPendingExtraction(initialData));
   const [highlightedFields, setHighlightedFields] = useState<Set<string>>(new Set());
 
   const {
@@ -499,31 +500,20 @@ function AcademicsProfileSection({
   // React to extraction polling status changes
   useEffect(() => {
     if (pollStatus === "complete" && extractedFields.length > 0) {
-      const handleComplete = () => {
+      const onComplete = () => {
         setHighlightedFields(new Set(extractedFields));
-        setPollingEnabled(false);
         toast.success("Successfully extracted data from your document");
       };
-      handleComplete();
+      onComplete();
       const timer = setTimeout(() => setHighlightedFields(new Set()), 3000);
       return () => clearTimeout(timer);
     }
     if (pollStatus === "failed") {
-      const handleFailed = () => {
-        setPollingEnabled(false);
-        toast.error(extractionError || "Document extraction failed");
-      };
-      handleFailed();
+      toast.error(extractionError || "Document extraction failed");
     }
-    if (pollStatus === "empty") {
-      const handleEmpty = () => setPollingEnabled(false);
-      handleEmpty();
-    }
-    if (pollStatus === "pending") {
-      // Polling timed out but extraction is still running — stop polling,
-      // the hero will show the pending state from persisted data.
-      const handlePending = () => setPollingEnabled(false);
-      handlePending();
+    if (pollStatus === "empty" || pollStatus === "idle") {
+      const onDone = () => setPollingEnabled(false);
+      onDone();
     }
   }, [pollStatus, extractedFields, extractionError]);
 
@@ -532,13 +522,7 @@ function AcademicsProfileSection({
   }, []);
 
   const heroElement = (
-    <AcademicUploadHero
-      initialData={initialData}
-      onExtractionStart={handleExtractionStart}
-      extractionStatus={pollStatus}
-      extractedFields={extractedFields}
-      extractionError={extractionError}
-    />
+    <AcademicUploadHero initialData={initialData} onExtractionStart={handleExtractionStart} />
   );
 
   return (
