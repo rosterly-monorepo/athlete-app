@@ -225,7 +225,9 @@ export type RecruitmentStage =
   | "offer_extended"
   | "committed"
   | "likely_letter"
-  | "admitted";
+  | "admitted"
+  | "rostered"
+  | "alumni";
 
 export type NoteType = "general" | "call" | "email" | "visit" | "evaluation";
 
@@ -302,6 +304,15 @@ export interface RecruitmentBoardColumn {
 export interface RecruitmentBoard {
   program_id: number;
   columns: RecruitmentBoardColumn[];
+  total_count: number;
+}
+
+export interface RosterEntry extends RecruitmentRecordWithAthlete {
+  program_sport_code: string;
+}
+
+export interface RosterResponse {
+  records: RosterEntry[];
   total_count: number;
 }
 

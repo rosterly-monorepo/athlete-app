@@ -91,36 +91,43 @@ export class ApiClientError extends Error {
 
 // ── Fetch wrapper ──
 
+function _buildHeaders(
+  token: string | null,
+  overrides: HeadersInit | undefined
+): Record<string, string> {
+  const headers: Record<string, string> = {
+    "Content-Type": "application/json",
+    ...(overrides as Record<string, string>),
+  };
+  if (token) {
+    headers["Authorization"] = `Bearer ${token}`;
+  }
+  return headers;
+}
+
+async function _throwIfError(response: Response): Promise<void> {
+  if (response.ok) return;
+  let body: ApiErrorBody | null = null;
+  let rawText = "Unknown error";
+  try {
+    body = (await response.json()) as ApiErrorBody;
+    rawText = JSON.stringify(body);
+  } catch {
+    rawText = await response.text().catch(() => "Unknown error");
+  }
+  throw new ApiClientError(rawText, response.status, body);
+}
+
 async function _fetch<T>(
   endpoint: string,
   token: string | null,
   options: RequestInit = {}
 ): Promise<T> {
   const url = `${API_BASE}${endpoint}`;
-
-  const headers: Record<string, string> = {
-    "Content-Type": "application/json",
-    ...(options.headers as Record<string, string>),
-  };
-
-  // Attach Clerk JWT if available
-  if (token) {
-    headers["Authorization"] = `Bearer ${token}`;
-  }
+  const headers = _buildHeaders(token, options.headers);
 
   const response = await fetch(url, { ...options, headers });
-
-  if (!response.ok) {
-    let body: ApiErrorBody | null = null;
-    let rawText = "Unknown error";
-    try {
-      body = (await response.json()) as ApiErrorBody;
-      rawText = JSON.stringify(body);
-    } catch {
-      rawText = await response.text().catch(() => "Unknown error");
-    }
-    throw new ApiClientError(rawText, response.status, body);
-  }
+  await _throwIfError(response);
 
   if (response.status === 204) {
     return undefined as T;
@@ -160,4 +167,43 @@ export async function serverApiClient<T>(
   options: RequestInit = {}
 ): Promise<T> {
   return _fetch<T>(endpoint, token, options);
+}
+
+/**
+ * Client-side API helper for endpoints that return a binary file body
+ * (e.g. CSV / XLSX downloads via `StreamingResponse`).
+ *
+ * Returns the blob plus the server-provided filename parsed from
+ * `Content-Disposition`, so callers can trigger a browser download
+ * with the backend's intended filename.
+ */
+export async function apiClientBlob(
+  endpoint: string,
+  token: string | null,
+  options: RequestInit = {}
+): Promise<{ blob: Blob; filename: string | null }> {
+  const url = `${API_BASE}${endpoint}`;
+  const headers = _buildHeaders(token, options.headers);
+
+  const response = await fetch(url, { ...options, headers });
+  await _throwIfError(response);
+
+  const blob = await response.blob();
+  const filename = parseContentDispositionFilename(response.headers.get("Content-Disposition"));
+  return { blob, filename };
+}
+
+function parseContentDispositionFilename(header: string | null): string | null {
+  if (!header) return null;
+  // RFC 5987 `filename*=UTF-8''...` takes precedence over plain `filename="..."`.
+  const utf8 = /filename\*=UTF-8''([^;]+)/i.exec(header);
+  if (utf8) {
+    try {
+      return decodeURIComponent(utf8[1]);
+    } catch {
+      return utf8[1];
+    }
+  }
+  const plain = /filename="?([^";]+)"?/i.exec(header);
+  return plain ? plain[1] : null;
 }

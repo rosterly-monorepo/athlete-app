@@ -13,6 +13,7 @@ import {
   addNote,
   updateNote,
   deleteNote,
+  getRoster,
 } from "@/services/recruitment";
 import type {
   RecruitmentBoard,
@@ -34,6 +35,7 @@ export const recruitmentKeys = {
   all: ["recruitment"] as const,
   board: (programId: number) => ["recruitment", "board", programId] as const,
   record: (recordId: number) => ["recruitment", "record", recordId] as const,
+  roster: ["recruitment", "roster"] as const,
 };
 
 // ── Board Hooks ──
@@ -48,6 +50,20 @@ export function useRecruitmentBoard(programId: number) {
       return getRecruitmentBoard(token!, programId);
     },
     enabled: !!programId,
+  });
+}
+
+// ── Roster Hook ──
+
+export function useRoster() {
+  const { getToken } = useAuth();
+
+  return useQuery({
+    queryKey: recruitmentKeys.roster,
+    queryFn: async () => {
+      const token = await getToken();
+      return getRoster(token!);
+    },
   });
 }
 
@@ -195,6 +211,9 @@ export function useMoveRecord(programId: number) {
       queryClient.invalidateQueries({
         queryKey: recruitmentKeys.board(programId),
       });
+      queryClient.invalidateQueries({
+        queryKey: recruitmentKeys.roster,
+      });
     },
   });
 }
@@ -333,6 +352,10 @@ export function useUpdateRecord(programId: number) {
       queryClient.invalidateQueries({
         queryKey: recruitmentKeys.record(updatedRecord.id),
       });
+      // Invalidate roster (stage may have changed to/from rostered)
+      queryClient.invalidateQueries({
+        queryKey: recruitmentKeys.roster,
+      });
       toast.success("Record updated");
     },
     onError: (error) => {
@@ -365,6 +388,9 @@ export function useRemoveRecord(programId: number) {
         };
       });
       toast.success("Athlete removed from pipeline");
+      queryClient.invalidateQueries({
+        queryKey: recruitmentKeys.roster,
+      });
     },
     onError: (error) => {
       const message = error instanceof ApiClientError ? error.userMessage : "Something went wrong.";

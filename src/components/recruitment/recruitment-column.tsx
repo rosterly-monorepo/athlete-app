@@ -28,6 +28,8 @@ const STAGE_LABELS: Record<RecruitmentStage, string> = {
   committed: "Committed",
   likely_letter: "Likely Letter",
   admitted: "Admitted",
+  rostered: "Rostered",
+  alumni: "Alumni",
 };
 
 const ACCENT_HEADER_STAGES: Set<RecruitmentStage> = new Set(["pre_read"]);

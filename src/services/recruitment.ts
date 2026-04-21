@@ -4,6 +4,7 @@ import type {
   RecruitmentRecordWithAthlete,
   RecruitmentRecordDetail,
   RecruitmentNote,
+  RosterResponse,
   AddRecordInput,
   UpdateRecordInput,
   MoveRecordInput,
@@ -42,6 +43,12 @@ export async function reorderRecords(
     method: "POST",
     body: JSON.stringify(data),
   });
+}
+
+// ── Roster ──
+
+export async function getRoster(token: string): Promise<RosterResponse> {
+  return apiClient<RosterResponse>("/api/v1/recruitment/roster", token);
 }
 
 // ── Record ──

@@ -2,9 +2,10 @@
 
 import { use, useState } from "react";
 import { useMyPrograms } from "@/hooks/use-programs";
+import { useARMSExport } from "@/hooks/use-arms-export";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Plus, ArrowLeft } from "lucide-react";
+import { Plus, ArrowLeft, Download, Loader2 } from "lucide-react";
 import Link from "next/link";
 import {
   RecruitmentBoard,
@@ -22,6 +23,7 @@ export default function RecruitingBoardPage({ params }: Props) {
   const { programId } = use(params);
   const numericProgramId = parseInt(programId, 10);
   const { data: programs, isLoading: programsLoading } = useMyPrograms();
+  const { mutate: exportToARMS, isPending: isExporting } = useARMSExport();
   const [addToStage, setAddToStage] = useState<RecruitmentStage | null>(null);
   const [selectedRecord, setSelectedRecord] = useState<RecruitmentRecordWithAthlete | null>(null);
 
@@ -54,6 +56,18 @@ export default function RecruitingBoardPage({ params }: Props) {
             hasMultiplePrograms &&
             programs && <ProgramSelector programs={programs} currentProgramId={numericProgramId} />
           )}
+          <Button
+            variant="outline"
+            onClick={() => exportToARMS({ program_id: numericProgramId })}
+            disabled={isExporting}
+          >
+            {isExporting ? (
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+            ) : (
+              <Download className="mr-2 h-4 w-4" />
+            )}
+            Export to ARMS
+          </Button>
           <AddAthleteDialog programId={numericProgramId}>
             <Button>
               <Plus className="mr-2 h-4 w-4" />

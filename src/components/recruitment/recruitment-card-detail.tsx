@@ -20,9 +20,17 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Skeleton } from "@/components/ui/skeleton";
-import { UserMinus } from "lucide-react";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Download, MoreHorizontal, UserMinus } from "lucide-react";
 import { useRecord, useUpdateRecord, useRemoveRecord, useAddNote } from "@/hooks/use-recruitment";
 import { useAthleteCoachView } from "@/hooks/use-athlete";
+import { useARMSExport } from "@/hooks/use-arms-export";
 import { AthleteCoachProfile, type AdditionalTab } from "@/components/coach/athlete-profile";
 import { CommunicationsTab } from "./communications-tab";
 import type {
@@ -50,6 +58,8 @@ const STAGES: { value: RecruitmentStage; label: string }[] = [
   { value: "committed", label: "Committed" },
   { value: "likely_letter", label: "Likely Letter" },
   { value: "admitted", label: "Admitted" },
+  { value: "rostered", label: "Rostered" },
+  { value: "alumni", label: "Alumni" },
 ];
 
 const PRIORITIES: { value: Priority; label: string }[] = [
@@ -103,7 +113,9 @@ function RecruitmentToolbar({
   onPriorityChange,
   onRatingChange,
   onRemove,
+  onExport,
   isRemoving,
+  isExporting,
   showRemove,
 }: {
   record: RecruitmentRecordDetail;
@@ -111,7 +123,9 @@ function RecruitmentToolbar({
   onPriorityChange: (priority: Priority) => void;
   onRatingChange: (rating: number) => void;
   onRemove: () => void;
+  onExport: () => void;
   isRemoving: boolean;
+  isExporting: boolean;
   showRemove: boolean;
 }) {
   return (
@@ -163,18 +177,34 @@ function RecruitmentToolbar({
         </div>
       )}
 
-      {showRemove && (
-        <Button
-          variant="ghost"
-          size="icon"
-          className="text-destructive hover:text-destructive ml-auto h-8 w-8"
-          onClick={onRemove}
-          disabled={isRemoving}
-          title="Remove from pipeline"
-        >
-          <UserMinus className="h-4 w-4" />
-        </Button>
-      )}
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button
+            variant="ghost"
+            size="icon"
+            className="ml-auto h-8 w-8"
+            disabled={isRemoving || isExporting}
+            aria-label="Athlete actions"
+          >
+            <MoreHorizontal className="h-4 w-4" />
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="end">
+          <DropdownMenuItem onSelect={onExport} disabled={isExporting}>
+            <Download className="mr-2 h-4 w-4" />
+            Export to ARMS
+          </DropdownMenuItem>
+          {showRemove && (
+            <>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem onSelect={onRemove} disabled={isRemoving} variant="destructive">
+                <UserMinus className="mr-2 h-4 w-4" />
+                Remove from pipeline
+              </DropdownMenuItem>
+            </>
+          )}
+        </DropdownMenuContent>
+      </DropdownMenu>
     </div>
   );
 }
@@ -275,6 +305,7 @@ function RecruitmentCardDetail({
   const updateRecord = useUpdateRecord(programId);
   const removeRecord = useRemoveRecord(programId);
   const addNote = useAddNote(programId);
+  const { mutate: exportToARMS, isPending: isExporting } = useARMSExport();
 
   if (!record) return null;
 
@@ -299,6 +330,13 @@ function RecruitmentCardDetail({
 
   const handleRemoveClick = () => {
     setRemoveDialogOpen(true);
+  };
+
+  const handleExport = () => {
+    exportToARMS({
+      program_id: programId,
+      athlete_ids: [record.athlete_id],
+    });
   };
 
   const handleRemoveConfirm = () => {
@@ -342,7 +380,9 @@ function RecruitmentCardDetail({
       onPriorityChange={handlePriorityChange}
       onRatingChange={handleRatingChange}
       onRemove={handleRemoveClick}
+      onExport={handleExport}
       isRemoving={removeRecord.isPending}
+      isExporting={isExporting}
       showRemove={showRemoveButton}
     />
   );
