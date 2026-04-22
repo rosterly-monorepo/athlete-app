@@ -1,5 +1,10 @@
 import { apiClient } from "./api-client";
-import type { OrganizationProgram, AvailableMetricsResponse, ScoringConfig } from "./types";
+import type {
+  OrganizationProgram,
+  AvailableMetricsResponse,
+  ProgramRequirements,
+  ScoringConfig,
+} from "./types";
 
 export interface OrganizationProfile {
   id: number;
@@ -34,14 +39,7 @@ export interface CreateProgramInput {
   region?: string;
   program_website?: string;
   recruiting_email?: string;
-  minimum_gpa?: number;
-  minimum_sat?: number;
-  minimum_act?: number;
-  minimum_height_inches?: number;
-  graduation_years_of_interest?: number[];
-  geographic_preferences?: string[];
-  citizenship_requirements?: string;
-  roster_spots?: number;
+  requirements?: ProgramRequirements | null;
   scoring_config?: ScoringConfig | null;
 }
 

@@ -113,10 +113,11 @@ Or connect your GitHub repo at [vercel.com/new](https://vercel.com/new) for auto
 
 ## Next Steps
 
-- [ ] **Database** — Add Prisma + PostgreSQL (Neon or Supabase) for athlete profiles
+- [x] **Database** — Postgres via the `athlete-api` FastAPI backend (SQLModel + Alembic migrations)
+- [x] **Public profiles** — `/athletes/[id]` renders from the backend
+- [x] **Image uploads** — Avatar + transcript presigned-URL flow (S3/DO Spaces)
+- [x] **Profile completion gating** — `/profile` and `/dashboard` surface a live percent; athletes below 100% are hidden from coach search and the public `/athletes` directory until they finish every required field ("recruitable" threshold)
 - [ ] **Clerk Billing** — Enable subscription plans and add `<PricingTable />`
 - [ ] **Data providers** — Build integrations to import competition results
 - [ ] **Error tracking** — Add Sentry for production monitoring
 - [ ] **Analytics** — Add Vercel Analytics or PostHog
-- [ ] **Public profiles** — Connect `/athletes/[id]` to the database for SEO
-- [ ] **Image uploads** — Athlete photos via Uploadthing or Vercel Blob

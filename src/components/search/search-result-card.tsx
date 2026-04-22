@@ -7,31 +7,17 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
-import { formatHeight, formatErgTime } from "@/lib/format";
+import { formatHeight } from "@/lib/format";
+import type { MatchResult } from "@/lib/requirements";
 import type { AthleteSearchHit } from "@/services/types";
-
-/** Extract sport-specific display stats from flat hit fields. */
-function getSportStats(hit: AthleteSearchHit): { label: string; value: string }[] {
-  const stats: { label: string; value: string }[] = [];
-
-  // Rowing
-  const erg2k = hit.rowing_best_2k_seconds;
-  if (typeof erg2k === "number") {
-    stats.push({ label: "2k", value: formatErgTime(erg2k) });
-  }
-  const erg6k = hit.rowing_best_6k_seconds;
-  if (typeof erg6k === "number") {
-    stats.push({ label: "6k", value: formatErgTime(erg6k) });
-  }
-
-  return stats;
-}
+import { MatchBadgeStack } from "./match-badge";
 
 interface SearchResultCardProps {
   hit: AthleteSearchHit;
   inPipeline?: boolean;
   isAdding?: boolean;
   onAddToBoard?: (athleteId: number) => void;
+  matches?: MatchResult[];
 }
 
 export const SearchResultCard = React.memo(function SearchResultCard({
@@ -39,6 +25,7 @@ export const SearchResultCard = React.memo(function SearchResultCard({
   inPipeline,
   isAdding,
   onAddToBoard,
+  matches = [],
 }: SearchResultCardProps) {
   const initials = (hit.first_name?.[0] ?? "") + (hit.last_name?.[0] ?? "");
 
@@ -86,19 +73,10 @@ export const SearchResultCard = React.memo(function SearchResultCard({
                 {formatHeight(hit.height_inches)}
               </span>
             )}
+            {hit.graduation_year && <span>Class of {hit.graduation_year}</span>}
           </div>
 
-          <div className="text-muted-foreground mt-1 flex flex-wrap gap-x-3 text-xs">
-            {hit.graduation_year && <span>Class of {hit.graduation_year}</span>}
-            {hit.gpa_unweighted != null && <span>GPA {hit.gpa_unweighted.toFixed(2)}</span>}
-            {getSportStats(hit).map((stat) => (
-              <span key={stat.label}>
-                {stat.label} {stat.value}
-              </span>
-            ))}
-            {hit.sat_total != null && <span>SAT {hit.sat_total}</span>}
-            {hit.act_composite != null && <span>ACT {hit.act_composite}</span>}
-          </div>
+          {matches.length > 0 && <MatchBadgeStack matches={matches} className="mt-2" />}
         </div>
       </Link>
 

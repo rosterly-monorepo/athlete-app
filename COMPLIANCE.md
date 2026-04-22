@@ -160,11 +160,20 @@ The application does not persist personal data in browser storage beyond Clerk's
 **Implemented:**
 
 - `isPublic` flag controls visibility to accredited university recruiters (not public internet)
+- `profile_completion_pct` gate — athletes below 100% completion are hidden from coach search and the public `/athletes` directory even if `isPublic = true`
 - Profile sharing limited to onboarded, verified schools
 - No analytics or tracking scripts
+- Avatars and transcripts served via short-lived presigned URLs; the underlying S3/DO Spaces bucket is private
 
 **Data Sharing Model:**
-Athlete profiles are **not publicly accessible**. The `isPublic` flag enables visibility only to:
+Athlete profiles are **not publicly accessible**. Coach discoverability requires **both** conditions:
+
+- `isPublic = true` — the athlete has opted into sharing, AND
+- `profile_completion_pct >= 100` — the athlete has provided the minimum information required to be recruitable
+
+When either condition is false, the profile is excluded from coach search (Elasticsearch) and the Postgres-backed public directory. Individual profile pages (`/athletes/[id]`) still render for direct-link sharing — athletes can share their own link before hitting 100%.
+
+Visibility is scoped to:
 
 - Accredited universities onboarded to the platform
 - Verified coaching staff with organization membership

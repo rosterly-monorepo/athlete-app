@@ -10,8 +10,10 @@ import { RosterlyLoader } from "@/components/ui/dot-loader";
 import { useSearchFilters, useAthleteSearch, useSearchState } from "@/hooks/use-athlete-search";
 import { useMyPrograms } from "@/hooks/use-programs";
 import { useAddRecord, usePipelineAthleteIds } from "@/hooks/use-recruitment";
+import { seedFiltersFromRequirements } from "@/lib/requirements";
 import { SearchFilterPanel } from "./search-filter-panel";
 import { OrderingPanel } from "./ordering-panel";
+import { SearchProgramPicker } from "./search-program-picker";
 import { SearchResultsPanel } from "./search-results-panel";
 
 function SearchPageContent() {
@@ -25,7 +27,7 @@ function SearchPageContent() {
   const urlSearchParams = useSearchParams();
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
 
-  const filterSchemas = filterData?.filters ?? [];
+  const filterSchemas = useMemo(() => filterData?.filters ?? [], [filterData]);
   const filterGroups = filterData?.groups ?? [];
   const sortOptions = useMemo(() => filterData?.sort_options ?? [], [filterData]);
 
@@ -81,17 +83,35 @@ function SearchPageContent() {
     }
   }, [selectedSports, sortBy, sortOptions, setSortBy]);
 
-  // Default sports filter from coach's programs (only on first load, not from URL)
+  // Resolve the active program from the URL (?program=<id>), falling back to the first program.
+  const selectedProgram = useMemo(() => {
+    if (!programs?.length) return null;
+    const raw = urlSearchParams.get("program");
+    const id = raw ? Number(raw) : NaN;
+    return (id && programs.find((p) => p.id === id)) || programs[0];
+  }, [programs, urlSearchParams]);
+
+  // One-shot defaults applied when the page mounts with a resolved program + schemas.
   const defaultsApplied = useRef(false);
   useEffect(() => {
     if (defaultsApplied.current) return;
-    if (!programs?.length) return;
-    if (urlSearchParams.has("sports")) return;
+    if (!selectedProgram) return;
+    if (!filterSchemas.length) return;
 
-    const sportCodes = [...new Set(programs.map((p) => p.sport_code))];
-    setFilter("sports", sportCodes);
+    // Sport filter: program's sport_code, unless the URL overrides.
+    if (!urlSearchParams.has("sports")) {
+      setFilter("sports", [selectedProgram.sport_code]);
+    }
+
+    // Requirement-driven range defaults (URL values win — seed checks `existing` first).
+    const seeded = seedFiltersFromRequirements(filterSchemas, selectedProgram.requirements, {});
+    for (const [field, value] of Object.entries(seeded)) {
+      if (urlSearchParams.has(field)) continue;
+      setFilter(field, value);
+    }
+
     defaultsApplied.current = true;
-  }, [programs, urlSearchParams, setFilter]);
+  }, [selectedProgram, filterSchemas, urlSearchParams, setFilter]);
 
   const handleFilterChange = useCallback(
     (field: string, value: unknown) => {
@@ -112,8 +132,8 @@ function SearchPageContent() {
     [pipelineAthleteIdList]
   );
 
-  // Use first program for adding (coaches typically have one program)
-  const defaultProgramId = programs?.[0]?.id;
+  // Adding-to-board uses the actively selected program.
+  const defaultProgramId = selectedProgram?.id;
   const addRecord = useAddRecord(defaultProgramId ?? 0);
   const [addingAthleteId, setAddingAthleteId] = useState<number | null>(null);
 
@@ -228,6 +248,16 @@ function SearchPageContent() {
         onSortChange={setSortBy}
         onPageChange={setPage}
         onAddToBoard={defaultProgramId ? handleAddToBoard : undefined}
+        programPicker={
+          programs && programs.length > 0 ? (
+            <SearchProgramPicker
+              programs={programs}
+              selectedProgramId={selectedProgram?.id ?? null}
+            />
+          ) : null
+        }
+        requirements={selectedProgram?.requirements ?? null}
+        filterSchemas={filterSchemas}
       />
     </div>
   );

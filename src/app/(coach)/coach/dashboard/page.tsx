@@ -6,6 +6,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { useUserRole } from "@/hooks/use-user-role";
 import { useMyPrograms } from "@/hooks/use-programs";
 import { formatSportCode } from "@/lib/format";
+import { findMinimum, formatRequirementValue, shortLabelFor } from "@/lib/requirements";
 
 export default function CoachDashboardPage() {
   const { orgRole, orgName } = useUserRole();
@@ -77,22 +78,41 @@ export default function CoachDashboardPage() {
         </div>
       ) : programs && programs.length > 0 ? (
         <div className="grid gap-4 md:grid-cols-2">
-          {programs.map((program) => (
-            <Card key={program.id}>
-              <CardHeader className="pb-2">
-                <CardTitle className="text-base font-medium">
-                  {formatSportCode(program.sport_code)}
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="text-muted-foreground flex gap-4 text-sm">
-                  <span>GPA: {program.minimum_gpa != null ? program.minimum_gpa : "—"}</span>
-                  <span>SAT: {program.minimum_sat != null ? program.minimum_sat : "—"}</span>
-                  <span>ACT: {program.minimum_act != null ? program.minimum_act : "—"}</span>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
+          {programs.map((program) => {
+            const minimums = program.requirements?.minimums ?? [];
+            const gpa = findMinimum(program.requirements, "gpa_unweighted");
+            const rai = findMinimum(program.requirements, "academic_index");
+            return (
+              <Card key={program.id}>
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-base font-medium">
+                    {formatSportCode(program.sport_code)}
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  {minimums.length === 0 ? (
+                    <p className="text-muted-foreground text-sm">No minimums configured</p>
+                  ) : (
+                    <div className="text-muted-foreground flex flex-wrap gap-x-4 gap-y-1 text-sm">
+                      {gpa && <span>GPA: {gpa.min_value.toFixed(2)}</span>}
+                      {rai && <span>RAI: {Math.round(rai.min_value)}</span>}
+                      {minimums
+                        .filter(
+                          (m) =>
+                            m.field_name !== "gpa_unweighted" && m.field_name !== "academic_index"
+                        )
+                        .map((m) => (
+                          <span key={m.field_name}>
+                            {shortLabelFor(m.field_name)}:{" "}
+                            {formatRequirementValue(m.min_value, null, null)}
+                          </span>
+                        ))}
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            );
+          })}
         </div>
       ) : (
         <Card>

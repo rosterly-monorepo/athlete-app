@@ -164,6 +164,15 @@ export interface PaginatedResponse<T> {
 
 // ── Organization Program ──
 
+export interface ProgramMinimum {
+  field_name: string;
+  min_value: number;
+}
+
+export interface ProgramRequirements {
+  minimums: ProgramMinimum[];
+}
+
 export interface OrganizationProgram {
   id: number;
   organization_id: number;
@@ -175,15 +184,7 @@ export interface OrganizationProgram {
   recruiting_email: string | null;
   is_active: boolean;
   recruiting_status: "active" | "paused" | "closed" | null;
-  // Recruiting requirements
-  minimum_gpa: number | null;
-  minimum_sat: number | null;
-  minimum_act: number | null;
-  minimum_height_inches: number | null;
-  graduation_years_of_interest: number[] | null;
-  geographic_preferences: string[] | null;
-  citizenship_requirements: string | null;
-  roster_spots: number | null;
+  requirements: ProgramRequirements | null;
   scoring_config: ScoringConfig | null;
   created_at: string;
   updated_at: string;
@@ -369,6 +370,8 @@ export interface SearchFilterOption {
   label: string;
 }
 
+export type MetricDirection = "higher_is_better" | "lower_is_better";
+
 export interface SearchFilterSchema {
   field: string;
   filter_type: "range" | "checkboxes" | "toggle";
@@ -383,6 +386,7 @@ export interface SearchFilterSchema {
   options_from_agg: boolean;
   group: string;
   order: number;
+  direction?: MetricDirection | null;
 }
 
 export interface FilterGroup {

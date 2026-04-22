@@ -14,6 +14,8 @@ import {
   PenLine,
   Globe,
   Activity,
+  Eye,
+  EyeOff,
 } from "lucide-react";
 import { useMyProfile } from "@/hooks/use-athlete";
 import { useAllFormSchemas, useSaveProfileSection } from "@/hooks/use-form-schema";
@@ -25,6 +27,7 @@ import { DynamicForm, DynamicFormSkeleton } from "@/components/dynamic-forms";
 import { AcademicUploadHero } from "@/components/dynamic-forms/AcademicUploadHero";
 import { ActivityCollection } from "@/components/forms/ActivityCollection";
 import { LanguageCollection } from "@/components/forms/LanguageCollection";
+import { ProfilePhotoField } from "@/components/forms/ProfilePhotoField";
 import { hasAnyPendingExtraction, useExtractionPolling } from "@/hooks/use-extraction-polling";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { Progress } from "@/components/ui/progress";
@@ -129,17 +132,40 @@ export default function ProfilePage() {
         <span className="text-sm font-medium">{overallPct}% complete</span>
       </div>
       <Progress value={overallPct} className="mb-2 h-2" />
+      {overallPct < 100 ? (
+        <div className="mb-4 flex items-start gap-2 rounded-md border border-amber-300 bg-amber-50 p-3 text-sm text-amber-900">
+          <EyeOff className="mt-0.5 h-4 w-4 shrink-0" />
+          <div className="flex-1">
+            <p className="font-medium">Your profile isn&apos;t visible to coaches yet.</p>
+            <p className="text-amber-800">
+              Finish every required section to be recruitable and appear in coach search.
+            </p>
+          </div>
+          {showContinue && (
+            <Button size="sm" className="shrink-0 gap-1.5" onClick={handleContinue}>
+              Continue
+              <ArrowRight className="h-4 w-4" />
+            </Button>
+          )}
+        </div>
+      ) : (
+        <div className="mb-4 flex items-center gap-2 rounded-md border border-emerald-300 bg-emerald-50 p-3 text-sm text-emerald-900">
+          <Eye className="h-4 w-4 shrink-0" />
+          <p className="font-medium">
+            Visible to coaches — your profile is complete and recruitable.
+          </p>
+        </div>
+      )}
       <div className="mb-6 flex items-center justify-between">
         <p className="text-muted-foreground">
           This information will appear on your public athlete profile page.
         </p>
-        {showContinue && (
-          <Button size="sm" className="ml-4 shrink-0 gap-1.5" onClick={handleContinue}>
-            Continue
-            <ArrowRight className="h-4 w-4" />
-          </Button>
-        )}
       </div>
+
+      <ProfilePhotoField
+        avatarUrl={(profileData?.avatar_url as string | null | undefined) ?? null}
+        required
+      />
 
       {resolvedTab && (
         <>

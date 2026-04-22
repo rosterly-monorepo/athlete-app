@@ -119,16 +119,19 @@ A JSON Schema with UI hints looks like this:
 
 The `FormFieldRenderer` maps `x-ui-widget` values to components:
 
-| x-ui-widget      | Component      | Notes                              |
-| ---------------- | -------------- | ---------------------------------- |
-| `text`           | TextWidget     | Also handles `email`, `tel`, `url` |
-| `textarea`       | TextareaWidget | Multi-line text with char count    |
-| `number`         | NumberWidget   | Numeric input with min/max         |
-| `date`           | DateWidget     | HTML5 date picker                  |
-| `select`         | SelectWidget   | Dropdown, supports categories      |
-| `checkbox`       | CheckboxWidget | Boolean toggle                     |
-| `country-select` | SelectWidget   | Same as select                     |
-| `state-select`   | SelectWidget   | Same as select                     |
+| x-ui-widget       | Component            | Notes                                             |
+| ----------------- | -------------------- | ------------------------------------------------- |
+| `text`            | TextWidget           | Also handles `email`, `tel`, `url`                |
+| `textarea`        | TextareaWidget       | Multi-line text with char count                   |
+| `number`          | NumberWidget         | Numeric input with min/max                        |
+| `date`            | DateWidget           | HTML5 date picker                                 |
+| `select`          | SelectWidget         | Dropdown, supports categories                     |
+| `checkbox`        | CheckboxWidget       | Boolean toggle                                    |
+| `country-select`  | SelectWidget         | Same as select                                    |
+| `state-select`    | SelectWidget         | Same as select                                    |
+| `image-upload`    | ImageUploadWidget    | 3-step presigned upload; config via `x-ui-upload` |
+| `document-upload` | DocumentUploadWidget | 3-step presigned upload; config via `x-ui-upload` |
+| `video-upload`    | VideoUploadWidget    | 3-step presigned upload; config via `x-ui-upload` |
 
 **Widget inference:** If `x-ui-widget` is not specified, the renderer infers:
 
@@ -313,6 +316,34 @@ See `src/app/(dashboard)/profile/page.tsx` for a complete example.
 2. **Check Zod conversion:** Import and call `jsonSchemaToZod(schema)` to see the generated validator
 3. **Check field errors:** The `error` prop is passed to each widget
 4. **Check React Query:** Use React Query DevTools to inspect cached schemas
+
+## Profile completion UI
+
+Every `GET /api/v1/athletes/me/profile` response carries two completion signals derived from the same `FormField(required=True)` annotations the dynamic form renders:
+
+- `section_completion` — a `{section_slug: {total, filled}}` dict.
+- `profile_completion_pct` — a 0–100 integer recomputed fresh on every read (backend `@model_validator`).
+
+Both values are authoritative and must agree by construction. When referring to "overall completion" on the frontend, compute it from `section_completion` via `getOverallCompletion` (same helper both `/profile` and `/dashboard` use) so the two surfaces can never drift.
+
+### Helpers (`src/lib/profile-completion.ts`)
+
+| Helper                                           | Purpose                                                      |
+| ------------------------------------------------ | ------------------------------------------------------------ |
+| `getSectionCompletion(sectionId, profile)`       | Read `{total, filled, done}` for one section                 |
+| `getOverallCompletion(sectionIds, profile)`      | Sum `filled/total` across sections, round to integer percent |
+| `getFirstIncompleteSection(sectionIds, profile)` | Used by the "Continue" CTA on `/profile`                     |
+
+`sectionIds` should be the schema section keys filtered by `!schema["x-ui-embedded-in"]` — exactly what both pages do today.
+
+### Visibility banner + dashboard card
+
+- `/profile` (`athlete-app/src/app/(dashboard)/profile/page.tsx`) shows an amber banner "Not visible to coaches yet" when `overallPct < 100`, or a green "Visible to coaches" badge at 100%.
+- `/dashboard` (`athlete-app/src/app/(dashboard)/dashboard/page.tsx`) — client component using `useMyProfile()` + `useAllFormSchemas()` — renders a Profile Completion card with the same progress bar, warning banner, and thresholds. Both surfaces share `useMyProfile`'s TanStack Query cache, so a mutation on one updates the other.
+
+### ProfilePhotoField (avatar uploader)
+
+`athlete-app/src/components/forms/ProfilePhotoField.tsx` is the avatar uploader. It sits outside the `DynamicForm` because `avatar_url` lives on the `Athlete` root — not on one of the registered profile sections. It reuses `useFileUpload({ field: "avatar" })` for the 3-step presigned flow, and handles the case where the backend serves `avatar_url` as a short-lived signed URL (explicit image-load error message with the URL so access-control issues are visible).
 
 ## File Reference
 

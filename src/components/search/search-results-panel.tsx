@@ -5,9 +5,15 @@ import { AlertCircle, Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { RosterlyLoader } from "@/components/ui/dot-loader";
+import { evaluateRequirements } from "@/lib/requirements";
 import { SearchResultCard } from "./search-result-card";
 import { SearchSortSelect } from "./search-sort-select";
-import type { AthleteSearchResponse, SortOption } from "@/services/types";
+import type {
+  AthleteSearchResponse,
+  ProgramRequirements,
+  SearchFilterSchema,
+  SortOption,
+} from "@/services/types";
 
 interface SearchResultsPanelProps {
   query: string;
@@ -26,6 +32,9 @@ interface SearchResultsPanelProps {
   onSortChange: (sort: string) => void;
   onPageChange: (page: number) => void;
   onAddToBoard?: (athleteId: number) => void;
+  programPicker?: React.ReactNode;
+  requirements?: ProgramRequirements | null;
+  filterSchemas?: SearchFilterSchema[];
 }
 
 export function SearchResultsPanel({
@@ -45,6 +54,9 @@ export function SearchResultsPanel({
   onSortChange,
   onPageChange,
   onAddToBoard,
+  programPicker,
+  requirements,
+  filterSchemas,
 }: SearchResultsPanelProps) {
   const totalPages = data ? Math.ceil(data.total / pageSize) : 0;
 
@@ -101,15 +113,18 @@ export function SearchResultsPanel({
 
   return (
     <div className="flex flex-1 flex-col gap-4">
-      {/* Search bar */}
-      <div className="relative">
-        <Search className="text-muted-foreground absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2" />
-        <Input
-          placeholder="Search by name, school, or sport..."
-          value={query}
-          onChange={(e) => onQueryChange(e.target.value)}
-          className="pl-9"
-        />
+      {/* Search bar + program picker */}
+      <div className="flex flex-wrap items-center gap-3">
+        <div className="relative min-w-[260px] flex-1">
+          <Search className="text-muted-foreground absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2" />
+          <Input
+            placeholder="Search by name, school, or sport..."
+            value={query}
+            onChange={(e) => onQueryChange(e.target.value)}
+            className="pl-9"
+          />
+        </div>
+        {programPicker}
       </div>
 
       {/* Results header */}
@@ -153,6 +168,11 @@ export function SearchResultsPanel({
               inPipeline={pipelineAthleteIds?.has(hit.id)}
               isAdding={addingAthleteId === hit.id}
               onAddToBoard={onAddToBoard}
+              matches={
+                requirements && filterSchemas
+                  ? evaluateRequirements(hit, requirements, filterSchemas)
+                  : []
+              }
             />
           ))}
         </div>

@@ -7,10 +7,9 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useMyPrograms, useUpdateProgram } from "@/hooks/use-programs";
 import { useUserRole } from "@/hooks/use-user-role";
 import { formatSportCode } from "@/lib/format";
-import { ProgramAcademicMinimums } from "@/components/composed/program-academic-minimums";
+import { RequirementsEditor } from "@/components/coach/requirements-editor";
 import { ProgramScoringConfig } from "@/components/composed/program-scoring-config";
-import type { CreateProgramInput } from "@/services/organization";
-import type { ScoringConfig } from "@/services/types";
+import type { ProgramRequirements, ScoringConfig } from "@/services/types";
 
 export default function ProgramSettingsPage() {
   const { isHeadCoach } = useUserRole();
@@ -55,8 +54,8 @@ export default function ProgramSettingsPage() {
     );
   }
 
-  const handleSaveAcademics = (programId: number, data: Partial<CreateProgramInput>) => {
-    updateProgram.mutate({ programId, data });
+  const handleSaveRequirements = (programId: number, requirements: ProgramRequirements) => {
+    updateProgram.mutate({ programId, data: { requirements } });
   };
 
   const handleSaveScoring = (programId: number, data: { scoring_config: ScoringConfig }) => {
@@ -76,11 +75,11 @@ export default function ProgramSettingsPage() {
           </p>
         </div>
         <div className="space-y-6">
-          <ProgramAcademicMinimums
-            key={`acad-${program.updated_at}`}
+          <RequirementsEditor
+            key={`req-${program.updated_at}`}
             program={program}
             isEditable={isHeadCoach}
-            onSave={(data) => handleSaveAcademics(program.id, data)}
+            onSave={(requirements) => handleSaveRequirements(program.id, requirements)}
             isSaving={updateProgram.isPending}
           />
           <ProgramScoringConfig
@@ -117,11 +116,11 @@ export default function ProgramSettingsPage() {
         {programs.map((program) => (
           <TabsContent key={program.id} value={String(program.id)}>
             <div className="space-y-6">
-              <ProgramAcademicMinimums
-                key={`acad-${program.updated_at}`}
+              <RequirementsEditor
+                key={`req-${program.updated_at}`}
                 program={program}
                 isEditable={isHeadCoach}
-                onSave={(data) => handleSaveAcademics(program.id, data)}
+                onSave={(requirements) => handleSaveRequirements(program.id, requirements)}
                 isSaving={updateProgram.isPending}
               />
               <ProgramScoringConfig
